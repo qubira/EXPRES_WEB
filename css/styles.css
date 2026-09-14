@@ -257,6 +257,65 @@ p { margin: 0 0 1rem; }
 }
 .nav-cta-group { display: flex; align-items: center; gap: 10px; }
 
+/* ---------- Menu de cuenta (nombre + desplegable) ---------- */
+.account-menu { position: relative; }
+.account-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 4px 4px 0;
+  font-family: var(--fuente);
+}
+.account-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--mar-900);
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--blanco);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-media);
+  min-width: 190px;
+  overflow: hidden;
+  z-index: 250;
+}
+.account-dropdown-header {
+  padding: 14px 16px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tinta-300);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-bottom: 1px solid var(--arena-200);
+}
+.account-dropdown a, .account-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tinta-900);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--fuente);
+}
+.account-dropdown a:hover, .account-dropdown button:hover { background: var(--arena-100); }
+.account-dropdown button.salir { color: var(--rojo-alerta); }
+
 /* ---------- Hero (search-first, estilo apps de delivery) ---------- */
 .hero {
   position: relative;

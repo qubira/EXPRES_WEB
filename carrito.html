@@ -17,7 +17,17 @@
       <a href="catalogo.html">Catálogo</a>
     </div>
     <div class="nav-cta-group">
-      <a href="login.html" class="icon-btn account-btn" data-next="carrito.html">👤</a>
+      <div class="account-menu">
+        <button class="account-trigger" type="button" data-next="carrito.html">
+          <span class="icon-btn account-btn">👤</span>
+          <span class="account-name hidden"></span>
+        </button>
+        <div class="account-dropdown hidden">
+          <div class="account-dropdown-header">Mi cuenta</div>
+          <a href="mis-pedidos.html">📦 Mis pedidos</a>
+          <button type="button" class="btn-logout-cuenta salir">🚪 Cerrar sesión</button>
+        </div>
+      </div>
       <a href="catalogo.html" class="btn btn-ghost btn-sm">← Seguir comprando</a>
     </div>
   </div>

@@ -22,7 +22,17 @@
       <a href="pedido.html">Rastrear pedido</a>
     </div>
     <div class="nav-cta-group">
-      <a href="login.html" class="icon-btn account-btn">👤</a>
+      <div class="account-menu">
+        <button class="account-trigger" type="button">
+          <span class="icon-btn account-btn">👤</span>
+          <span class="account-name hidden"></span>
+        </button>
+        <div class="account-dropdown hidden">
+          <div class="account-dropdown-header">Mi cuenta</div>
+          <a href="mis-pedidos.html">📦 Mis pedidos</a>
+          <button type="button" class="btn-logout-cuenta salir">🚪 Cerrar sesión</button>
+        </div>
+      </div>
       <a href="carrito.html" class="icon-btn">
         🛒 <span class="badge-count hidden" data-cart-count>0</span>
       </a>
