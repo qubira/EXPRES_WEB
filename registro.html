@@ -29,6 +29,10 @@
       <input type="text" name="nombre" required placeholder="Ej. María Torres">
     </div>
     <div class="form-grupo">
+      <label>Correo electrónico</label>
+      <input type="email" name="email" required placeholder="Ej. maria@correo.com">
+    </div>
+    <div class="form-grupo">
       <label>Celular</label>
       <input type="tel" name="telefono" required placeholder="Ej. 987654321">
     </div>
@@ -60,6 +64,7 @@ document.getElementById('form-registro').addEventListener('submit', async (e) =>
     const fd = new FormData(e.target);
     const data = await Api.clienteRegistro({
       nombre: fd.get('nombre'),
+      email: fd.get('email'),
       telefono: fd.get('telefono'),
       password: fd.get('password'),
     });

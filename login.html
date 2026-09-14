@@ -25,8 +25,8 @@
 
   <form id="form-login" class="card card-pad mt-16">
     <div class="form-grupo">
-      <label>Celular</label>
-      <input type="tel" name="telefono" required placeholder="Ej. 987654321">
+      <label>Correo electrónico</label>
+      <input type="email" name="email" required placeholder="Ej. maria@correo.com">
     </div>
     <div class="form-grupo">
       <label>Contraseña</label>
@@ -54,7 +54,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
   btn.textContent = 'Ingresando...';
   try {
     const fd = new FormData(e.target);
-    const data = await Api.clienteLogin({ telefono: fd.get('telefono'), password: fd.get('password') });
+    const data = await Api.clienteLogin({ email: fd.get('email'), password: fd.get('password') });
     guardarSesionCliente(data.token, data.nombre);
     const next = new URLSearchParams(location.search).get('next') || 'mis-pedidos.html';
     location.href = next;
