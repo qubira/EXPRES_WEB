@@ -316,6 +316,61 @@ p { margin: 0 0 1rem; }
 .account-dropdown a:hover, .account-dropdown button:hover { background: var(--arena-100); }
 .account-dropdown button.salir { color: var(--rojo-alerta); }
 
+/* ---------- Vista previa del carrito (desplegable) ---------- */
+.cart-menu { position: relative; }
+.cart-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--blanco);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-media);
+  width: 320px;
+  max-width: 88vw;
+  overflow: hidden;
+  z-index: 250;
+}
+.cart-dropdown-header {
+  padding: 14px 16px 10px;
+  font-weight: 800;
+  font-size: 14px;
+  border-bottom: 1px solid var(--arena-200);
+}
+.cart-dropdown-items { max-height: 280px; overflow-y: auto; }
+.cart-preview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--arena-100);
+}
+.cart-preview-item .nombre {
+  font-size: 13.5px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+.cart-preview-item .detalle { font-size: 12px; color: var(--tinta-300); }
+.cart-preview-item .quitar {
+  border: none;
+  background: none;
+  color: var(--tinta-300);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.cart-preview-item .quitar:hover { color: var(--rojo-alerta); }
+.cart-dropdown-footer { padding: 12px 16px 16px; }
+.cart-preview-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--tinta-300);
+  font-size: 13px;
+}
+
 /* ---------- Hero (search-first, estilo apps de delivery) ---------- */
 .hero {
   position: relative;
@@ -1062,6 +1117,34 @@ body.con-tabbar { padding-bottom: var(--tabbar-h); }
   color: white;
   font-weight: 800;
   font-size: 13px;
+}
+
+/* ---------- Stepper en linea (pagina de detalle, no flotante) ---------- */
+.stepper-inline {
+  display: inline-flex;
+  align-items: center;
+  background: var(--coral-600);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(255,71,87,0.35);
+}
+.stepper-inline button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.stepper-inline button:active { background: rgba(0,0,0,0.15); }
+.stepper-inline .qty {
+  min-width: 28px;
+  text-align: center;
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
 }
 
 /* ---------- Badge de stock bajo (dato real, no decorativo) ---------- */

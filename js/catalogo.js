@@ -60,17 +60,15 @@ function tarjetaProducto(p, index) {
   const media = p.foto_url
     ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>`
     : `<div class="pcard-media">${icon}</div>`;
-  const stockBadge = p.stock <= 5 ? `<span class="stock-badge">¡Solo ${p.stock}!</span>` : '';
   return `
-    <div class="pcard fade-in-up" data-id="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
+    <div class="pcard fade-in-up" data-id="${p.id}" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
         ${media}
-        ${stockBadge}
         <div class="pcard-control" data-control="${p.id}">${controlHtml(p)}</div>
       </div>
       <div class="pcard-body">
         <span class="pcard-name">${p.nombre}</span>
-        <span class="pcard-store">${p.tienda_nombre}</span>
+        <span class="pcard-store">${p.tienda_nombre} · ${labelUnidad(p.unidad)}</span>
         <span class="pcard-price">${formatoSoles(p.precio)}</span>
       </div>
     </div>
@@ -146,6 +144,12 @@ async function cargarProductos() {
 
     grid.innerHTML = productos.map(tarjetaProducto).join('');
     productos.forEach((p) => enlazarControl(p.id));
+    grid.querySelectorAll('[data-abrir]').forEach((card) => {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => {
+        location.href = `producto.html?id=${card.dataset.abrir}`;
+      });
+    });
   } catch (err) {
     grid.innerHTML = '';
     estadoCarga.textContent = 'No se pudo conectar con el servidor. Intenta de nuevo.';

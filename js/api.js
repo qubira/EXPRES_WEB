@@ -44,6 +44,7 @@ const Api = {
     const qs = new URLSearchParams(params).toString();
     return apiRequest(`/productos${qs ? `?${qs}` : ''}`);
   },
+  getProducto: (id) => apiRequest(`/productos/${id}`),
   crearPedido: (data) => apiRequest('/pedidos', { method: 'POST', body: data, role: 'cliente' }),
   subirComprobante: (pedidoId, formData) => apiRequest(`/pedidos/${pedidoId}/pago`, { method: 'POST', body: formData, isForm: true }),
   getPedido: (id) => apiRequest(`/pedidos/${id}`),
@@ -119,6 +120,14 @@ function mostrarToast(mensaje, tipo = '') {
 
 function formatoSoles(monto) {
   return `S/ ${Number(monto || 0).toFixed(2)}`;
+}
+
+const UNIDAD_LABELS = {
+  unidad: 'unidad', kg: 'Kg', g: 'g', l: 'L', ml: 'ml', cm: 'cm', m: 'm',
+  paquete: 'paquete', docena: 'docena',
+};
+function labelUnidad(unidad) {
+  return UNIDAD_LABELS[unidad] || unidad || 'unidad';
 }
 
 const ESTADO_LABELS = {

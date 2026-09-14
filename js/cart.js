@@ -76,7 +76,62 @@ function actualizarBadgeCarrito() {
   document.querySelectorAll('[data-cart-total]').forEach((el) => {
     el.textContent = formatoSoles(cartTotal());
   });
+  document.querySelectorAll('.cart-dropdown:not(.hidden)').forEach(renderCartPreview);
 }
+
+// ---------- Vista previa del carrito (desplegable en el navbar) ----------
+function cerrarCartDropdowns() {
+  document.querySelectorAll('.cart-dropdown').forEach((d) => d.classList.add('hidden'));
+}
+
+function renderCartPreview(dropdown) {
+  const items = getCart();
+  const itemsWrap = dropdown.querySelector('.cart-dropdown-items');
+  if (!itemsWrap) return;
+
+  if (items.length === 0) {
+    itemsWrap.innerHTML = '<div class="cart-preview-empty">🛒 Tu carrito está vacío</div>';
+  } else {
+    itemsWrap.innerHTML = items.map((i) => `
+      <div class="cart-preview-item">
+        <div>
+          <div class="nombre">${i.nombre}</div>
+          <div class="detalle">${i.cantidad} x ${formatoSoles(i.precio)}</div>
+        </div>
+        <div class="flex items-center gap-8">
+          <strong class="text-sm">${formatoSoles(i.precio * i.cantidad)}</strong>
+          <button class="quitar" data-quitar="${i.producto_id}" aria-label="Quitar">✕</button>
+        </div>
+      </div>
+    `).join('');
+    itemsWrap.querySelectorAll('[data-quitar]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeFromCart(btn.dataset.quitar);
+        renderCartPreview(dropdown);
+      });
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.cart-trigger').forEach((trigger) => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropdown = trigger.closest('.cart-menu').querySelector('.cart-dropdown');
+      const yaAbierto = !dropdown.classList.contains('hidden');
+      cerrarCartDropdowns();
+      if (!yaAbierto) {
+        renderCartPreview(dropdown);
+        dropdown.classList.remove('hidden');
+      }
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.cart-menu')) cerrarCartDropdowns();
+  });
+});
 
 function rebotarCarrito() {
   document.querySelectorAll('.icon-btn, .tabbar-item .tabbar-icon').forEach((el) => {

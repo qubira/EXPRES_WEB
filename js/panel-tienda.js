@@ -80,6 +80,7 @@ async function cargarPedidos() {
 
 // ---------- Productos ----------
 const CATEGORIAS = ['ropa','comida','bebidas','servicios','artesanias','otros'];
+const UNIDADES = ['unidad','kg','g','l','ml','cm','m','paquete','docena'];
 
 async function cargarProductos() {
   const grid = document.getElementById('grid-productos-tienda');
@@ -92,9 +93,10 @@ async function cargarProductos() {
     }
     grid.innerHTML = productos.map((p) => `
       <div class="card card-pad">
-        <span class="tag">${p.categoria}</span>
+        <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
         <strong>${p.nombre}</strong>
-        <div class="precio">${formatoSoles(p.precio)}</div>
+        ${p.marca ? `<div class="text-sm text-muted">${p.marca}</div>` : ''}
+        <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${labelUnidad(p.unidad)}</span></div>
         <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
         <div class="flex gap-8 mt-8">
           <button class="btn btn-outline btn-sm w-full" data-editar="${p.id}">Editar</button>
@@ -125,14 +127,21 @@ function abrirModalProducto(p) {
   abrirModal(`
     <h3>${editando ? 'Editar producto' : 'Nuevo producto'}</h3>
     <div class="form-grupo"><label>Nombre</label><input id="p-nombre" value="${p ? p.nombre : ''}" required></div>
-    <div class="form-grupo"><label>Categoría</label>
-      <select id="p-categoria">${CATEGORIAS.map((c) => `<option value="${c}" ${p && p.categoria===c?'selected':''}>${c}</option>`).join('')}</select>
-    </div>
-    <div class="form-grupo"><label>Descripción</label><textarea id="p-descripcion">${p ? (p.descripcion||'') : ''}</textarea></div>
+    <div class="form-grupo"><label>Marca (opcional)</label><input id="p-marca" value="${p ? (p.marca||'') : ''}" placeholder="Ej. Inca Kola, San Luis..."></div>
     <div class="grid-cols grid-cols-2">
-      <div class="form-grupo"><label>Precio (S/)</label><input id="p-precio" type="number" step="0.10" value="${p ? p.precio : ''}" required></div>
-      <div class="form-grupo"><label>Stock</label><input id="p-stock" type="number" value="${p ? p.stock : 10}" required></div>
+      <div class="form-grupo"><label>Categoría</label>
+        <select id="p-categoria">${CATEGORIAS.map((c) => `<option value="${c}" ${p && p.categoria===c?'selected':''}>${c}</option>`).join('')}</select>
+      </div>
+      <div class="form-grupo"><label>Subcategoría</label><input id="p-subcategoria" value="${p ? (p.subcategoria||'') : ''}" placeholder="Ej. jugos, sombreros..." required></div>
     </div>
+    <div class="form-grupo"><label>Detalle (opcional)</label><textarea id="p-descripcion">${p ? (p.descripcion||'') : ''}</textarea></div>
+    <div class="grid-cols grid-cols-2">
+      <div class="form-grupo"><label>Precio de venta (S/)</label><input id="p-precio" type="number" step="0.10" value="${p ? p.precio : ''}" required></div>
+      <div class="form-grupo"><label>Unidad</label>
+        <select id="p-unidad">${UNIDADES.map((u) => `<option value="${u}" ${p && p.unidad===u?'selected':''}>${labelUnidad(u)}</option>`).join('')}</select>
+      </div>
+    </div>
+    <div class="form-grupo"><label>Stock</label><input id="p-stock" type="number" value="${p ? p.stock : 10}" required></div>
     <div class="form-grupo">
       <label>Foto del producto</label>
       <input type="file" id="p-foto-file" accept="image/*" capture="environment">
@@ -165,13 +174,17 @@ function abrirModalProducto(p) {
   document.getElementById('btn-guardar-producto').addEventListener('click', async () => {
     const datos = {
       nombre: document.getElementById('p-nombre').value,
+      marca: document.getElementById('p-marca').value,
       categoria: document.getElementById('p-categoria').value,
+      subcategoria: document.getElementById('p-subcategoria').value,
       descripcion: document.getElementById('p-descripcion').value,
       precio: Number(document.getElementById('p-precio').value),
+      unidad: document.getElementById('p-unidad').value,
       stock: Number(document.getElementById('p-stock').value),
       foto_url: document.getElementById('p-foto').value,
     };
     if (!datos.nombre || !datos.precio) { mostrarToast('Completa nombre y precio', 'error'); return; }
+    if (!datos.subcategoria) { mostrarToast('Completa la subcategoría', 'error'); return; }
     try {
       if (editando) {
         datos.activo = document.getElementById('p-activo').checked;

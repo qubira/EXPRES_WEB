@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo | Express Ancon</title>
+<title>Producto | Express Ancon</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -13,11 +13,6 @@
 <nav class="navbar">
   <div class="container navbar-inner">
     <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
-    <div class="nav-links">
-      <a href="catalogo.html"><strong>Catálogo</strong></a>
-      <a href="index.html#como-funciona">Cómo funciona</a>
-      <a href="pedido.html">Rastrear pedido</a>
-    </div>
     <div class="nav-cta-group">
       <div class="account-menu">
         <button class="account-trigger" type="button">
@@ -46,24 +41,51 @@
       </div>
     </div>
   </div>
-  <div class="location-bar">📍 <span class="zona-texto">Entregando en Playa Ancón</span> <span class="chevron">▾</span></div>
-  <div class="search-bar-wrap">
-    <div class="search-bar">
-      <span class="search-icon">🔍</span>
-      <input type="search" id="buscador" placeholder="Buscar producto (ej. anticucho, sombrero...)">
-    </div>
-  </div>
 </nav>
 
-<div class="container mt-16">
-  <div class="filtros" id="filtros"></div>
+<div id="estado-carga" class="container mt-24 text-center text-muted">Cargando producto...</div>
 
-  <div id="estado-carga" class="text-center text-muted" style="padding:40px 0;">Cargando productos...</div>
-  <div class="product-grid" id="grid-productos"></div>
-  <div id="vacio" class="empty-state hidden">
-    <div class="icon">🐚</div>
-    <p>No encontramos productos con ese filtro.</p>
+<div id="contenido" class="hidden">
+  <div class="container mt-16">
+    <a href="javascript:history.back()" class="text-sm" style="color:var(--mar-700);font-weight:700;">← Volver</a>
+
+    <div class="card mt-16" style="overflow:hidden;">
+      <div id="producto-media" class="card-media" style="height:280px;font-size:64px;"></div>
+      <div class="card-pad">
+        <div class="flex gap-8 mt-0" id="producto-tags"></div>
+        <h1 style="font-size:22px;margin:10px 0 2px;" id="producto-nombre"></h1>
+        <div class="text-sm text-muted" id="producto-marca"></div>
+        <div class="flex justify-between items-center mt-16">
+          <div>
+            <div class="precio" id="producto-precio" style="font-size:26px;"></div>
+            <div class="text-sm text-muted" id="producto-unidad"></div>
+          </div>
+          <div id="detalle-control"></div>
+        </div>
+
+        <hr class="divider">
+        <div id="producto-detalle-wrap" class="hidden">
+          <h3 style="font-size:15px;">Detalle</h3>
+          <p class="text-sm text-muted" id="producto-descripcion"></p>
+        </div>
+
+        <div class="flex items-center gap-12 mt-16" style="background:var(--arena-100);border-radius:var(--radio-m);padding:14px;">
+          <div style="font-size:28px;">🏪</div>
+          <div>
+            <strong id="producto-tienda-nombre"></strong>
+            <div class="text-sm text-muted" id="producto-tienda-zona"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <section class="mt-24" id="similares-wrap">
+    <div class="container">
+      <h2 style="font-size:19px;">También te puede interesar</h2>
+    </div>
+    <div class="product-grid container" id="grid-similares"></div>
+  </section>
 </div>
 
 <div style="height:20px;"></div>
@@ -90,7 +112,6 @@
 <script src="js/api.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/auth-cliente.js"></script>
-<script src="js/ubicacion.js"></script>
-<script src="js/catalogo.js"></script>
+<script src="js/producto.js"></script>
 </body>
 </html>
