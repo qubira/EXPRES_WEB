@@ -39,6 +39,9 @@ const Api = {
   // Publico
   getCategorias: () => apiRequest('/categorias'),
   getTiposNegocio: () => apiRequest('/tipos-negocio'),
+  agregarTipoNegocio: (etiqueta, role) => apiRequest('/tipos-negocio', { method: 'POST', body: { etiqueta }, role }),
+  getZonas: () => apiRequest('/zonas'),
+  agregarZona: (nombre, role) => apiRequest('/zonas', { method: 'POST', body: { nombre }, role }),
   getTiendas: (categoria) => apiRequest(`/tiendas${categoria ? `?categoria=${categoria}` : ''}`),
   getTienda: (id) => apiRequest(`/tiendas/${id}`),
   getProductos: (params = {}) => {
@@ -70,6 +73,7 @@ const Api = {
   adminActualizarRepartidor: (id, data) => apiRequest(`/admin/repartidores/${id}`, { method: 'PUT', body: data, role: 'admin' }),
   adminLiquidarRepartidor: (id) => apiRequest(`/admin/repartidores/${id}/liquidar`, { method: 'POST', role: 'admin' }),
   adminGetProductos: (tiendaId) => apiRequest(`/admin/productos${tiendaId ? `?tienda_id=${tiendaId}` : ''}`, { role: 'admin' }),
+  adminAuditoria: (rol) => apiRequest(`/admin/auditoria${rol ? `?rol=${rol}` : ''}`, { role: 'admin' }),
 
   // Tienda
   tiendaLogin: (data) => apiRequest('/tienda/login', { method: 'POST', body: data }),
@@ -134,12 +138,6 @@ function labelUnidad(unidad) {
   return UNIDAD_LABELS[unidad] || unidad || 'unidad';
 }
 
-const ZONAS_PLAYA = [
-  'Playa Ancón - Malecón Sur',
-  'Playa Ancón - Malecón Norte',
-  'Playa Ancón - Zona Muelle',
-  'Playa Ancón - Frente al mar',
-];
 // Conecta un boton "Buscar" a un input de DNI: al hacer click, consulta RENIEC
 // y autocompleta el input de nombre. Si falla, no bloquea (se llena a mano).
 function habilitarBuscarDni(dniInputId, nombreInputId, btnId) {
@@ -169,9 +167,55 @@ function habilitarBuscarDni(dniInputId, nombreInputId, btnId) {
   });
 }
 
-function zonaOptionsHtml(seleccionada) {
+async function zonaOptionsHtml(seleccionada) {
+  const zonas = await Api.getZonas();
   return `<option value="">Selecciona una zona</option>` +
-    ZONAS_PLAYA.map((z) => `<option value="${z}" ${z === seleccionada ? 'selected' : ''}>${z}</option>`).join('');
+    zonas.map((z) => `<option value="${z}" ${z === seleccionada ? 'selected' : ''}>${z}</option>`).join('');
+}
+
+// Conecta un boton "+" a un <select> de tipo de negocio: pide el nombre y lo agrega
+// a la lista compartida (queda disponible para todos desde ese momento).
+function habilitarAgregarTipoNegocio(selectId, btnId, role) {
+  const btn = document.getElementById(btnId);
+  const select = document.getElementById(selectId);
+  if (!btn || !select) return;
+  btn.addEventListener('click', async () => {
+    const etiqueta = (prompt('Nombre del nuevo tipo de negocio (ej. Chichería):') || '').trim();
+    if (!etiqueta) return;
+    try {
+      const nuevo = await Api.agregarTipoNegocio(etiqueta, role);
+      const opt = document.createElement('option');
+      opt.value = nuevo.clave;
+      opt.textContent = nuevo.etiqueta;
+      select.appendChild(opt);
+      select.value = nuevo.clave;
+      mostrarToast('Tipo de negocio agregado', 'success');
+    } catch (err) {
+      mostrarToast(err.message || 'No se pudo agregar', 'error');
+    }
+  });
+}
+
+// Igual que arriba, pero para agregar una zona/playa nueva al <select> de zona.
+function habilitarAgregarZona(selectId, btnId, role) {
+  const btn = document.getElementById(btnId);
+  const select = document.getElementById(selectId);
+  if (!btn || !select) return;
+  btn.addEventListener('click', async () => {
+    const nombre = (prompt('Nombre de la nueva zona (ej. Playa Ancón - Sector X):') || '').trim();
+    if (!nombre) return;
+    try {
+      await Api.agregarZona(nombre, role);
+      const opt = document.createElement('option');
+      opt.value = nombre;
+      opt.textContent = nombre;
+      select.appendChild(opt);
+      select.value = nombre;
+      mostrarToast('Zona agregada', 'success');
+    } catch (err) {
+      mostrarToast(err.message || 'No se pudo agregar', 'error');
+    }
+  });
 }
 
 const TIPO_NEGOCIO_LABELS = {

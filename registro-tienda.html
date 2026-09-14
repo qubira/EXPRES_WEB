@@ -77,8 +77,8 @@
 (async () => {
   const tipos = await Api.getTiposNegocio();
   document.getElementById('reg-categoria').insertAdjacentHTML('beforeend',
-    tipos.map((t) => `<option value="${t}">${labelTipoNegocio(t)}</option>`).join(''));
-  document.getElementById('reg-zona').innerHTML = zonaOptionsHtml('');
+    tipos.map((t) => `<option value="${t.clave}">${t.etiqueta}</option>`).join(''));
+  document.getElementById('reg-zona').innerHTML = await zonaOptionsHtml('');
 })();
 habilitarBuscarDni('reg-dni', 'reg-nombre-titular', 'reg-buscar-dni');
 

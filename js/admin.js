@@ -19,7 +19,7 @@ function manejarError401(err) {
 }
 
 // ---------- Navegacion entre vistas ----------
-const TITULOS = { resumen: 'Resumen', registro: 'Registrar cuenta', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores' };
+const TITULOS = { resumen: 'Resumen', registro: 'Registrar cuenta', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores', auditoria: 'Auditoría' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -33,6 +33,7 @@ function irAVista(vista) {
   if (vista === 'pedidos') cargarPedidos();
   if (vista === 'tiendas') cargarTiendas();
   if (vista === 'repartidores') cargarRepartidores();
+  if (vista === 'auditoria') cargarAuditoria();
 }
 
 document.querySelectorAll('.panel-link[data-view]').forEach((link) => {
@@ -211,17 +212,24 @@ async function cargarTiendas() {
 
 async function abrirModalEditarTienda(t) {
   const tipos = await Api.getTiposNegocio();
+  const zonaHtml = await zonaOptionsHtml(t.zona || '');
   abrirModal(`
     <h3>${t.nombre}</h3>
     <div class="form-grupo"><label>Nombre</label><input id="e-nombre" value="${t.nombre}"></div>
     <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
-      <select id="e-categoria">
-        ${tipos.map((c) => `<option value="${c}" ${c===t.categoria?'selected':''}>${labelTipoNegocio(c)}</option>`).join('')}
-      </select>
+      <div class="flex" style="gap:8px;">
+        <select id="e-categoria" style="flex:1;">
+          ${tipos.map((tn) => `<option value="${tn.clave}" ${tn.clave===t.categoria?'selected':''}>${tn.etiqueta}</option>`).join('')}
+        </select>
+        <button type="button" class="btn btn-outline btn-sm" id="e-categoria-add" title="Agregar tipo de negocio">+</button>
+      </div>
     </div>
     <div class="form-grupo"><label>¿Qué vende?</label><input id="e-subcategoria" value="${t.subcategoria || ''}" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
     <div class="form-grupo"><label>Zona</label>
-      <select id="e-zona">${zonaOptionsHtml(t.zona || '')}</select>
+      <div class="flex" style="gap:8px;">
+        <select id="e-zona" style="flex:1;">${zonaHtml}</select>
+        <button type="button" class="btn btn-outline btn-sm" id="e-zona-add" title="Agregar zona">+</button>
+      </div>
     </div>
     <div class="form-grupo"><label>DNI del titular</label>
       <div class="flex" style="gap:8px;">
@@ -244,6 +252,8 @@ async function abrirModalEditarTienda(t) {
     <button class="btn btn-primary btn-block" id="btn-guardar-tienda">Guardar cambios</button>
   `);
   habilitarBuscarDni('e-dni', 'e-nombre-titular', 'e-buscar-dni');
+  habilitarAgregarTipoNegocio('e-categoria', 'e-categoria-add', 'admin');
+  habilitarAgregarZona('e-zona', 'e-zona-add', 'admin');
   document.getElementById('btn-guardar-tienda').addEventListener('click', async () => {
     try {
       await Api.adminActualizarTienda(t.id, {
@@ -307,9 +317,11 @@ async function initVistaRegistro() {
   registroInicializado = true;
 
   const tipos = await Api.getTiposNegocio();
-  document.getElementById('rt-categoria').innerHTML = tipos.map((c) => `<option value="${c}">${labelTipoNegocio(c)}</option>`).join('');
-  document.getElementById('rt-zona').innerHTML = zonaOptionsHtml('');
+  document.getElementById('rt-categoria').innerHTML = tipos.map((t) => `<option value="${t.clave}">${t.etiqueta}</option>`).join('');
+  document.getElementById('rt-zona').innerHTML = await zonaOptionsHtml('');
   habilitarBuscarDni('rt-dni', 'rt-nombre-titular', 'rt-buscar-dni');
+  habilitarAgregarTipoNegocio('rt-categoria', 'rt-categoria-add', 'admin');
+  habilitarAgregarZona('rt-zona', 'rt-zona-add', 'admin');
 
   const btnTienda = document.getElementById('btn-tipo-tienda');
   const btnRepartidor = document.getElementById('btn-tipo-repartidor');
@@ -367,5 +379,40 @@ async function initVistaRegistro() {
     } catch (err) { mostrarToast(err.message, 'error'); }
   });
 }
+
+// ---------- Auditoria (conexiones del equipo) ----------
+const ROL_LABELS = { admin: 'Admin', tienda: 'Tienda', repartidor: 'Repartidor' };
+
+async function cargarAuditoria(rol = '') {
+  const tbody = document.getElementById('tabla-auditoria');
+  tbody.innerHTML = '<tr><td colspan="6" class="text-muted">Cargando...</td></tr>';
+  try {
+    const registros = await Api.adminAuditoria(rol);
+    if (registros.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-muted">Sin registros todavía</td></tr>';
+      return;
+    }
+    tbody.innerHTML = registros.map((r) => `
+      <tr>
+        <td>${new Date(r.created_at).toLocaleString('es-PE')}</td>
+        <td>${ROL_LABELS[r.rol] || r.rol}</td>
+        <td>${r.nombre || '—'}</td>
+        <td>${r.accion === 'login_ok' ? '<span class="badge badge-entregado">Exitoso</span>' : '<span class="badge badge-cancelado">Fallido</span>'}</td>
+        <td>${r.ip || '—'}</td>
+        <td class="text-sm text-muted" style="max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${r.user_agent || ''}">${r.user_agent || '—'}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="6" class="form-error">${err.message}</td></tr>`;
+  }
+}
+
+document.querySelectorAll('#filtro-auditoria .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#filtro-auditoria .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    cargarAuditoria(chip.dataset.rol);
+  });
+});
 
 cargarResumen();

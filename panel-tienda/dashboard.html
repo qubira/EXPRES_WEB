@@ -56,7 +56,10 @@
           <div class="form-grupo"><label>Nombre</label><input id="tp-nombre" required></div>
           <div class="form-grupo">
             <label>Categoría (tipo de negocio)</label>
-            <select id="tp-categoria"></select>
+            <div class="flex" style="gap:8px;">
+              <select id="tp-categoria" style="flex:1;"></select>
+              <button type="button" class="btn btn-outline btn-sm" id="tp-categoria-add" title="Agregar tipo de negocio">+</button>
+            </div>
           </div>
           <div class="form-grupo">
             <label>¿Qué vendes?</label>
@@ -66,7 +69,10 @@
           <div class="form-grupo"><label>Descripción</label><textarea id="tp-descripcion"></textarea></div>
           <div class="form-grupo">
             <label>Zona en la playa</label>
-            <select id="tp-zona" required></select>
+            <div class="flex" style="gap:8px;">
+              <select id="tp-zona" required style="flex:1;"></select>
+              <button type="button" class="btn btn-outline btn-sm" id="tp-zona-add" title="Agregar zona">+</button>
+            </div>
           </div>
           <div class="form-grupo">
             <label>DNI del titular</label>

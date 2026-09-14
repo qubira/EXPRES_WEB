@@ -19,6 +19,7 @@
     <div class="panel-link" data-view="pedidos">📦 Pedidos</div>
     <div class="panel-link" data-view="tiendas">🏪 Tiendas</div>
     <div class="panel-link" data-view="repartidores">🚴 Repartidores</div>
+    <div class="panel-link" data-view="auditoria">🛡️ Auditoría</div>
     <div style="flex:1"></div>
     <div class="panel-link" id="btn-logout">🚪 Salir</div>
   </aside>
@@ -68,9 +69,19 @@
       <form id="form-registro-tienda" class="card card-pad" style="max-width:480px;">
         <h3>Registrar tienda</h3>
         <div class="form-grupo"><label>Nombre</label><input id="rt-nombre" required></div>
-        <div class="form-grupo"><label>Categoría (tipo de negocio)</label><select id="rt-categoria"></select></div>
+        <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
+          <div class="flex" style="gap:8px;">
+            <select id="rt-categoria" style="flex:1;"></select>
+            <button type="button" class="btn btn-outline btn-sm" id="rt-categoria-add" title="Agregar tipo de negocio">+</button>
+          </div>
+        </div>
         <div class="form-grupo"><label>¿Qué vende?</label><input id="rt-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
-        <div class="form-grupo"><label>Zona</label><select id="rt-zona"></select></div>
+        <div class="form-grupo"><label>Zona</label>
+          <div class="flex" style="gap:8px;">
+            <select id="rt-zona" style="flex:1;"></select>
+            <button type="button" class="btn btn-outline btn-sm" id="rt-zona-add" title="Agregar zona">+</button>
+          </div>
+        </div>
         <div class="form-grupo"><label>DNI del titular</label>
           <div class="flex" style="gap:8px;">
             <input id="rt-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
@@ -131,6 +142,22 @@
         <table>
           <thead><tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Disponible</th><th>Por pagar</th><th></th></tr></thead>
           <tbody id="tabla-repartidores"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-auditoria" class="view hidden">
+      <p class="text-muted mb-16">Historial de conexiones del equipo (admin, tiendas y repartidores): quién entró, desde qué IP y cuándo. Útil para detectar accesos sospechosos.</p>
+      <div class="filtros" id="filtro-auditoria">
+        <button class="chip activo" data-rol="">Todos</button>
+        <button class="chip" data-rol="admin">Admin</button>
+        <button class="chip" data-rol="tienda">Tiendas</button>
+        <button class="chip" data-rol="repartidor">Repartidores</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Rol</th><th>Cuenta</th><th>Resultado</th><th>IP</th><th>Dispositivo</th></tr></thead>
+          <tbody id="tabla-auditoria"></tbody>
         </table>
       </div>
     </section>

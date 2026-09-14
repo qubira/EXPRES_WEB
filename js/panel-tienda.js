@@ -229,7 +229,9 @@ async function cargarPerfilTienda() {
   try {
     if (!tiposNegocioCargados) {
       const tipos = await Api.getTiposNegocio();
-      document.getElementById('tp-categoria').innerHTML = tipos.map((t) => `<option value="${t}">${labelTipoNegocio(t)}</option>`).join('');
+      document.getElementById('tp-categoria').innerHTML = tipos.map((t) => `<option value="${t.clave}">${t.etiqueta}</option>`).join('');
+      habilitarAgregarTipoNegocio('tp-categoria', 'tp-categoria-add', 'tienda');
+      habilitarAgregarZona('tp-zona', 'tp-zona-add', 'tienda');
       tiposNegocioCargados = true;
     }
     const p = await Api.tiendaPerfil();
@@ -237,7 +239,7 @@ async function cargarPerfilTienda() {
     document.getElementById('tp-categoria').value = p.categoria || 'tienda';
     document.getElementById('tp-subcategoria').value = p.subcategoria || '';
     document.getElementById('tp-descripcion').value = p.descripcion || '';
-    document.getElementById('tp-zona').innerHTML = zonaOptionsHtml(p.zona || '');
+    document.getElementById('tp-zona').innerHTML = await zonaOptionsHtml(p.zona || '');
     document.getElementById('tp-dni').value = p.dni_titular || '';
     document.getElementById('tp-nombre-titular').value = p.nombre_titular || '';
     document.getElementById('tp-telefono').value = p.contacto_telefono || '';
