@@ -187,26 +187,27 @@ function abrirModalAsignar(pedidoId) {
 // ---------- Tiendas ----------
 async function cargarTiendas() {
   const tbody = document.getElementById('tabla-tiendas');
-  tbody.innerHTML = '<tr><td colspan="6" class="text-muted">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Cargando...</td></tr>';
   try {
     const tiendas = await Api.adminGetTiendas();
     tbody.innerHTML = tiendas.map((t) => `
       <tr>
         <td>${t.nombre}</td>
+        <td class="text-sm text-muted">${t.email || '—'}</td>
         <td>${labelTipoNegocio(t.categoria)}</td>
         <td>${t.zona || '—'}</td>
         <td>${t.comision_pactada}%</td>
         <td>${t.activo ? '<span class="badge badge-entregado">Activa</span>' : '<span class="badge badge-cancelado">Inactiva</span>'}</td>
         <td><button class="btn btn-outline btn-sm" data-editar-tienda="${t.id}">Editar</button></td>
       </tr>
-    `).join('') || '<tr><td colspan="6" class="text-muted">Aún no hay tiendas registradas</td></tr>';
+    `).join('') || '<tr><td colspan="7" class="text-muted">Aún no hay tiendas registradas</td></tr>';
 
     tbody.querySelectorAll('[data-editar-tienda]').forEach((btn) => btn.addEventListener('click', () => {
       const tienda = tiendas.find((t) => t.id === btn.dataset.editarTienda);
       abrirModalEditarTienda(tienda);
     }));
   } catch (err) {
-    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="6" class="form-error">${err.message}</td></tr>`;
+    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="7" class="form-error">${err.message}</td></tr>`;
   }
 }
 
@@ -215,6 +216,7 @@ async function abrirModalEditarTienda(t) {
   const zonaHtml = await zonaOptionsHtml(t.zona || '');
   abrirModal(`
     <h3>${t.nombre}</h3>
+    <div class="form-grupo"><label>Email (login)</label><input value="${t.email || ''}" readonly style="opacity:0.7;"></div>
     <div class="form-grupo"><label>Nombre</label><input id="e-nombre" value="${t.nombre}"></div>
     <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
       <div class="flex" style="gap:8px;">
