@@ -52,7 +52,15 @@
     <div class="flex justify-between"><span style="font-weight:700;">Total a pagar</span><strong class="precio" id="r-total">S/ 0.00</strong></div>
   </div>
 
-  <form id="form-checkout" class="card card-pad mt-16">
+  <div id="login-gate" class="card card-pad mt-16 hidden text-center">
+    <div style="font-size:36px;">🔒</div>
+    <h3>Inicia sesión para completar tu compra</h3>
+    <p class="text-sm text-muted">Por seguridad, toda compra requiere una cuenta — así puedes ver tu PIN de entrega y el estado de tu pedido cuando quieras.</p>
+    <a href="login.html?next=carrito.html" class="btn btn-primary btn-block mt-8">Iniciar sesión</a>
+    <a href="registro.html?next=carrito.html" class="btn btn-outline btn-block mt-8">Crear cuenta nueva</a>
+  </div>
+
+  <form id="form-checkout" class="card card-pad mt-16 hidden">
     <h3>Datos de entrega</h3>
     <div class="form-grupo">
       <label>Nombre completo</label>

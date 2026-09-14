@@ -4,17 +4,23 @@ function renderCarrito() {
   const vacio = document.getElementById('vacio-carrito');
   const resumen = document.getElementById('resumen-carrito');
   const form = document.getElementById('form-checkout');
+  const loginGate = document.getElementById('login-gate');
 
   if (items.length === 0) {
     lista.innerHTML = '';
     vacio.classList.remove('hidden');
     resumen.classList.add('hidden');
     form.classList.add('hidden');
+    loginGate.classList.add('hidden');
     return;
   }
   vacio.classList.add('hidden');
   resumen.classList.remove('hidden');
-  form.classList.remove('hidden');
+
+  // Regla del negocio: toda compra requiere una cuenta iniciada.
+  const logueado = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
+  form.classList.toggle('hidden', !logueado);
+  loginGate.classList.toggle('hidden', logueado);
 
   lista.innerHTML = items.map((i) => `
     <div class="card card-pad mt-16 flex justify-between items-center" data-id="${i.producto_id}">
