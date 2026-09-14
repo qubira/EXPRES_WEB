@@ -57,8 +57,17 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
   btn.textContent = 'Ingresando...';
   try {
     const fd = new FormData(e.target);
-    const data = await Api.clienteLogin({ email: fd.get('email'), password: fd.get('password') });
-    guardarSesionCliente(data.token, data.nombre);
+    const data = await Api.loginUnificado({ email: fd.get('email'), password: fd.get('password') });
+    localStorage.setItem(`express_token_${data.rol}`, data.token);
+    localStorage.setItem(`express_nombre_${data.rol}`, data.nombre);
+
+    if (data.rol !== 'cliente') {
+      // Dueño de tienda o repartidor: se queda en el sitio normal, el menu de
+      // cuenta le mostrara un boton para ir a su dashboard.
+      location.href = 'index.html';
+      return;
+    }
+
     if (data.zona) localStorage.setItem('express_zona_entrega', data.zona);
 
     const irSiguiente = () => {

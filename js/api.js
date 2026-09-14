@@ -53,6 +53,7 @@ const Api = {
   subirComprobante: (pedidoId, formData) => apiRequest(`/pedidos/${pedidoId}/pago`, { method: 'POST', body: formData, isForm: true }),
   getPedido: (id) => apiRequest(`/pedidos/${id}`),
   solicitarTienda: (data) => apiRequest('/tiendas/solicitud', { method: 'POST', body: data }),
+  loginUnificado: (data) => apiRequest('/login', { method: 'POST', body: data }),
   consultarDni: (numero) => apiRequest(`/consulta-dni/${numero}`),
 
   // Admin
