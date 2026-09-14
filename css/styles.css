@@ -863,11 +863,16 @@ textarea { resize: vertical; min-height: 80px; }
 .panel-sidebar {
   display: none;
   width: 230px;
+  flex-shrink: 0;
   background: var(--mar-900);
   color: white;
   padding: 24px 16px;
   flex-direction: column;
   gap: 6px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 .panel-sidebar .brand { color: white; margin-bottom: 20px; }
 .panel-link {
