@@ -93,6 +93,8 @@ const Api = {
   clienteRegistro: (data) => apiRequest('/cliente/registro', { method: 'POST', body: data }),
   clienteLogin: (data) => apiRequest('/cliente/login', { method: 'POST', body: data }),
   clientePerfil: () => apiRequest('/cliente/perfil', { role: 'cliente' }),
+  clienteActualizarPerfil: (data) => apiRequest('/cliente/perfil', { method: 'PUT', body: data, role: 'cliente' }),
+  clienteCambiarPassword: (data) => apiRequest('/cliente/perfil/password', { method: 'POST', body: data, role: 'cliente' }),
   clientePedidos: () => apiRequest('/cliente/pedidos', { role: 'cliente' }),
 };
 

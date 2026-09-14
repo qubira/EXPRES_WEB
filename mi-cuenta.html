@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi cuenta | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+    <a href="mis-pedidos.html" class="btn btn-ghost btn-sm">← Mis pedidos</a>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:460px;">
+  <h1 class="section-title" style="margin-bottom:4px;">Editar mis datos</h1>
+  <p class="text-muted">Actualiza tu nombre, correo o celular.</p>
+
+  <form id="form-datos" class="card card-pad mt-16">
+    <div class="form-grupo">
+      <label>Nombre completo</label>
+      <input type="text" name="nombre" required>
+    </div>
+    <div class="form-grupo">
+      <label>Correo electrónico</label>
+      <input type="email" name="email" required>
+    </div>
+    <div class="form-grupo">
+      <label>Celular</label>
+      <input type="tel" name="telefono" required>
+    </div>
+    <div id="error-datos" class="form-error hidden"></div>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-guardar-datos">Guardar cambios</button>
+  </form>
+
+  <h2 style="font-size:17px;margin-top:28px;">Cambiar contraseña</h2>
+  <form id="form-password" class="card card-pad mt-16">
+    <div class="form-grupo">
+      <label>Contraseña actual</label>
+      <input type="password" name="password_actual" required placeholder="••••••••">
+    </div>
+    <div class="form-grupo">
+      <label>Nueva contraseña</label>
+      <input type="password" name="password_nueva" required minlength="6" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div id="error-password" class="form-error hidden"></div>
+    <button type="submit" class="btn btn-secondary btn-block" id="btn-cambiar-password">Actualizar contraseña</button>
+  </form>
+</div>
+
+<div style="height:40px;"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth-cliente.js"></script>
+<script>
+if (!clienteEstaLogueado()) {
+  location.href = 'login.html?next=mi-cuenta.html';
+}
+
+async function cargarPerfil() {
+  try {
+    const perfil = await Api.clientePerfil();
+    document.querySelector('#form-datos input[name="nombre"]').value = perfil.nombre;
+    document.querySelector('#form-datos input[name="email"]').value = perfil.email;
+    document.querySelector('#form-datos input[name="telefono"]').value = perfil.telefono;
+  } catch (err) {
+    mostrarToast(err.message || 'No se pudo cargar tu perfil', 'error');
+  }
+}
+cargarPerfil();
+
+document.getElementById('form-datos').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar-datos');
+  const errorBox = document.getElementById('error-datos');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+  try {
+    const fd = new FormData(e.target);
+    const perfil = await Api.clienteActualizarPerfil({
+      nombre: fd.get('nombre'),
+      email: fd.get('email'),
+      telefono: fd.get('telefono'),
+    });
+    localStorage.setItem('express_nombre_cliente', perfil.nombre);
+    mostrarToast('Datos actualizados', 'success');
+  } catch (err) {
+    errorBox.textContent = err.message || 'No se pudo actualizar tus datos';
+    errorBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar cambios';
+  }
+});
+
+document.getElementById('form-password').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-cambiar-password');
+  const errorBox = document.getElementById('error-password');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Actualizando...';
+  try {
+    const fd = new FormData(e.target);
+    await Api.clienteCambiarPassword({
+      password_actual: fd.get('password_actual'),
+      password_nueva: fd.get('password_nueva'),
+    });
+    mostrarToast('Contraseña actualizada', 'success');
+    e.target.reset();
+  } catch (err) {
+    errorBox.textContent = err.message || 'No se pudo cambiar la contraseña';
+    errorBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Actualizar contraseña';
+  }
+});
+</script>
+</body>
+</html>
