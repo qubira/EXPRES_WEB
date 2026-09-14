@@ -10,6 +10,17 @@ const CATEGORIAS_ICONOS = {
 let categoriaActiva = new URLSearchParams(location.search).get('categoria') || '';
 let terminoBusqueda = new URLSearchParams(location.search).get('q') || '';
 let debounceTimer = null;
+let ultimosProductos = [];
+
+function skeletonGrid(n) {
+  return Array.from({ length: n }).map(() => `
+    <div class="skel-pcard">
+      <div class="skeleton skel-media"></div>
+      <div class="skeleton skel-line w60"></div>
+      <div class="skeleton skel-line w40"></div>
+    </div>
+  `).join('');
+}
 
 async function cargarFiltros() {
   const categorias = await Api.getCategorias();
@@ -30,16 +41,32 @@ async function cargarFiltros() {
   });
 }
 
-function tarjetaProducto(p) {
+function controlHtml(p) {
+  const qty = cartQtyFor(p.id);
+  if (qty > 0) {
+    return `
+      <div class="pcard-stepper" data-stepper="${p.id}">
+        <button data-menos="${p.id}" aria-label="Quitar uno">−</button>
+        <span class="qty">${qty}</span>
+        <button data-mas="${p.id}" aria-label="Agregar uno">+</button>
+      </div>
+    `;
+  }
+  return `<button class="pcard-add" data-add="${p.id}" aria-label="Agregar">+</button>`;
+}
+
+function tarjetaProducto(p, index) {
   const icon = CATEGORIAS_ICONOS[p.categoria] || '🛍️';
   const media = p.foto_url
     ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>`
     : `<div class="pcard-media">${icon}</div>`;
+  const stockBadge = p.stock <= 5 ? `<span class="stock-badge">¡Solo ${p.stock}!</span>` : '';
   return `
-    <div class="pcard" data-id="${p.id}">
+    <div class="pcard fade-in-up" data-id="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
         ${media}
-        <button class="pcard-add" data-add="${p.id}" aria-label="Agregar">+</button>
+        ${stockBadge}
+        <div class="pcard-control" data-control="${p.id}">${controlHtml(p)}</div>
       </div>
       <div class="pcard-body">
         <span class="pcard-name">${p.nombre}</span>
@@ -50,38 +77,79 @@ function tarjetaProducto(p) {
   `;
 }
 
+function refrescarControl(productoId) {
+  const producto = ultimosProductos.find((p) => p.id === productoId);
+  const cont = document.querySelector(`[data-control="${productoId}"]`);
+  if (producto && cont) {
+    cont.innerHTML = controlHtml(producto);
+    enlazarControl(productoId);
+  }
+}
+
+function enlazarControl(productoId) {
+  const cont = document.querySelector(`[data-control="${productoId}"]`);
+  if (!cont) return;
+
+  const btnAdd = cont.querySelector('[data-add]');
+  if (btnAdd) {
+    btnAdd.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const producto = ultimosProductos.find((p) => p.id === productoId);
+      addToCart(producto, 1);
+      rebotarCarrito();
+      mostrarToast(`${producto.nombre} agregado`, 'success');
+      actualizarCartBar();
+      refrescarControl(productoId);
+    });
+  }
+  const btnMas = cont.querySelector('[data-mas]');
+  if (btnMas) {
+    btnMas.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateCartQty(productoId, cartQtyFor(productoId) + 1);
+      rebotarCarrito();
+      actualizarCartBar();
+      refrescarControl(productoId);
+    });
+  }
+  const btnMenos = cont.querySelector('[data-menos]');
+  if (btnMenos) {
+    btnMenos.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateCartQty(productoId, cartQtyFor(productoId) - 1);
+      actualizarCartBar();
+      refrescarControl(productoId);
+    });
+  }
+}
+
 async function cargarProductos() {
   const grid = document.getElementById('grid-productos');
   const estadoCarga = document.getElementById('estado-carga');
   const vacio = document.getElementById('vacio');
-  estadoCarga.classList.remove('hidden');
-  grid.innerHTML = '';
+  estadoCarga.classList.add('hidden');
   vacio.classList.add('hidden');
+  grid.innerHTML = skeletonGrid(6);
 
   try {
     const params = {};
     if (categoriaActiva) params.categoria = categoriaActiva;
     if (terminoBusqueda) params.q = terminoBusqueda;
     const productos = await Api.getProductos(params);
+    ultimosProductos = productos;
 
-    estadoCarga.classList.add('hidden');
     if (productos.length === 0) {
+      grid.innerHTML = '';
       vacio.classList.remove('hidden');
       return;
     }
 
     grid.innerHTML = productos.map(tarjetaProducto).join('');
-    grid.querySelectorAll('[data-add]').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const producto = productos.find((p) => p.id === btn.dataset.add);
-        addToCart(producto, 1);
-        mostrarToast(`${producto.nombre} agregado al carrito`, 'success');
-        actualizarCartBar();
-      });
-    });
+    productos.forEach((p) => enlazarControl(p.id));
   } catch (err) {
+    grid.innerHTML = '';
     estadoCarga.textContent = 'No se pudo conectar con el servidor. Intenta de nuevo.';
+    estadoCarga.classList.remove('hidden');
   }
 }
 

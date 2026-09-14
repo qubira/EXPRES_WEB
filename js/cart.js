@@ -62,6 +62,11 @@ function cartCount() {
   return getCart().reduce((sum, i) => sum + i.cantidad, 0);
 }
 
+function cartQtyFor(productoId) {
+  const item = getCart().find((i) => i.producto_id === productoId);
+  return item ? item.cantidad : 0;
+}
+
 function actualizarBadgeCarrito() {
   document.querySelectorAll('[data-cart-count]').forEach((el) => {
     const count = cartCount();
@@ -71,6 +76,37 @@ function actualizarBadgeCarrito() {
   document.querySelectorAll('[data-cart-total]').forEach((el) => {
     el.textContent = formatoSoles(cartTotal());
   });
+}
+
+function rebotarCarrito() {
+  document.querySelectorAll('.icon-btn, .tabbar-item .tabbar-icon').forEach((el) => {
+    el.classList.remove('rebote');
+    void el.offsetWidth;
+    el.classList.add('rebote');
+  });
+}
+
+// ---------- Favoritos (tiendas) ----------
+const FAV_KEY = 'express_favoritos_v1';
+
+function getFavoritos() {
+  try {
+    return JSON.parse(localStorage.getItem(FAV_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function esFavorito(tiendaId) {
+  return getFavoritos().includes(tiendaId);
+}
+
+function toggleFavorito(tiendaId) {
+  let favs = getFavoritos();
+  const yaEsta = favs.includes(tiendaId);
+  favs = yaEsta ? favs.filter((id) => id !== tiendaId) : [...favs, tiendaId];
+  localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+  return !yaEsta;
 }
 
 document.addEventListener('DOMContentLoaded', actualizarBadgeCarrito);

@@ -28,7 +28,10 @@
 </nav>
 
 <header class="hero">
-  <div class="container hero-inner">
+  <span class="hero-deco d1">☀️</span>
+  <span class="hero-deco d2">🌊</span>
+  <span class="hero-deco d3">🐚</span>
+  <div class="container hero-inner fade-in-up">
     <div class="hero-badge">☀️ Temporada de verano</div>
     <h1>¿Qué se te antoja hoy?</h1>
     <p class="lead">Pide comida y bebidas, directo a tu sombrilla.</p>
@@ -39,15 +42,20 @@
       </div>
     </form>
   </div>
+  <div class="hero-wave">
+    <svg viewBox="0 0 500 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,20 C100,45 150,0 250,15 C350,30 400,0 500,18 L500,40 L0,40 Z" fill="var(--arena-100)"></path>
+    </svg>
+  </div>
 </header>
 
 <div class="cat-strip" id="cat-strip">
-  <a href="catalogo.html?categoria=comida" class="cat-icon"><span class="cat-icon-circle">🍢</span><span class="cat-label">Comida</span></a>
-  <a href="catalogo.html?categoria=bebidas" class="cat-icon"><span class="cat-icon-circle">🥤</span><span class="cat-label">Bebidas</span></a>
-  <a href="catalogo.html?categoria=ropa" class="cat-icon"><span class="cat-icon-circle">👙</span><span class="cat-label">Ropa</span></a>
-  <a href="catalogo.html?categoria=servicios" class="cat-icon"><span class="cat-icon-circle">⛱️</span><span class="cat-label">Servicios</span></a>
-  <a href="catalogo.html?categoria=artesanias" class="cat-icon"><span class="cat-icon-circle">🎨</span><span class="cat-label">Artesanías</span></a>
-  <a href="catalogo.html" class="cat-icon"><span class="cat-icon-circle">🛍️</span><span class="cat-label">Todo</span></a>
+  <a href="catalogo.html?categoria=comida" class="cat-icon" data-cat="comida"><span class="cat-icon-circle">🍢</span><span class="cat-label">Comida</span></a>
+  <a href="catalogo.html?categoria=bebidas" class="cat-icon" data-cat="bebidas"><span class="cat-icon-circle">🥤</span><span class="cat-label">Bebidas</span></a>
+  <a href="catalogo.html?categoria=ropa" class="cat-icon" data-cat="ropa"><span class="cat-icon-circle">👙</span><span class="cat-label">Ropa</span></a>
+  <a href="catalogo.html?categoria=servicios" class="cat-icon" data-cat="servicios"><span class="cat-icon-circle">⛱️</span><span class="cat-label">Servicios</span></a>
+  <a href="catalogo.html?categoria=artesanias" class="cat-icon" data-cat="artesanias"><span class="cat-icon-circle">🎨</span><span class="cat-label">Artesanías</span></a>
+  <a href="catalogo.html" class="cat-icon" data-cat="todo"><span class="cat-icon-circle">🛍️</span><span class="cat-label">Todo</span></a>
 </div>
 
 <div class="container mt-16">
@@ -66,7 +74,9 @@
     <a href="catalogo.html" class="text-sm" style="color:var(--coral-600);font-weight:700;">Ver todo →</a>
   </div>
   <div class="store-scroll" id="store-scroll">
-    <div class="text-muted text-sm" style="padding:16px 18px;">Cargando tiendas...</div>
+    <div class="skel-store"><div class="skeleton skel-media"></div><div class="skeleton skel-line w70"></div><div class="skeleton skel-line w45"></div></div>
+    <div class="skel-store"><div class="skeleton skel-media"></div><div class="skeleton skel-line w70"></div><div class="skeleton skel-line w45"></div></div>
+    <div class="skel-store"><div class="skeleton skel-media"></div><div class="skeleton skel-line w70"></div><div class="skeleton skel-line w45"></div></div>
   </div>
 </section>
 
@@ -77,21 +87,21 @@
     <p class="section-sub">De la sombrilla a tu mano en minutos, sin filas ni caminatas al sol.</p>
 
     <div class="steps">
-      <div class="step-card">
+      <div class="step-card fade-in-up" style="animation-delay:0ms">
         <div class="step-num">1</div>
-        <div class="step-icon">📱</div>
+        <div class="step-icon-circle">📱</div>
         <h3>Elige y paga</h3>
         <p class="text-sm text-muted">Escoge productos de tiendas y ambulantes cercanos. Paga por adelantado con Yape, Plin o tarjeta.</p>
       </div>
-      <div class="step-card">
+      <div class="step-card fade-in-up" style="animation-delay:100ms">
         <div class="step-num">2</div>
-        <div class="step-icon">🔑</div>
+        <div class="step-icon-circle">🔑</div>
         <h3>Recibe tu PIN</h3>
         <p class="text-sm text-muted">Al confirmarse el pago, te damos un PIN de 4 dígitos. Es tu llave para recibir el pedido.</p>
       </div>
-      <div class="step-card">
+      <div class="step-card fade-in-up" style="animation-delay:200ms">
         <div class="step-num">3</div>
-        <div class="step-icon">🚲</div>
+        <div class="step-icon-circle">🚲</div>
         <h3>Llega en bici</h3>
         <p class="text-sm text-muted">Un repartidor recoge tu pedido y te lo lleva a la playa. Entrega tu PIN y listo.</p>
       </div>
@@ -170,16 +180,29 @@ async function cargarTiendasDestacadas() {
       cont.innerHTML = '<div class="text-muted text-sm" style="padding:16px 18px;">Muy pronto tendremos tiendas aquí.</div>';
       return;
     }
-    cont.innerHTML = tiendas.slice(0, 8).map((t) => `
-      <a href="catalogo.html?categoria=${t.categoria}" class="store-mini">
-        <div class="store-mini-media">${ICONOS[t.categoria] || '🛍️'}</div>
-        <div class="store-mini-body">
-          <strong>${t.nombre}</strong>
-          <span class="tag">${t.categoria}</span>
-          <span class="delivery-badge">🚲 S/5.00 · ${t.zona || 'Playa Ancón'}</span>
-        </div>
-      </a>
+    const lista = tiendas.slice(0, 8);
+    cont.innerHTML = lista.map((t, i) => `
+      <div class="store-mini fade-in-up" style="animation-delay:${i * 60}ms; position:relative;">
+        <button class="heart-btn ${esFavorito(t.id) ? 'activo' : ''}" data-fav="${t.id}" aria-label="Favorito">${esFavorito(t.id) ? '❤️' : '🤍'}</button>
+        <a href="catalogo.html?categoria=${t.categoria}" style="display:block;">
+          <div class="store-mini-media">${ICONOS[t.categoria] || '🛍️'}</div>
+          <div class="store-mini-body">
+            <strong>${t.nombre}</strong>
+            <span class="tag">${t.categoria}</span>
+            <span class="delivery-badge">🚲 S/5.00 · ${t.zona || 'Playa Ancón'}</span>
+          </div>
+        </a>
+      </div>
     `).join('');
+
+    cont.querySelectorAll('[data-fav]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const activo = toggleFavorito(btn.dataset.fav);
+        btn.textContent = activo ? '❤️' : '🤍';
+        btn.classList.toggle('activo', activo);
+      });
+    });
   } catch (err) {
     cont.innerHTML = '<div class="text-muted text-sm" style="padding:16px 18px;">No se pudo cargar el catálogo en este momento.</div>';
   }
