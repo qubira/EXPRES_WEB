@@ -14,6 +14,7 @@
   <aside class="panel-sidebar">
     <div class="brand"><img src="../assets/logo-navbar.png" alt="Express" class="brand-logo"></div>
     <div class="panel-link activo" data-view="resumen">📊 Resumen</div>
+    <div class="panel-link" data-view="registro">➕ Registrar cuenta</div>
     <div class="panel-link" data-view="pagos">💳 Pagos pendientes</div>
     <div class="panel-link" data-view="pedidos">📦 Pedidos</div>
     <div class="panel-link" data-view="tiendas">🏪 Tiendas</div>
@@ -57,6 +58,44 @@
       </div>
     </section>
 
+    <section id="view-registro" class="view hidden">
+      <p class="text-muted mb-16">Solo los administradores pueden dar de alta tiendas y repartidores. Elige qué tipo de cuenta vas a registrar:</p>
+      <div class="flex" style="gap:12px; max-width:480px; margin-bottom:24px;">
+        <button type="button" class="btn btn-primary btn-block" id="btn-tipo-tienda" data-tipo="tienda">🏪 Tienda</button>
+        <button type="button" class="btn btn-outline btn-block" id="btn-tipo-repartidor" data-tipo="repartidor">🚴 Entrega</button>
+      </div>
+
+      <form id="form-registro-tienda" class="card card-pad" style="max-width:480px;">
+        <h3>Registrar tienda</h3>
+        <div class="form-grupo"><label>Nombre</label><input id="rt-nombre" required></div>
+        <div class="form-grupo"><label>Categoría (tipo de negocio)</label><select id="rt-categoria"></select></div>
+        <div class="form-grupo"><label>¿Qué vende?</label><input id="rt-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
+        <div class="form-grupo"><label>Zona</label><select id="rt-zona"></select></div>
+        <div class="form-grupo"><label>DNI del titular</label>
+          <div class="flex" style="gap:8px;">
+            <input id="rt-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+            <button type="button" class="btn btn-outline btn-sm" id="rt-buscar-dni">Buscar</button>
+          </div>
+        </div>
+        <div class="form-grupo"><label>Nombre del titular</label><input id="rt-nombre-titular" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
+        <div class="form-grupo"><label>Comisión (%)</label><input id="rt-comision" type="number" value="12" step="0.5"></div>
+        <div class="form-grupo"><label>WhatsApp</label><input id="rt-whatsapp"></div>
+        <div class="form-grupo"><label>Email de acceso</label><input id="rt-email" type="email" required></div>
+        <div class="form-grupo"><label>Contraseña</label><input id="rt-password" type="text" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Crear tienda</button>
+      </form>
+
+      <form id="form-registro-repartidor" class="card card-pad hidden" style="max-width:480px;">
+        <h3>Registrar repartidor</h3>
+        <div class="form-grupo"><label>Nombre</label><input id="rr-nombre" required></div>
+        <div class="form-grupo"><label>DNI</label><input id="rr-dni" required></div>
+        <div class="form-grupo"><label>Teléfono</label><input id="rr-telefono" required></div>
+        <div class="form-grupo"><label>Email de acceso</label><input id="rr-email" type="email" required></div>
+        <div class="form-grupo"><label>Contraseña</label><input id="rr-password" type="text" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Crear repartidor</button>
+      </form>
+    </section>
+
     <section id="view-pagos" class="view hidden">
       <div id="lista-pagos"></div>
     </section>
@@ -79,8 +118,7 @@
     </section>
 
     <section id="view-tiendas" class="view hidden">
-      <button class="btn btn-primary btn-sm" id="btn-nueva-tienda">+ Nueva tienda</button>
-      <div class="table-wrap mt-16">
+      <div class="table-wrap">
         <table>
           <thead><tr><th>Nombre</th><th>Categoría</th><th>Zona</th><th>Comisión</th><th>Estado</th><th></th></tr></thead>
           <tbody id="tabla-tiendas"></tbody>
@@ -89,8 +127,7 @@
     </section>
 
     <section id="view-repartidores" class="view hidden">
-      <button class="btn btn-primary btn-sm" id="btn-nuevo-repartidor">+ Nuevo repartidor</button>
-      <div class="table-wrap mt-16">
+      <div class="table-wrap">
         <table>
           <thead><tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Disponible</th><th>Por pagar</th><th></th></tr></thead>
           <tbody id="tabla-repartidores"></tbody>
@@ -102,6 +139,7 @@
 
 <nav class="panel-mobile-nav">
   <div class="panel-link activo" data-view="resumen"><span class="icon">📊</span>Resumen</div>
+  <div class="panel-link" data-view="registro"><span class="icon">➕</span>Registrar</div>
   <div class="panel-link" data-view="pagos"><span class="icon">💳</span>Pagos</div>
   <div class="panel-link" data-view="pedidos"><span class="icon">📦</span>Pedidos</div>
   <div class="panel-link" data-view="tiendas"><span class="icon">🏪</span>Tiendas</div>

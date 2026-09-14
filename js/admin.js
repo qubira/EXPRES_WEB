@@ -19,7 +19,7 @@ function manejarError401(err) {
 }
 
 // ---------- Navegacion entre vistas ----------
-const TITULOS = { resumen: 'Resumen', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores' };
+const TITULOS = { resumen: 'Resumen', registro: 'Registrar cuenta', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -28,6 +28,7 @@ function irAVista(vista) {
   document.getElementById('titulo-vista').textContent = TITULOS[vista];
 
   if (vista === 'resumen') cargarResumen();
+  if (vista === 'registro') initVistaRegistro();
   if (vista === 'pagos') cargarPagos();
   if (vista === 'pedidos') cargarPedidos();
   if (vista === 'tiendas') cargarTiendas();
@@ -267,55 +268,6 @@ async function abrirModalEditarTienda(t) {
   });
 }
 
-document.getElementById('btn-nueva-tienda').addEventListener('click', async () => {
-  const tipos = await Api.getTiposNegocio();
-  abrirModal(`
-    <h3>Nueva tienda</h3>
-    <div class="form-grupo"><label>Nombre</label><input id="n-nombre" required></div>
-    <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
-      <select id="n-categoria">
-        ${tipos.map((c) => `<option value="${c}">${labelTipoNegocio(c)}</option>`).join('')}
-      </select>
-    </div>
-    <div class="form-grupo"><label>¿Qué vende?</label><input id="n-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
-    <div class="form-grupo"><label>Zona</label>
-      <select id="n-zona">${zonaOptionsHtml('')}</select>
-    </div>
-    <div class="form-grupo"><label>DNI del titular</label>
-      <div class="flex" style="gap:8px;">
-        <input id="n-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
-        <button type="button" class="btn btn-outline btn-sm" id="n-buscar-dni">Buscar</button>
-      </div>
-    </div>
-    <div class="form-grupo"><label>Nombre del titular</label><input id="n-nombre-titular" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
-    <div class="form-grupo"><label>Comisión (%)</label><input id="n-comision" type="number" value="12" step="0.5"></div>
-    <div class="form-grupo"><label>WhatsApp</label><input id="n-whatsapp"></div>
-    <div class="form-grupo"><label>Email de acceso</label><input id="n-email" type="email" required></div>
-    <div class="form-grupo"><label>Contraseña</label><input id="n-password" type="text" required></div>
-    <button class="btn btn-primary btn-block" id="btn-crear-tienda">Crear tienda</button>
-  `);
-  habilitarBuscarDni('n-dni', 'n-nombre-titular', 'n-buscar-dni');
-  document.getElementById('btn-crear-tienda').addEventListener('click', async () => {
-    try {
-      await Api.adminCrearTienda({
-        nombre: document.getElementById('n-nombre').value,
-        categoria: document.getElementById('n-categoria').value,
-        subcategoria: document.getElementById('n-subcategoria').value,
-        zona: document.getElementById('n-zona').value,
-        dni_titular: document.getElementById('n-dni').value,
-        nombre_titular: document.getElementById('n-nombre-titular').value,
-        comision_pactada: Number(document.getElementById('n-comision').value),
-        contacto_whatsapp: document.getElementById('n-whatsapp').value,
-        email: document.getElementById('n-email').value,
-        password: document.getElementById('n-password').value,
-      });
-      mostrarToast('Tienda creada', 'success');
-      cerrarModal();
-      cargarTiendas();
-    } catch (err) { mostrarToast(err.message, 'error'); }
-  });
-});
-
 // ---------- Repartidores ----------
 async function cargarRepartidores() {
   const tbody = document.getElementById('tabla-repartidores');
@@ -348,30 +300,72 @@ async function cargarRepartidores() {
   }
 }
 
-document.getElementById('btn-nuevo-repartidor').addEventListener('click', () => {
-  abrirModal(`
-    <h3>Nuevo repartidor</h3>
-    <div class="form-grupo"><label>Nombre</label><input id="r-nombre" required></div>
-    <div class="form-grupo"><label>DNI</label><input id="r-dni" required></div>
-    <div class="form-grupo"><label>Teléfono</label><input id="r-telefono" required></div>
-    <div class="form-grupo"><label>Email de acceso</label><input id="r-email" type="email" required></div>
-    <div class="form-grupo"><label>Contraseña</label><input id="r-password" type="text" required></div>
-    <button class="btn btn-primary btn-block" id="btn-crear-repartidor">Crear repartidor</button>
-  `);
-  document.getElementById('btn-crear-repartidor').addEventListener('click', async () => {
+// ---------- Registro unificado (Tienda / Entrega) ----------
+let registroInicializado = false;
+async function initVistaRegistro() {
+  if (registroInicializado) return;
+  registroInicializado = true;
+
+  const tipos = await Api.getTiposNegocio();
+  document.getElementById('rt-categoria').innerHTML = tipos.map((c) => `<option value="${c}">${labelTipoNegocio(c)}</option>`).join('');
+  document.getElementById('rt-zona').innerHTML = zonaOptionsHtml('');
+  habilitarBuscarDni('rt-dni', 'rt-nombre-titular', 'rt-buscar-dni');
+
+  const btnTienda = document.getElementById('btn-tipo-tienda');
+  const btnRepartidor = document.getElementById('btn-tipo-repartidor');
+  const formTienda = document.getElementById('form-registro-tienda');
+  const formRepartidor = document.getElementById('form-registro-repartidor');
+
+  btnTienda.addEventListener('click', () => {
+    btnTienda.classList.replace('btn-outline', 'btn-primary');
+    btnRepartidor.classList.replace('btn-primary', 'btn-outline');
+    formTienda.classList.remove('hidden');
+    formRepartidor.classList.add('hidden');
+  });
+  btnRepartidor.addEventListener('click', () => {
+    btnRepartidor.classList.replace('btn-outline', 'btn-primary');
+    btnTienda.classList.replace('btn-primary', 'btn-outline');
+    formRepartidor.classList.remove('hidden');
+    formTienda.classList.add('hidden');
+  });
+
+  formTienda.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await Api.adminCrearTienda({
+        nombre: document.getElementById('rt-nombre').value,
+        categoria: document.getElementById('rt-categoria').value,
+        subcategoria: document.getElementById('rt-subcategoria').value,
+        zona: document.getElementById('rt-zona').value,
+        dni_titular: document.getElementById('rt-dni').value,
+        nombre_titular: document.getElementById('rt-nombre-titular').value,
+        comision_pactada: Number(document.getElementById('rt-comision').value),
+        contacto_whatsapp: document.getElementById('rt-whatsapp').value,
+        email: document.getElementById('rt-email').value,
+        password: document.getElementById('rt-password').value,
+      });
+      mostrarToast('Tienda creada', 'success');
+      formTienda.reset();
+      document.getElementById('rt-nombre-titular').value = '';
+      cargarTiendas();
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  });
+
+  formRepartidor.addEventListener('submit', async (e) => {
+    e.preventDefault();
     try {
       await Api.adminCrearRepartidor({
-        nombre: document.getElementById('r-nombre').value,
-        dni: document.getElementById('r-dni').value,
-        telefono: document.getElementById('r-telefono').value,
-        email: document.getElementById('r-email').value,
-        password: document.getElementById('r-password').value,
+        nombre: document.getElementById('rr-nombre').value,
+        dni: document.getElementById('rr-dni').value,
+        telefono: document.getElementById('rr-telefono').value,
+        email: document.getElementById('rr-email').value,
+        password: document.getElementById('rr-password').value,
       });
       mostrarToast('Repartidor creado', 'success');
-      cerrarModal();
+      formRepartidor.reset();
       cargarRepartidores();
     } catch (err) { mostrarToast(err.message, 'error'); }
   });
-});
+}
 
 cargarResumen();
