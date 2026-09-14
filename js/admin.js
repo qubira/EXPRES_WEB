@@ -220,8 +220,12 @@ function abrirModalEditarTienda(t) {
     <div class="form-grupo"><label>Zona</label><input id="e-zona" value="${t.zona || ''}"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="e-comision" type="number" step="0.5" value="${t.comision_pactada}"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="e-whatsapp" value="${t.contacto_whatsapp || ''}"></div>
-    <div class="form-grupo">
-      <label><input type="checkbox" id="e-activo" ${t.activo ? 'checked' : ''} style="width:auto;display:inline-block;margin-right:6px;"> Tienda activa</label>
+    <div class="form-grupo flex justify-between items-center">
+      <label class="mb-0">Tienda activa</label>
+      <span class="toggle-switch">
+        <input type="checkbox" id="e-activo" ${t.activo ? 'checked' : ''}>
+        <span class="toggle-slider"></span>
+      </span>
     </div>
     <hr class="divider">
     <div class="form-grupo"><label>Nueva contraseña (opcional)</label><input id="e-password" type="text" placeholder="Dejar vacío para no cambiar"></div>

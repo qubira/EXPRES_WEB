@@ -36,17 +36,23 @@ function abrirModal(html) {
 }
 function cerrarModal() { document.getElementById('modal-root').innerHTML = ''; }
 
+function actualizarEtiquetaDisponible(disponible) {
+  document.getElementById('disponible-label').textContent = disponible ? 'Disponible' : 'No disponible';
+}
+
 async function cargarPerfil() {
   try {
     const perfil = await Api.repartidorPerfil();
     document.getElementById('pago-pendiente').textContent = formatoSoles(perfil.pago_pendiente);
     document.getElementById('toggle-disponible').checked = perfil.disponible;
+    actualizarEtiquetaDisponible(perfil.disponible);
   } catch (err) { manejarError401(err); }
 }
 
 document.getElementById('toggle-disponible').addEventListener('change', async (e) => {
   try {
     await Api.repartidorDisponibilidad(e.target.checked);
+    actualizarEtiquetaDisponible(e.target.checked);
     mostrarToast(e.target.checked ? 'Ahora estás disponible' : 'Ya no estás disponible', 'success');
   } catch (err) { mostrarToast(err.message, 'error'); }
 });
@@ -62,21 +68,28 @@ async function cargarActivos() {
       return;
     }
     cont.innerHTML = pedidos.map((p) => `
-      <div class="card card-pad mt-16">
+      <div class="card card-pad mt-16 entrega-card estado-${p.estado}">
         <div class="flex justify-between items-center">
           <strong>#${p.id.slice(0,8).toUpperCase()}</strong>
           <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
         </div>
-        <div class="text-sm text-muted mt-8">📍 ${p.zona_entrega}</div>
-        ${p.referencia_entrega ? `<div class="text-sm text-muted">${p.referencia_entrega}</div>` : ''}
-        <div class="text-sm mt-8">👤 ${p.cliente_nombre} · <a href="tel:${p.cliente_telefono}">${p.cliente_telefono}</a></div>
-        <div class="flex justify-between items-center mt-8">
-          <span class="text-sm">Tarifa de entrega: <strong>${formatoSoles(p.delivery_fee)}</strong></span>
+        <div class="mt-8">
+          <div class="entrega-info-row">📍 <span>${p.zona_entrega}</span></div>
+          ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${p.referencia_entrega}</span></div>` : ''}
+          <div class="entrega-info-row">👤 <span>${p.cliente_nombre}</span></div>
+        </div>
+        <div class="flex gap-8 mt-8">
+          <a href="tel:${p.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
+          <a href="https://wa.me/51${p.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
+        </div>
+        <div class="entrega-tarifa">
+          <span class="text-sm">Tarifa de entrega</span>
+          <strong>${formatoSoles(p.delivery_fee)}</strong>
         </div>
         <div class="mt-16">
-          ${p.estado === 'listo_recoger' ? `<button class="btn btn-secondary btn-block" data-recoger="${p.id}">He recogido el pedido</button>` : ''}
-          ${p.estado === 'recogido' ? `<button class="btn btn-success btn-block" data-entregar="${p.id}">Confirmar entrega (PIN)</button>` : ''}
-          ${!['listo_recoger','recogido'].includes(p.estado) ? `<div class="text-sm text-muted text-center">Esperando que la tienda prepare el pedido...</div>` : ''}
+          ${p.estado === 'listo_recoger' ? `<button class="btn btn-secondary btn-block" data-recoger="${p.id}">🚲 He recogido el pedido</button>` : ''}
+          ${p.estado === 'recogido' ? `<button class="btn btn-success btn-block" data-entregar="${p.id}">🔑 Confirmar entrega (PIN)</button>` : ''}
+          ${!['listo_recoger','recogido'].includes(p.estado) ? `<div class="text-sm text-muted text-center">⏳ Esperando que la tienda prepare el pedido...</div>` : ''}
         </div>
       </div>
     `).join('');
@@ -97,13 +110,16 @@ async function cargarActivos() {
 
 function abrirModalPin(pedidoId) {
   abrirModal(`
-    <h3>Confirmar entrega</h3>
-    <p class="text-muted text-sm">Pídele al cliente su PIN de 4 dígitos.</p>
-    <div class="form-grupo">
-      <input id="input-pin" type="text" inputmode="numeric" maxlength="4" placeholder="0000" style="font-size:28px; text-align:center; letter-spacing:10px;">
+    <div class="text-center">
+      <div style="font-size:38px;">🔑</div>
+      <h3>Confirmar entrega</h3>
+      <p class="text-muted text-sm">Pídele al cliente su PIN de 4 dígitos.</p>
     </div>
-    <div id="pin-error" class="form-error hidden"></div>
-    <button class="btn btn-success btn-block" id="btn-confirmar-pin">Confirmar entrega</button>
+    <div class="form-grupo mt-16">
+      <input id="input-pin" type="text" inputmode="numeric" maxlength="4" placeholder="0000" style="font-size:32px; text-align:center; letter-spacing:12px; font-weight:800;">
+    </div>
+    <div id="pin-error" class="form-error hidden text-center"></div>
+    <button class="btn btn-success btn-block mt-8" id="btn-confirmar-pin">Confirmar entrega</button>
   `);
   document.getElementById('btn-confirmar-pin').addEventListener('click', async () => {
     const pin = document.getElementById('input-pin').value.trim();

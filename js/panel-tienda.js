@@ -145,12 +145,27 @@ function abrirModalProducto(p) {
     <div class="form-grupo"><label>Stock</label><input id="p-stock" type="number" value="${p ? p.stock : 10}" required></div>
     <div class="form-grupo">
       <label>Foto del producto</label>
-      <input type="file" id="p-foto-file" accept="image/*" capture="environment">
-      <div class="form-hint">Sube una foto desde tu celular, o pega una URL abajo.</div>
-      <img id="p-foto-preview" src="${p && p.foto_url ? p.foto_url : ''}" style="max-height:120px;border-radius:10px;margin-top:8px;${p && p.foto_url ? '' : 'display:none;'}">
+      <label class="file-drop ${p && p.foto_url ? 'con-imagen' : ''}" id="p-foto-drop">
+        <input type="file" id="p-foto-file" accept="image/*" capture="environment" class="file-drop-input">
+        <img id="p-foto-preview" class="file-drop-preview" src="${p && p.foto_url ? p.foto_url : ''}" style="${p && p.foto_url ? '' : 'display:none;'}">
+        <div id="p-foto-placeholder" style="${p && p.foto_url ? 'display:none;' : 'display:flex;flex-direction:column;align-items:center;gap:6px;'}">
+          <span class="file-drop-icon">📷</span>
+          <span class="file-drop-text">Toca para subir una foto</span>
+          <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+        </div>
+      </label>
+      <div class="form-hint">También puedes pegar una URL abajo.</div>
     </div>
     <div class="form-grupo"><label>URL de foto</label><input id="p-foto" value="${p ? (p.foto_url||'') : ''}" placeholder="https://..."></div>
-    ${editando ? `<div class="form-grupo"><label><input type="checkbox" id="p-activo" ${p.activo?'checked':''} style="width:auto;display:inline-block;margin-right:6px;"> Producto activo</label></div>` : ''}
+    ${editando ? `
+      <div class="form-grupo flex justify-between items-center">
+        <label class="mb-0">Producto activo</label>
+        <span class="toggle-switch">
+          <input type="checkbox" id="p-activo" ${p.activo?'checked':''}>
+          <span class="toggle-slider"></span>
+        </span>
+      </div>
+    ` : ''}
     <button class="btn btn-primary btn-block" id="btn-guardar-producto">${editando ? 'Guardar cambios' : 'Crear producto'}</button>
   `);
 
@@ -158,6 +173,8 @@ function abrirModalProducto(p) {
     const file = e.target.files[0];
     if (!file) return;
     const preview = document.getElementById('p-foto-preview');
+    const placeholder = document.getElementById('p-foto-placeholder');
+    const drop = document.getElementById('p-foto-drop');
     try {
       const fd = new FormData();
       fd.append('imagen', file);
@@ -166,6 +183,8 @@ function abrirModalProducto(p) {
       document.getElementById('p-foto').value = url;
       preview.src = url;
       preview.style.display = 'block';
+      placeholder.style.display = 'none';
+      drop.classList.add('con-imagen');
       mostrarToast('Imagen subida', 'success');
     } catch (err) {
       mostrarToast(err.message || 'No se pudo subir la imagen', 'error');
@@ -216,6 +235,8 @@ async function cargarPerfilTienda() {
     if (p.logo_url) {
       preview.src = p.logo_url;
       preview.style.display = 'block';
+      document.getElementById('tp-logo-placeholder').style.display = 'none';
+      document.getElementById('tp-logo-drop').classList.add('con-imagen');
     }
   } catch (err) {
     if (!manejarError401(err)) mostrarToast(err.message, 'error');
@@ -227,6 +248,8 @@ document.getElementById('tp-logo-file').addEventListener('change', async (e) => 
   const file = e.target.files[0];
   if (!file) return;
   const preview = document.getElementById('tp-logo-preview');
+  const placeholder = document.getElementById('tp-logo-placeholder');
+  const drop = document.getElementById('tp-logo-drop');
   try {
     const fd = new FormData();
     fd.append('imagen', file);
@@ -235,6 +258,8 @@ document.getElementById('tp-logo-file').addEventListener('change', async (e) => 
     logoUrlActual = url;
     preview.src = url;
     preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    drop.classList.add('con-imagen');
     mostrarToast('Logo subido', 'success');
   } catch (err) {
     mostrarToast(err.message || 'No se pudo subir el logo', 'error');

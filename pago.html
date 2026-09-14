@@ -41,8 +41,15 @@
     <h3>2. Sube tu comprobante</h3>
     <div class="form-grupo">
       <label>Captura de pantalla del pago</label>
-      <input type="file" name="comprobante" accept="image/*" capture="environment" required>
-      <div class="form-hint">Foto o captura clara del Yape/Plin realizado.</div>
+      <label class="file-drop" id="comprobante-drop">
+        <input type="file" name="comprobante" id="comprobante-file" accept="image/*" capture="environment" required class="file-drop-input">
+        <img id="comprobante-preview" class="file-drop-preview" style="display:none;">
+        <div id="comprobante-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <span class="file-drop-icon">🧾</span>
+          <span class="file-drop-text">Toca para subir tu comprobante</span>
+          <span class="file-drop-hint">Foto o captura clara del Yape/Plin realizado</span>
+        </div>
+      </label>
     </div>
     <div class="form-grupo">
       <label>Número de operación (opcional)</label>

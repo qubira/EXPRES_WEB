@@ -43,8 +43,15 @@
           <h3>Datos de mi tienda</h3>
           <div class="form-grupo">
             <label>Logo</label>
-            <input type="file" id="tp-logo-file" accept="image/*">
-            <img id="tp-logo-preview" style="max-height:90px;border-radius:10px;margin-top:8px;display:none;">
+            <label class="file-drop" id="tp-logo-drop">
+              <input type="file" id="tp-logo-file" accept="image/*" class="file-drop-input">
+              <img id="tp-logo-preview" class="file-drop-preview" style="display:none;">
+              <div id="tp-logo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <span class="file-drop-icon">🏪</span>
+                <span class="file-drop-text">Toca para subir tu logo</span>
+                <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+              </div>
+            </label>
           </div>
           <div class="form-grupo"><label>Nombre</label><input id="tp-nombre" required></div>
           <div class="form-grupo"><label>Categoría</label>

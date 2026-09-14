@@ -27,6 +27,16 @@ document.querySelectorAll('#metodos-pago .chip').forEach((chip) => {
   });
 });
 
+document.getElementById('comprobante-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const preview = document.getElementById('comprobante-preview');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  document.getElementById('comprobante-placeholder').style.display = 'none';
+  document.getElementById('comprobante-drop').classList.add('con-imagen');
+});
+
 document.getElementById('form-pago').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-pago');
