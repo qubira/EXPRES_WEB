@@ -47,11 +47,14 @@
   <p class="text-center mt-16">¿Ya tienes cuenta? <a href="login.html" style="color:var(--coral-600);font-weight:700;">Inicia sesión</a></p>
 </div>
 
+<div id="modal-root"></div>
+
 <div style="height:40px;"></div>
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth-cliente.js"></script>
+<script src="js/ubicacion.js"></script>
 <script>
 document.getElementById('form-registro').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -69,8 +72,11 @@ document.getElementById('form-registro').addEventListener('submit', async (e) =>
       password: fd.get('password'),
     });
     guardarSesionCliente(data.token, data.nombre);
-    const next = new URLSearchParams(location.search).get('next') || 'mis-pedidos.html';
-    location.href = next;
+
+    abrirSelectorUbicacion(() => {
+      const next = new URLSearchParams(location.search).get('next') || 'mis-pedidos.html';
+      location.href = next;
+    });
   } catch (err) {
     errorBox.textContent = err.message || 'Error al crear la cuenta';
     errorBox.classList.remove('hidden');
