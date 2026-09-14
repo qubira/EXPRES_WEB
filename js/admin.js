@@ -228,7 +228,7 @@ async function abrirModalEditarTienda(t) {
         <button type="button" class="btn btn-outline btn-sm" id="e-buscar-dni">Buscar</button>
       </div>
     </div>
-    <div class="form-grupo"><label>Nombre del titular</label><input id="e-nombre-titular" value="${t.nombre_titular || ''}"></div>
+    <div class="form-grupo"><label>Nombre del titular</label><input id="e-nombre-titular" value="${t.nombre_titular || ''}" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="e-comision" type="number" step="0.5" value="${t.comision_pactada}"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="e-whatsapp" value="${t.contacto_whatsapp || ''}"></div>
     <div class="form-grupo flex justify-between items-center">
@@ -287,7 +287,7 @@ document.getElementById('btn-nueva-tienda').addEventListener('click', async () =
         <button type="button" class="btn btn-outline btn-sm" id="n-buscar-dni">Buscar</button>
       </div>
     </div>
-    <div class="form-grupo"><label>Nombre del titular</label><input id="n-nombre-titular"></div>
+    <div class="form-grupo"><label>Nombre del titular</label><input id="n-nombre-titular" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="n-comision" type="number" value="12" step="0.5"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="n-whatsapp"></div>
     <div class="form-grupo"><label>Email de acceso</label><input id="n-email" type="email" required></div>
