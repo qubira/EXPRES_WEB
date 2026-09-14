@@ -78,3 +78,12 @@ document.getElementById('form-checkout').addEventListener('submit', async (e) =>
 });
 
 renderCarrito();
+
+// Si el cliente ya eligio una zona desde el home/catalogo, se la dejamos lista
+if (typeof getZonaGuardada === 'function') {
+  const zonaGuardada = getZonaGuardada();
+  const campoZona = document.querySelector('input[name="zona_entrega"]');
+  if (zonaGuardada && campoZona && !campoZona.value) {
+    campoZona.value = zonaGuardada;
+  }
+}

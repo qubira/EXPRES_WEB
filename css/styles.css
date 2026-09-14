@@ -176,6 +176,15 @@ p { margin: 0 0 1rem; }
   color: var(--mar-900);
   font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+.location-bar:hover { background: #d3f3f7; }
+.location-bar .zona-texto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70vw;
 }
 .location-bar .chevron { color: var(--mar-500); font-size: 11px; }
 
