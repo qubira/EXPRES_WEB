@@ -38,6 +38,7 @@ async function apiRequest(path, { method = 'GET', body, role, isForm = false } =
 const Api = {
   // Publico
   getCategorias: () => apiRequest('/categorias'),
+  getTiposNegocio: () => apiRequest('/tipos-negocio'),
   getTiendas: (categoria) => apiRequest(`/tiendas${categoria ? `?categoria=${categoria}` : ''}`),
   getTienda: (id) => apiRequest(`/tiendas/${id}`),
   getProductos: (params = {}) => {
@@ -130,6 +131,27 @@ const UNIDAD_LABELS = {
 };
 function labelUnidad(unidad) {
   return UNIDAD_LABELS[unidad] || unidad || 'unidad';
+}
+
+const ZONAS_PLAYA = [
+  'Playa Ancón - Malecón Sur',
+  'Playa Ancón - Malecón Norte',
+  'Playa Ancón - Zona Muelle',
+  'Playa Ancón - Frente al mar',
+];
+function zonaOptionsHtml(seleccionada) {
+  return `<option value="">Selecciona una zona</option>` +
+    ZONAS_PLAYA.map((z) => `<option value="${z}" ${z === seleccionada ? 'selected' : ''}>${z}</option>`).join('');
+}
+
+const TIPO_NEGOCIO_LABELS = {
+  tienda: 'Tienda', minimarket: 'Minimarket', bazar: 'Bazar', ferreteria: 'Ferretería',
+  heladeria: 'Heladería', restaurante: 'Restaurante', ambulante: 'Ambulante',
+  boutique: 'Boutique / Ropa', artesanias: 'Artesanías', servicios_playa: 'Servicios de playa',
+  otro: 'Otro',
+};
+function labelTipoNegocio(tipo) {
+  return TIPO_NEGOCIO_LABELS[tipo] || tipo;
 }
 
 const ESTADO_LABELS = {

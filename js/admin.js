@@ -191,7 +191,7 @@ async function cargarTiendas() {
     tbody.innerHTML = tiendas.map((t) => `
       <tr>
         <td>${t.nombre}</td>
-        <td>${t.categoria}</td>
+        <td>${labelTipoNegocio(t.categoria)}</td>
         <td>${t.zona || '—'}</td>
         <td>${t.comision_pactada}%</td>
         <td>${t.activo ? '<span class="badge badge-entregado">Activa</span>' : '<span class="badge badge-cancelado">Inactiva</span>'}</td>
@@ -208,16 +208,21 @@ async function cargarTiendas() {
   }
 }
 
-function abrirModalEditarTienda(t) {
+async function abrirModalEditarTienda(t) {
+  const tipos = await Api.getTiposNegocio();
   abrirModal(`
     <h3>${t.nombre}</h3>
     <div class="form-grupo"><label>Nombre</label><input id="e-nombre" value="${t.nombre}"></div>
-    <div class="form-grupo"><label>Categoría</label>
+    <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
       <select id="e-categoria">
-        ${['ropa','comida','bebidas','servicios','artesanias','otros'].map((c) => `<option value="${c}" ${c===t.categoria?'selected':''}>${c}</option>`).join('')}
+        ${tipos.map((c) => `<option value="${c}" ${c===t.categoria?'selected':''}>${labelTipoNegocio(c)}</option>`).join('')}
       </select>
     </div>
-    <div class="form-grupo"><label>Zona</label><input id="e-zona" value="${t.zona || ''}"></div>
+    <div class="form-grupo"><label>¿Qué vende?</label><input id="e-subcategoria" value="${t.subcategoria || ''}" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
+    <div class="form-grupo"><label>Zona</label>
+      <select id="e-zona">${zonaOptionsHtml(t.zona || '')}</select>
+    </div>
+    <div class="form-grupo"><label>DNI del titular</label><input id="e-dni" value="${t.dni_titular || ''}" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="e-comision" type="number" step="0.5" value="${t.comision_pactada}"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="e-whatsapp" value="${t.contacto_whatsapp || ''}"></div>
     <div class="form-grupo flex justify-between items-center">
@@ -236,7 +241,9 @@ function abrirModalEditarTienda(t) {
       await Api.adminActualizarTienda(t.id, {
         nombre: document.getElementById('e-nombre').value,
         categoria: document.getElementById('e-categoria').value,
+        subcategoria: document.getElementById('e-subcategoria').value,
         descripcion: t.descripcion,
+        dni_titular: document.getElementById('e-dni').value,
         contacto_telefono: t.contacto_telefono,
         contacto_whatsapp: document.getElementById('e-whatsapp').value,
         zona: document.getElementById('e-zona').value,
@@ -252,18 +259,21 @@ function abrirModalEditarTienda(t) {
   });
 }
 
-document.getElementById('btn-nueva-tienda').addEventListener('click', () => {
+document.getElementById('btn-nueva-tienda').addEventListener('click', async () => {
+  const tipos = await Api.getTiposNegocio();
   abrirModal(`
     <h3>Nueva tienda</h3>
     <div class="form-grupo"><label>Nombre</label><input id="n-nombre" required></div>
-    <div class="form-grupo"><label>Categoría</label>
+    <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
       <select id="n-categoria">
-        <option value="comida">comida</option><option value="bebidas">bebidas</option>
-        <option value="ropa">ropa</option><option value="servicios">servicios</option>
-        <option value="artesanias">artesanias</option><option value="otros">otros</option>
+        ${tipos.map((c) => `<option value="${c}">${labelTipoNegocio(c)}</option>`).join('')}
       </select>
     </div>
-    <div class="form-grupo"><label>Zona</label><input id="n-zona"></div>
+    <div class="form-grupo"><label>¿Qué vende?</label><input id="n-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
+    <div class="form-grupo"><label>Zona</label>
+      <select id="n-zona">${zonaOptionsHtml('')}</select>
+    </div>
+    <div class="form-grupo"><label>DNI del titular</label><input id="n-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="n-comision" type="number" value="12" step="0.5"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="n-whatsapp"></div>
     <div class="form-grupo"><label>Email de acceso</label><input id="n-email" type="email" required></div>
@@ -275,7 +285,9 @@ document.getElementById('btn-nueva-tienda').addEventListener('click', () => {
       await Api.adminCrearTienda({
         nombre: document.getElementById('n-nombre').value,
         categoria: document.getElementById('n-categoria').value,
+        subcategoria: document.getElementById('n-subcategoria').value,
         zona: document.getElementById('n-zona').value,
+        dni_titular: document.getElementById('n-dni').value,
         comision_pactada: Number(document.getElementById('n-comision').value),
         contacto_whatsapp: document.getElementById('n-whatsapp').value,
         email: document.getElementById('n-email').value,

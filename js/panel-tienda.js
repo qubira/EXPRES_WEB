@@ -222,13 +222,21 @@ function abrirModalProducto(p) {
 document.getElementById('btn-nuevo-producto').addEventListener('click', () => abrirModalProducto(null));
 
 // ---------- Mi perfil ----------
+let tiposNegocioCargados = false;
 async function cargarPerfilTienda() {
   try {
+    if (!tiposNegocioCargados) {
+      const tipos = await Api.getTiposNegocio();
+      document.getElementById('tp-categoria').innerHTML = tipos.map((t) => `<option value="${t}">${labelTipoNegocio(t)}</option>`).join('');
+      tiposNegocioCargados = true;
+    }
     const p = await Api.tiendaPerfil();
     document.getElementById('tp-nombre').value = p.nombre || '';
-    document.getElementById('tp-categoria').value = p.categoria || 'otros';
+    document.getElementById('tp-categoria').value = p.categoria || 'tienda';
+    document.getElementById('tp-subcategoria').value = p.subcategoria || '';
     document.getElementById('tp-descripcion').value = p.descripcion || '';
-    document.getElementById('tp-zona').value = p.zona || '';
+    document.getElementById('tp-zona').innerHTML = zonaOptionsHtml(p.zona || '');
+    document.getElementById('tp-dni').value = p.dni_titular || '';
     document.getElementById('tp-telefono').value = p.contacto_telefono || '';
     document.getElementById('tp-whatsapp').value = p.contacto_whatsapp || '';
     const preview = document.getElementById('tp-logo-preview');
@@ -278,8 +286,10 @@ document.getElementById('form-perfil-tienda').addEventListener('submit', async (
     await Api.tiendaActualizarPerfil({
       nombre: document.getElementById('tp-nombre').value,
       categoria: document.getElementById('tp-categoria').value,
+      subcategoria: document.getElementById('tp-subcategoria').value,
       descripcion: document.getElementById('tp-descripcion').value,
       zona: document.getElementById('tp-zona').value,
+      dni_titular: document.getElementById('tp-dni').value,
       contacto_telefono: document.getElementById('tp-telefono').value,
       contacto_whatsapp: document.getElementById('tp-whatsapp').value,
       logo_url: logoUrlActual || (preview.style.display !== 'none' ? preview.src : ''),

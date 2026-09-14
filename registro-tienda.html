@@ -26,24 +26,26 @@
       <input type="text" name="nombre" required placeholder="Ej. Anticuchos Doña Rosa">
     </div>
     <div class="form-grupo">
-      <label>Categoría</label>
-      <select name="categoria" required>
+      <label>Categoría (tipo de negocio)</label>
+      <select name="categoria" id="reg-categoria" required>
         <option value="">Selecciona una categoría</option>
-        <option value="comida">Comida</option>
-        <option value="bebidas">Bebidas</option>
-        <option value="ropa">Ropa de playa</option>
-        <option value="servicios">Servicios (sombrillas, camas, etc.)</option>
-        <option value="artesanias">Artesanías</option>
-        <option value="otros">Otros</option>
       </select>
+    </div>
+    <div class="form-grupo">
+      <label>¿Qué vendes?</label>
+      <input type="text" name="subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis...">
+    </div>
+    <div class="form-grupo">
+      <label>DNI del titular</label>
+      <input type="text" name="dni_titular" required inputmode="numeric" maxlength="8" placeholder="Ej. 12345678">
     </div>
     <div class="form-grupo">
       <label>WhatsApp de contacto</label>
       <input type="tel" name="contacto_whatsapp" required placeholder="Ej. 987654321">
     </div>
     <div class="form-grupo">
-      <label>Zona en la playa (opcional)</label>
-      <input type="text" name="zona" placeholder="Ej. Malecón Sur, frente al muelle">
+      <label>Zona en la playa</label>
+      <select name="zona" id="reg-zona" required></select>
     </div>
     <div class="form-grupo">
       <label>Cuéntanos sobre tus productos (opcional)</label>
@@ -65,6 +67,13 @@
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script>
+(async () => {
+  const tipos = await Api.getTiposNegocio();
+  document.getElementById('reg-categoria').insertAdjacentHTML('beforeend',
+    tipos.map((t) => `<option value="${t}">${labelTipoNegocio(t)}</option>`).join(''));
+  document.getElementById('reg-zona').innerHTML = zonaOptionsHtml('');
+})();
+
 document.getElementById('form-registro').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-registro');

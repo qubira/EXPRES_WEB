@@ -54,15 +54,24 @@
             </label>
           </div>
           <div class="form-grupo"><label>Nombre</label><input id="tp-nombre" required></div>
-          <div class="form-grupo"><label>Categoría</label>
-            <select id="tp-categoria">
-              <option value="ropa">ropa</option><option value="comida">comida</option>
-              <option value="bebidas">bebidas</option><option value="servicios">servicios</option>
-              <option value="artesanias">artesanias</option><option value="otros">otros</option>
-            </select>
+          <div class="form-grupo">
+            <label>Categoría (tipo de negocio)</label>
+            <select id="tp-categoria"></select>
+          </div>
+          <div class="form-grupo">
+            <label>¿Qué vendes?</label>
+            <input id="tp-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis...">
+            <div class="form-hint">Sepáralo por comas si vendes varias cosas.</div>
           </div>
           <div class="form-grupo"><label>Descripción</label><textarea id="tp-descripcion"></textarea></div>
-          <div class="form-grupo"><label>Zona en la playa</label><input id="tp-zona" placeholder="Ej. Playa Ancón - Malecón Sur"></div>
+          <div class="form-grupo">
+            <label>Zona en la playa</label>
+            <select id="tp-zona" required></select>
+          </div>
+          <div class="form-grupo">
+            <label>DNI del titular</label>
+            <input id="tp-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678">
+          </div>
           <div class="form-grupo"><label>Teléfono</label><input id="tp-telefono"></div>
           <div class="form-grupo"><label>WhatsApp</label><input id="tp-whatsapp"></div>
           <div id="error-perfil-tienda" class="form-error hidden"></div>
