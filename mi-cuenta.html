@@ -51,7 +51,15 @@
     <div id="error-password" class="form-error hidden"></div>
     <button type="submit" class="btn btn-secondary btn-block" id="btn-cambiar-password">Actualizar contraseña</button>
   </form>
+
+  <h2 style="font-size:17px;margin-top:28px;color:var(--rojo-alerta);">Zona de peligro</h2>
+  <div class="card card-pad mt-16" style="border:2px solid #fde3e1;">
+    <p class="text-sm text-muted">Al eliminar tu cuenta perderás el acceso a tu historial de pedidos guardado. Esta acción no se puede deshacer.</p>
+    <button type="button" class="btn btn-danger btn-block" id="btn-eliminar-cuenta">🗑️ Eliminar mi cuenta</button>
+  </div>
 </div>
+
+<div id="modal-root"></div>
 
 <div style="height:40px;"></div>
 
@@ -122,6 +130,60 @@ document.getElementById('form-password').addEventListener('submit', async (e) =>
     btn.disabled = false;
     btn.textContent = 'Actualizar contraseña';
   }
+});
+
+document.getElementById('btn-eliminar-cuenta').addEventListener('click', () => {
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="modal-overlay" id="eliminar-overlay">
+      <div class="modal-box">
+        <h3>¿Eliminar tu cuenta?</h3>
+        <p class="text-sm text-muted">Esta acción es permanente. Ingresa tu contraseña para confirmar.</p>
+        <div class="form-grupo mt-16">
+          <label>Contraseña</label>
+          <input type="password" id="password-confirmar-eliminar" placeholder="••••••••">
+        </div>
+        <div id="error-eliminar" class="form-error hidden"></div>
+        <div class="flex gap-8 mt-16">
+          <button type="button" class="btn btn-outline btn-block" id="btn-cancelar-eliminar">Cancelar</button>
+          <button type="button" class="btn btn-danger btn-block" id="btn-confirmar-eliminar">Sí, eliminar</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('eliminar-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'eliminar-overlay') root.innerHTML = '';
+  });
+  document.getElementById('btn-cancelar-eliminar').addEventListener('click', () => {
+    root.innerHTML = '';
+  });
+  document.getElementById('btn-confirmar-eliminar').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-confirmar-eliminar');
+    const errorBox = document.getElementById('error-eliminar');
+    const password = document.getElementById('password-confirmar-eliminar').value;
+    errorBox.classList.add('hidden');
+    if (!password) {
+      errorBox.textContent = 'Ingresa tu contraseña';
+      errorBox.classList.remove('hidden');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Eliminando...';
+    try {
+      await Api.clienteEliminarCuenta(password);
+      root.innerHTML = '';
+      localStorage.removeItem('express_token_cliente');
+      localStorage.removeItem('express_nombre_cliente');
+      mostrarToast('Tu cuenta fue eliminada', 'success');
+      setTimeout(() => { location.href = 'index.html'; }, 1200);
+    } catch (err) {
+      errorBox.textContent = err.message || 'No se pudo eliminar la cuenta';
+      errorBox.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Sí, eliminar';
+    }
+  });
 });
 </script>
 </body>
