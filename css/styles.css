@@ -140,6 +140,9 @@ p { margin: 0 0 1rem; }
   color: var(--mar-900);
 }
 .brand-icon { font-size: 24px; }
+.brand-logo { height: 42px; width: auto; display: block; }
+.brand-logo-sm { height: 30px; width: auto; display: block; }
+.login-logo { max-width: 210px; width: 60%; margin: 0 auto 8px; }
 .nav-links {
   display: none;
   gap: 22px;
@@ -739,6 +742,14 @@ textarea { resize: vertical; min-height: 80px; }
   .panel-sidebar { display: flex; }
   .panel-mobile-nav { display: none; }
   .panel-main { padding: 32px; padding-bottom: 32px; }
+}
+
+/* Centra el contenido de los paneles en monitores muy anchos */
+@media (min-width: 1300px) {
+  .panel-main {
+    padding-left: max(32px, calc((100% - 1200px) / 2));
+    padding-right: max(32px, calc((100% - 1200px) / 2));
+  }
 }
 
 .stat-card {
