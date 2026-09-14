@@ -37,7 +37,14 @@
     </div>
     <div class="form-grupo">
       <label>DNI del titular</label>
-      <input type="text" name="dni_titular" required inputmode="numeric" maxlength="8" placeholder="Ej. 12345678">
+      <div class="flex" style="gap:8px;">
+        <input type="text" name="dni_titular" id="reg-dni" required inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+        <button type="button" class="btn btn-outline btn-sm" id="reg-buscar-dni">Buscar</button>
+      </div>
+    </div>
+    <div class="form-grupo">
+      <label>Nombre del titular</label>
+      <input type="text" name="nombre_titular" id="reg-nombre-titular" placeholder="Se completa al buscar el DNI, o escríbelo tú mismo">
     </div>
     <div class="form-grupo">
       <label>WhatsApp de contacto</label>
@@ -73,6 +80,7 @@
     tipos.map((t) => `<option value="${t}">${labelTipoNegocio(t)}</option>`).join(''));
   document.getElementById('reg-zona').innerHTML = zonaOptionsHtml('');
 })();
+habilitarBuscarDni('reg-dni', 'reg-nombre-titular', 'reg-buscar-dni');
 
 document.getElementById('form-registro').addEventListener('submit', async (e) => {
   e.preventDefault();

@@ -222,7 +222,13 @@ async function abrirModalEditarTienda(t) {
     <div class="form-grupo"><label>Zona</label>
       <select id="e-zona">${zonaOptionsHtml(t.zona || '')}</select>
     </div>
-    <div class="form-grupo"><label>DNI del titular</label><input id="e-dni" value="${t.dni_titular || ''}" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678"></div>
+    <div class="form-grupo"><label>DNI del titular</label>
+      <div class="flex" style="gap:8px;">
+        <input id="e-dni" value="${t.dni_titular || ''}" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+        <button type="button" class="btn btn-outline btn-sm" id="e-buscar-dni">Buscar</button>
+      </div>
+    </div>
+    <div class="form-grupo"><label>Nombre del titular</label><input id="e-nombre-titular" value="${t.nombre_titular || ''}"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="e-comision" type="number" step="0.5" value="${t.comision_pactada}"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="e-whatsapp" value="${t.contacto_whatsapp || ''}"></div>
     <div class="form-grupo flex justify-between items-center">
@@ -236,6 +242,7 @@ async function abrirModalEditarTienda(t) {
     <div class="form-grupo"><label>Nueva contraseña (opcional)</label><input id="e-password" type="text" placeholder="Dejar vacío para no cambiar"></div>
     <button class="btn btn-primary btn-block" id="btn-guardar-tienda">Guardar cambios</button>
   `);
+  habilitarBuscarDni('e-dni', 'e-nombre-titular', 'e-buscar-dni');
   document.getElementById('btn-guardar-tienda').addEventListener('click', async () => {
     try {
       await Api.adminActualizarTienda(t.id, {
@@ -244,6 +251,7 @@ async function abrirModalEditarTienda(t) {
         subcategoria: document.getElementById('e-subcategoria').value,
         descripcion: t.descripcion,
         dni_titular: document.getElementById('e-dni').value,
+        nombre_titular: document.getElementById('e-nombre-titular').value,
         contacto_telefono: t.contacto_telefono,
         contacto_whatsapp: document.getElementById('e-whatsapp').value,
         zona: document.getElementById('e-zona').value,
@@ -273,13 +281,20 @@ document.getElementById('btn-nueva-tienda').addEventListener('click', async () =
     <div class="form-grupo"><label>Zona</label>
       <select id="n-zona">${zonaOptionsHtml('')}</select>
     </div>
-    <div class="form-grupo"><label>DNI del titular</label><input id="n-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678"></div>
+    <div class="form-grupo"><label>DNI del titular</label>
+      <div class="flex" style="gap:8px;">
+        <input id="n-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+        <button type="button" class="btn btn-outline btn-sm" id="n-buscar-dni">Buscar</button>
+      </div>
+    </div>
+    <div class="form-grupo"><label>Nombre del titular</label><input id="n-nombre-titular"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="n-comision" type="number" value="12" step="0.5"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="n-whatsapp"></div>
     <div class="form-grupo"><label>Email de acceso</label><input id="n-email" type="email" required></div>
     <div class="form-grupo"><label>Contraseña</label><input id="n-password" type="text" required></div>
     <button class="btn btn-primary btn-block" id="btn-crear-tienda">Crear tienda</button>
   `);
+  habilitarBuscarDni('n-dni', 'n-nombre-titular', 'n-buscar-dni');
   document.getElementById('btn-crear-tienda').addEventListener('click', async () => {
     try {
       await Api.adminCrearTienda({
@@ -288,6 +303,7 @@ document.getElementById('btn-nueva-tienda').addEventListener('click', async () =
         subcategoria: document.getElementById('n-subcategoria').value,
         zona: document.getElementById('n-zona').value,
         dni_titular: document.getElementById('n-dni').value,
+        nombre_titular: document.getElementById('n-nombre-titular').value,
         comision_pactada: Number(document.getElementById('n-comision').value),
         contacto_whatsapp: document.getElementById('n-whatsapp').value,
         email: document.getElementById('n-email').value,

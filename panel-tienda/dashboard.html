@@ -70,7 +70,14 @@
           </div>
           <div class="form-grupo">
             <label>DNI del titular</label>
-            <input id="tp-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678">
+            <div class="flex" style="gap:8px;">
+              <input id="tp-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+              <button type="button" class="btn btn-outline btn-sm" id="tp-buscar-dni">Buscar</button>
+            </div>
+          </div>
+          <div class="form-grupo">
+            <label>Nombre del titular</label>
+            <input id="tp-nombre-titular" placeholder="Se completa al buscar el DNI, o escríbelo tú mismo">
           </div>
           <div class="form-grupo"><label>Teléfono</label><input id="tp-telefono"></div>
           <div class="form-grupo"><label>WhatsApp</label><input id="tp-whatsapp"></div>

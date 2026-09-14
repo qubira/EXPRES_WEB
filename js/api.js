@@ -50,6 +50,7 @@ const Api = {
   subirComprobante: (pedidoId, formData) => apiRequest(`/pedidos/${pedidoId}/pago`, { method: 'POST', body: formData, isForm: true }),
   getPedido: (id) => apiRequest(`/pedidos/${id}`),
   solicitarTienda: (data) => apiRequest('/tiendas/solicitud', { method: 'POST', body: data }),
+  consultarDni: (numero) => apiRequest(`/consulta-dni/${numero}`),
 
   // Admin
   adminLogin: (data) => apiRequest('/admin/login', { method: 'POST', body: data }),
@@ -139,6 +140,35 @@ const ZONAS_PLAYA = [
   'Playa Ancón - Zona Muelle',
   'Playa Ancón - Frente al mar',
 ];
+// Conecta un boton "Buscar" a un input de DNI: al hacer click, consulta RENIEC
+// y autocompleta el input de nombre. Si falla, no bloquea (se llena a mano).
+function habilitarBuscarDni(dniInputId, nombreInputId, btnId) {
+  const btn = document.getElementById(btnId);
+  const dniInput = document.getElementById(dniInputId);
+  const nombreInput = document.getElementById(nombreInputId);
+  if (!btn || !dniInput || !nombreInput) return;
+  btn.addEventListener('click', async () => {
+    const numero = dniInput.value.trim();
+    if (!/^\d{8}$/.test(numero)) {
+      mostrarToast('Ingresa un DNI válido de 8 dígitos', 'error');
+      return;
+    }
+    const textoOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Buscando...';
+    try {
+      const { nombre } = await Api.consultarDni(numero);
+      nombreInput.value = nombre || '';
+      mostrarToast('Nombre encontrado', 'success');
+    } catch (err) {
+      mostrarToast(err.message || 'No se encontró el DNI, ingresa el nombre manualmente', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    }
+  });
+}
+
 function zonaOptionsHtml(seleccionada) {
   return `<option value="">Selecciona una zona</option>` +
     ZONAS_PLAYA.map((z) => `<option value="${z}" ${z === seleccionada ? 'selected' : ''}>${z}</option>`).join('');

@@ -8,6 +8,8 @@ document.getElementById('btn-logout').addEventListener('click', () => {
   location.href = 'login.html';
 });
 
+habilitarBuscarDni('tp-dni', 'tp-nombre-titular', 'tp-buscar-dni');
+
 function manejarError401(err) {
   if (err.status === 401 || err.status === 403) {
     localStorage.removeItem('express_token_tienda');
@@ -237,6 +239,7 @@ async function cargarPerfilTienda() {
     document.getElementById('tp-descripcion').value = p.descripcion || '';
     document.getElementById('tp-zona').innerHTML = zonaOptionsHtml(p.zona || '');
     document.getElementById('tp-dni').value = p.dni_titular || '';
+    document.getElementById('tp-nombre-titular').value = p.nombre_titular || '';
     document.getElementById('tp-telefono').value = p.contacto_telefono || '';
     document.getElementById('tp-whatsapp').value = p.contacto_whatsapp || '';
     const preview = document.getElementById('tp-logo-preview');
@@ -290,6 +293,7 @@ document.getElementById('form-perfil-tienda').addEventListener('submit', async (
       descripcion: document.getElementById('tp-descripcion').value,
       zona: document.getElementById('tp-zona').value,
       dni_titular: document.getElementById('tp-dni').value,
+      nombre_titular: document.getElementById('tp-nombre-titular').value,
       contacto_telefono: document.getElementById('tp-telefono').value,
       contacto_whatsapp: document.getElementById('tp-whatsapp').value,
       logo_url: logoUrlActual || (preview.style.display !== 'none' ? preview.src : ''),
