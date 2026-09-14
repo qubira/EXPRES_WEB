@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div class="panel-shell">
+  <aside class="panel-sidebar">
+    <div class="brand"><span class="brand-icon">🚲</span> Express</div>
+    <div class="panel-link activo" data-view="resumen">📊 Resumen</div>
+    <div class="panel-link" data-view="pagos">💳 Pagos pendientes</div>
+    <div class="panel-link" data-view="pedidos">📦 Pedidos</div>
+    <div class="panel-link" data-view="tiendas">🏪 Tiendas</div>
+    <div class="panel-link" data-view="repartidores">🚴 Repartidores</div>
+    <div style="flex:1"></div>
+    <div class="panel-link" id="btn-logout">🚪 Salir</div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-topbar">
+      <div>
+        <h2 style="margin:0;" id="titulo-vista">Resumen</h2>
+        <span class="text-sm text-muted" id="admin-nombre"></span>
+      </div>
+    </div>
+
+    <section id="view-resumen" class="view">
+      <div class="grid-cols grid-cols-4">
+        <div class="stat-card">
+          <div class="stat-value" id="m-pedidos-hoy">–</div>
+          <div class="stat-label">Pedidos hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="m-ventas-hoy">–</div>
+          <div class="stat-label">Ventas hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="m-comisiones-hoy">–</div>
+          <div class="stat-label">Comisión Express hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="m-pagos-pendientes">–</div>
+          <div class="stat-label">Pagos por confirmar</div>
+        </div>
+      </div>
+      <div class="table-wrap mt-24">
+        <table>
+          <thead><tr><th>Estado</th><th>Cantidad de pedidos</th></tr></thead>
+          <tbody id="tabla-estados"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-pagos" class="view hidden">
+      <div id="lista-pagos"></div>
+    </section>
+
+    <section id="view-pedidos" class="view hidden">
+      <div class="filtros" id="filtro-pedidos">
+        <button class="chip activo" data-estado="">Todos</button>
+        <button class="chip" data-estado="pagado">Pagados</button>
+        <button class="chip" data-estado="preparando">Preparando</button>
+        <button class="chip" data-estado="listo_recoger">Listo p/ recoger</button>
+        <button class="chip" data-estado="recogido">En camino</button>
+        <button class="chip" data-estado="entregado">Entregados</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Cliente</th><th>Zona</th><th>Estado</th><th>Total</th><th>Repartidor</th><th></th></tr></thead>
+          <tbody id="tabla-pedidos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-tiendas" class="view hidden">
+      <button class="btn btn-primary btn-sm" id="btn-nueva-tienda">+ Nueva tienda</button>
+      <div class="table-wrap mt-16">
+        <table>
+          <thead><tr><th>Nombre</th><th>Categoría</th><th>Zona</th><th>Comisión</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="tabla-tiendas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="view-repartidores" class="view hidden">
+      <button class="btn btn-primary btn-sm" id="btn-nuevo-repartidor">+ Nuevo repartidor</button>
+      <div class="table-wrap mt-16">
+        <table>
+          <thead><tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Disponible</th><th>Por pagar</th><th></th></tr></thead>
+          <tbody id="tabla-repartidores"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="panel-mobile-nav">
+  <div class="panel-link activo" data-view="resumen"><span class="icon">📊</span>Resumen</div>
+  <div class="panel-link" data-view="pagos"><span class="icon">💳</span>Pagos</div>
+  <div class="panel-link" data-view="pedidos"><span class="icon">📦</span>Pedidos</div>
+  <div class="panel-link" data-view="tiendas"><span class="icon">🏪</span>Tiendas</div>
+  <div class="panel-link" data-view="repartidores"><span class="icon">🚴</span>Bici</div>
+</nav>
+
+<div id="modal-root"></div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>

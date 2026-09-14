@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Tienda | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body style="min-height:100vh; display:flex; align-items:center; background:var(--mar-700);">
+
+<div class="container" style="max-width:400px;">
+  <div class="text-center mt-24" style="color:white;">
+    <div style="font-size:40px;">🏪</div>
+    <h1 style="color:white;">Panel de Tienda</h1>
+    <p style="color:var(--cielo-100);">Express Ancón</p>
+  </div>
+
+  <form id="form-login" class="card card-pad mt-16">
+    <div class="form-grupo">
+      <label>Email</label>
+      <input type="email" name="email" required placeholder="tunegocio@correo.com">
+    </div>
+    <div class="form-grupo">
+      <label>Contraseña</label>
+      <input type="password" name="password" required placeholder="••••••••">
+    </div>
+    <div id="error-login" class="form-error hidden"></div>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-login">Ingresar</button>
+  </form>
+
+  <p class="text-center mt-16"><a href="../registro-tienda.html" style="color:var(--cielo-100);">¿Aún no tienes tienda? Regístrate</a></p>
+  <p class="text-center"><a href="../index.html" style="color:var(--cielo-100);">← Volver al sitio</a></p>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script>
+document.getElementById('form-login').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-login');
+  const errorBox = document.getElementById('error-login');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Ingresando...';
+  try {
+    const fd = new FormData(e.target);
+    const data = await Api.tiendaLogin({ email: fd.get('email'), password: fd.get('password') });
+    localStorage.setItem('express_token_tienda', data.token);
+    localStorage.setItem('express_nombre_tienda', data.nombre);
+    location.href = 'dashboard.html';
+  } catch (err) {
+    errorBox.textContent = err.message || 'Error al iniciar sesión';
+    errorBox.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+});
+</script>
+</body>
+</html>

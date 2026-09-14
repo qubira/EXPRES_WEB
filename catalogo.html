@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><span class="brand-icon">🚲</span> Express</a>
+    <div class="nav-links">
+      <a href="catalogo.html"><strong>Catálogo</strong></a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="pedido.html">Rastrear pedido</a>
+    </div>
+    <div class="nav-cta">
+      <a href="carrito.html" class="btn btn-ghost btn-sm">
+        🛒 <span data-cart-count>0</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-24">
+  <h1 class="section-title" style="margin-bottom:4px;">Catálogo</h1>
+  <p class="text-muted">Productos de tiendas y ambulantes cerca de la playa.</p>
+
+  <div class="form-grupo" style="max-width:420px;">
+    <input type="search" id="buscador" placeholder="Buscar producto (ej. anticucho, sombrero...)">
+  </div>
+
+  <div class="filtros" id="filtros"></div>
+
+  <div id="estado-carga" class="text-center text-muted" style="padding:40px 0;">Cargando productos...</div>
+  <div class="grid-cols grid-cols-3" id="grid-productos"></div>
+  <div id="vacio" class="empty-state hidden">
+    <div class="icon">🐚</div>
+    <p>No encontramos productos con ese filtro.</p>
+  </div>
+</div>
+
+<div style="height:90px;"></div>
+
+<div class="cart-bar" id="cart-bar" style="display:none;">
+  <div>
+    <div class="cart-bar-info">Tu carrito</div>
+    <div class="cart-bar-total" data-cart-total>S/ 0.00</div>
+  </div>
+  <a href="carrito.html" class="btn btn-primary">Ver carrito (<span data-cart-count>0</span>)</a>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/catalogo.js"></script>
+</body>
+</html>

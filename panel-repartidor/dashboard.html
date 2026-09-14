@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Repartidor | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div class="panel-shell">
+  <aside class="panel-sidebar">
+    <div class="brand"><span class="brand-icon">🚴</span> Repartidor</div>
+    <div class="panel-link activo" data-view="activos">📦 Mis entregas</div>
+    <div class="panel-link" data-view="historial">🗂️ Historial</div>
+    <div style="flex:1"></div>
+    <div class="panel-link" id="btn-logout">🚪 Salir</div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-topbar">
+      <div>
+        <h2 style="margin:0;" id="titulo-vista">Mis entregas</h2>
+        <span class="text-sm text-muted" id="rep-nombre"></span>
+      </div>
+      <label class="flex items-center gap-8 text-sm">
+        <input type="checkbox" id="toggle-disponible" style="width:auto;">
+        Disponible
+      </label>
+    </div>
+
+    <div class="stat-card mt-16" style="display:inline-block;">
+      <div class="stat-value" id="pago-pendiente">S/ 0.00</div>
+      <div class="stat-label">Por cobrar (tarifas de entrega)</div>
+    </div>
+
+    <section id="view-activos" class="view mt-24">
+      <div id="lista-activos"></div>
+    </section>
+
+    <section id="view-historial" class="view hidden mt-24">
+      <div id="lista-historial"></div>
+    </section>
+  </main>
+</div>
+
+<nav class="panel-mobile-nav">
+  <div class="panel-link activo" data-view="activos"><span class="icon">📦</span>Entregas</div>
+  <div class="panel-link" data-view="historial"><span class="icon">🗂️</span>Historial</div>
+</nav>
+
+<div id="modal-root"></div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/panel-repartidor.js"></script>
+</body>
+</html>

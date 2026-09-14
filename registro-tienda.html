@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registra tu tienda | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><span class="brand-icon">🚲</span> Express</a>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:560px;">
+  <h1 class="section-title">Registra tu tienda o negocio</h1>
+  <p class="text-muted">Cuéntanos sobre tu negocio. Te contactaremos por WhatsApp para activar tu cuenta y coordinar tu comisión.</p>
+
+  <form id="form-registro" class="card card-pad mt-16">
+    <div class="form-grupo">
+      <label>Nombre del negocio</label>
+      <input type="text" name="nombre" required placeholder="Ej. Anticuchos Doña Rosa">
+    </div>
+    <div class="form-grupo">
+      <label>Categoría</label>
+      <select name="categoria" required>
+        <option value="">Selecciona una categoría</option>
+        <option value="comida">Comida</option>
+        <option value="bebidas">Bebidas</option>
+        <option value="ropa">Ropa de playa</option>
+        <option value="servicios">Servicios (sombrillas, camas, etc.)</option>
+        <option value="artesanias">Artesanías</option>
+        <option value="otros">Otros</option>
+      </select>
+    </div>
+    <div class="form-grupo">
+      <label>WhatsApp de contacto</label>
+      <input type="tel" name="contacto_whatsapp" required placeholder="Ej. 987654321">
+    </div>
+    <div class="form-grupo">
+      <label>Zona en la playa (opcional)</label>
+      <input type="text" name="zona" placeholder="Ej. Malecón Sur, frente al muelle">
+    </div>
+    <div class="form-grupo">
+      <label>Cuéntanos sobre tus productos (opcional)</label>
+      <textarea name="descripcion" placeholder="Ej. Vendo anticuchos, choripan y bebidas frías"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-registro">Enviar solicitud</button>
+  </form>
+
+  <div id="exito" class="card card-pad mt-16 hidden text-center">
+    <div style="font-size:40px;">🎉</div>
+    <h3>¡Solicitud recibida!</h3>
+    <p class="text-muted">Te contactaremos pronto por WhatsApp para activar tu tienda en Express.</p>
+    <a href="index.html" class="btn btn-outline">Volver al inicio</a>
+  </div>
+</div>
+
+<div style="height:40px;"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script>
+document.getElementById('form-registro').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-registro');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  try {
+    const fd = new FormData(e.target);
+    await Api.solicitarTienda(Object.fromEntries(fd.entries()));
+    e.target.classList.add('hidden');
+    document.getElementById('exito').classList.remove('hidden');
+  } catch (err) {
+    mostrarToast(err.message || 'No se pudo enviar la solicitud', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Enviar solicitud';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Tienda | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<div class="panel-shell">
+  <aside class="panel-sidebar">
+    <div class="brand"><span class="brand-icon">🏪</span> Mi tienda</div>
+    <div class="panel-link activo" data-view="pedidos">📦 Pedidos</div>
+    <div class="panel-link" data-view="productos">🛍️ Productos</div>
+    <div style="flex:1"></div>
+    <div class="panel-link" id="btn-logout">🚪 Salir</div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-topbar">
+      <div>
+        <h2 style="margin:0;" id="titulo-vista">Pedidos</h2>
+        <span class="text-sm text-muted" id="tienda-nombre"></span>
+      </div>
+    </div>
+
+    <section id="view-pedidos" class="view">
+      <div id="lista-pedidos-tienda"></div>
+    </section>
+
+    <section id="view-productos" class="view hidden">
+      <button class="btn btn-primary btn-sm" id="btn-nuevo-producto">+ Nuevo producto</button>
+      <div class="grid-cols grid-cols-3 mt-16" id="grid-productos-tienda"></div>
+    </section>
+  </main>
+</div>
+
+<nav class="panel-mobile-nav">
+  <div class="panel-link activo" data-view="pedidos"><span class="icon">📦</span>Pedidos</div>
+  <div class="panel-link" data-view="productos"><span class="icon">🛍️</span>Productos</div>
+</nav>
+
+<div id="modal-root"></div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/panel-tienda.js"></script>
+</body>
+</html>

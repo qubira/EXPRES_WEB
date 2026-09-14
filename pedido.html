@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi pedido | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><span class="brand-icon">🚲</span> Express</a>
+    <a href="catalogo.html" class="btn btn-ghost btn-sm">Catálogo</a>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:560px;">
+  <h1 class="section-title">Rastrear pedido</h1>
+
+  <form id="form-buscar" class="card card-pad flex gap-8" style="align-items:flex-end;">
+    <div class="form-grupo mb-0" style="flex:1;">
+      <label>ID de tu pedido</label>
+      <input type="text" id="input-id" placeholder="Pega aquí el ID de tu pedido">
+    </div>
+    <button class="btn btn-secondary" type="submit">Buscar</button>
+  </form>
+
+  <div id="contenido" class="mt-16"></div>
+</div>
+
+<div style="height:40px;"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/pedido.js"></script>
+</body>
+</html>

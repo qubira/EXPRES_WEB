@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagar pedido | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><span class="brand-icon">🚲</span> Express</a>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:520px;">
+  <h1 class="section-title">Confirma tu pago</h1>
+  <p class="text-muted">Pedido <strong id="pedido-id-corto"></strong> · Total a pagar: <strong id="pedido-total"></strong></p>
+
+  <div class="card card-pad mt-16">
+    <h3>1. Elige método de pago</h3>
+    <div class="flex gap-12 mt-8" id="metodos-pago">
+      <button class="chip activo" data-tipo="yape">📱 Yape</button>
+      <button class="chip" data-tipo="plin">📲 Plin</button>
+    </div>
+
+    <div id="datos-pago" class="mt-16" style="text-align:center;">
+      <div class="card-media" style="height:auto; padding:24px; border-radius:12px; font-size:16px; background:linear-gradient(135deg,var(--mar-300),var(--mar-500));">
+        <div style="font-size:40px;">💳</div>
+        <p style="margin:10px 0 0;">Yapea o Plinea al número:</p>
+        <p style="font-size:24px; font-weight:800; margin:4px 0 0;">987 000 000</p>
+        <p style="margin:4px 0 0;">A nombre de: Express Ancón</p>
+      </div>
+    </div>
+  </div>
+
+  <form id="form-pago" class="card card-pad mt-16">
+    <h3>2. Sube tu comprobante</h3>
+    <div class="form-grupo">
+      <label>Captura de pantalla del pago</label>
+      <input type="file" name="comprobante" accept="image/*" capture="environment" required>
+      <div class="form-hint">Foto o captura clara del Yape/Plin realizado.</div>
+    </div>
+    <div class="form-grupo">
+      <label>Número de operación (opcional)</label>
+      <input type="text" name="referencia" placeholder="Ej. 000123456">
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-pago">Enviar comprobante</button>
+  </form>
+
+  <p class="text-sm text-muted text-center mt-16">Una vez confirmado tu pago recibirás tu <strong>PIN de entrega de 4 dígitos</strong>. Puedes seguir el estado en cualquier momento.</p>
+</div>
+
+<div style="height:40px;"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/pago.js"></script>
+</body>
+</html>

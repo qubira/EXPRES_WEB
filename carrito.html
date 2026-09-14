@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carrito | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><span class="brand-icon">🚲</span> Express</a>
+    <div class="nav-links">
+      <a href="catalogo.html">Catálogo</a>
+    </div>
+    <a href="catalogo.html" class="btn btn-ghost btn-sm">← Seguir comprando</a>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:640px;">
+  <h1 class="section-title">Tu carrito</h1>
+
+  <div id="lista-carrito"></div>
+
+  <div id="vacio-carrito" class="empty-state hidden">
+    <div class="icon">🛒</div>
+    <p>Tu carrito está vacío.</p>
+    <a href="catalogo.html" class="btn btn-primary">Ver catálogo</a>
+  </div>
+
+  <div id="resumen-carrito" class="card card-pad mt-16">
+    <div class="flex justify-between mb-0"><span>Subtotal productos</span><strong id="r-subtotal">S/ 0.00</strong></div>
+    <div class="flex justify-between mt-8"><span>Delivery (bicicleta)</span><strong id="r-delivery">S/ 5.00</strong></div>
+    <hr class="divider">
+    <div class="flex justify-between"><span style="font-weight:700;">Total a pagar</span><strong class="precio" id="r-total">S/ 0.00</strong></div>
+  </div>
+
+  <form id="form-checkout" class="card card-pad mt-16">
+    <h3>Datos de entrega</h3>
+    <div class="form-grupo">
+      <label>Nombre completo</label>
+      <input type="text" name="cliente_nombre" required placeholder="Ej. María Torres">
+    </div>
+    <div class="form-grupo">
+      <label>Celular (WhatsApp)</label>
+      <input type="tel" name="cliente_telefono" required placeholder="Ej. 987654321">
+    </div>
+    <div class="form-grupo">
+      <label>¿Dónde estás en la playa?</label>
+      <input type="text" name="zona_entrega" required placeholder="Ej. Playa Ancón, sombrilla azul #12, frente al muelle">
+    </div>
+    <div class="form-grupo">
+      <label>Referencia adicional (opcional)</label>
+      <textarea name="referencia_entrega" placeholder="Ej. Polo rojo, cerca al puesto de salvavidas"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-continuar">Continuar al pago →</button>
+  </form>
+</div>
+
+<div style="height:40px;"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/checkout.js"></script>
+</body>
+</html>
