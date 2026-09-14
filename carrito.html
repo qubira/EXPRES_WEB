@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="con-tabbar">
 
 <nav class="navbar">
   <div class="container navbar-inner">
@@ -59,7 +59,17 @@
   </form>
 </div>
 
-<div style="height:40px;"></div>
+<div style="height:20px;"></div>
+
+<nav class="tabbar">
+  <a href="index.html" class="tabbar-item"><span class="tabbar-icon">🏠</span>Inicio</a>
+  <a href="catalogo.html" class="tabbar-item"><span class="tabbar-icon">🔍</span>Catálogo</a>
+  <a href="pedido.html" class="tabbar-item"><span class="tabbar-icon">📦</span>Pedidos</a>
+  <a href="carrito.html" class="tabbar-item activo">
+    <span class="tabbar-icon">🛒</span>Carrito
+    <span class="tabbar-badge hidden" data-cart-count>0</span>
+  </a>
+</nav>
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>

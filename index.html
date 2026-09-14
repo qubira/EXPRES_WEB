@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="con-tabbar">
 
 <nav class="navbar">
   <div class="container navbar-inner">
@@ -20,26 +20,55 @@
       <a href="#tiendas-socias">Para tiendas</a>
       <a href="pedido.html">Rastrear pedido</a>
     </div>
-    <div class="nav-cta">
-      <a href="catalogo.html" class="btn btn-primary btn-sm">Pedir ahora</a>
-    </div>
+    <a href="carrito.html" class="icon-btn">
+      🛒 <span class="badge-count hidden" data-cart-count>0</span>
+    </a>
   </div>
+  <div class="location-bar">📍 Entregando en Playa Ancón <span class="chevron">▾</span></div>
 </nav>
 
 <header class="hero">
   <div class="container hero-inner">
-    <div>
-      <div class="hero-badge">☀️ Temporada de verano en Ancón</div>
-      <h1>Tu playa, tu pedido, a un pedaleo de distancia</h1>
-      <p class="lead">Comida, bebidas bien heladas, ropa de playa y todo lo que necesitas, entregado directo a tu sombrilla por nuestros repartidores en bicicleta.</p>
-      <div class="hero-actions">
-        <a href="catalogo.html" class="btn btn-primary">Ver catálogo 🏖️</a>
-        <a href="#tiendas-socias" class="btn btn-outline-white">Quiero ser tienda socia</a>
+    <div class="hero-badge">☀️ Temporada de verano</div>
+    <h1>¿Qué se te antoja hoy?</h1>
+    <p class="lead">Pide comida y bebidas, directo a tu sombrilla.</p>
+    <form class="search-bar-wrap" action="catalogo.html" method="get">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="search" name="q" placeholder="Busca anticuchos, bebidas, sombrillas...">
       </div>
-    </div>
-    <div class="hero-art">🏖️🚲</div>
+    </form>
   </div>
 </header>
+
+<div class="cat-strip" id="cat-strip">
+  <a href="catalogo.html?categoria=comida" class="cat-icon"><span class="cat-icon-circle">🍢</span><span class="cat-label">Comida</span></a>
+  <a href="catalogo.html?categoria=bebidas" class="cat-icon"><span class="cat-icon-circle">🥤</span><span class="cat-label">Bebidas</span></a>
+  <a href="catalogo.html?categoria=ropa" class="cat-icon"><span class="cat-icon-circle">👙</span><span class="cat-label">Ropa</span></a>
+  <a href="catalogo.html?categoria=servicios" class="cat-icon"><span class="cat-icon-circle">⛱️</span><span class="cat-label">Servicios</span></a>
+  <a href="catalogo.html?categoria=artesanias" class="cat-icon"><span class="cat-icon-circle">🎨</span><span class="cat-label">Artesanías</span></a>
+  <a href="catalogo.html" class="cat-icon"><span class="cat-icon-circle">🛍️</span><span class="cat-label">Todo</span></a>
+</div>
+
+<div class="container mt-16">
+  <div class="promo-banner">
+    <div class="promo-text">
+      <strong>Verano sin filas 🏖️</strong>
+      <span>Paga por adelantado y recibe tu pedido con PIN de entrega</span>
+    </div>
+    <div class="promo-emoji">🚲</div>
+  </div>
+</div>
+
+<section class="mt-24">
+  <div class="container flex justify-between items-center mb-0">
+    <h2 style="margin:0;font-size:19px;">Tiendas destacadas</h2>
+    <a href="catalogo.html" class="text-sm" style="color:var(--coral-600);font-weight:700;">Ver todo →</a>
+  </div>
+  <div class="store-scroll" id="store-scroll">
+    <div class="text-muted text-sm" style="padding:16px 18px;">Cargando tiendas...</div>
+  </div>
+</section>
 
 <section class="section section-white" id="como-funciona">
   <div class="container">
@@ -70,37 +99,6 @@
   </div>
 </section>
 
-<section class="section section-arena">
-  <div class="container">
-    <div class="eyebrow">Explora</div>
-    <h2 class="section-title">Todo lo que se te antoja en la playa</h2>
-    <p class="section-sub">Tiendas y vendedores locales, verificados por Express.</p>
-
-    <div class="grid-cols grid-cols-4">
-      <a href="catalogo.html?categoria=comida" class="card card-pad text-center">
-        <div style="font-size:36px">🍢</div>
-        <strong>Comida</strong>
-      </a>
-      <a href="catalogo.html?categoria=bebidas" class="card card-pad text-center">
-        <div style="font-size:36px">🥤</div>
-        <strong>Bebidas</strong>
-      </a>
-      <a href="catalogo.html?categoria=ropa" class="card card-pad text-center">
-        <div style="font-size:36px">👙</div>
-        <strong>Ropa de playa</strong>
-      </a>
-      <a href="catalogo.html?categoria=servicios" class="card card-pad text-center">
-        <div style="font-size:36px">⛱️</div>
-        <strong>Sombrillas y más</strong>
-      </a>
-    </div>
-
-    <div class="text-center mt-24">
-      <a href="catalogo.html" class="btn btn-secondary">Ver catálogo completo</a>
-    </div>
-  </div>
-</section>
-
 <section class="section section-mar" id="tiendas-socias">
   <div class="container">
     <div class="grid-cols grid-cols-2" style="align-items:center;">
@@ -122,14 +120,6 @@
         <a href="https://wa.me/51987000000" target="_blank" rel="noopener" class="btn btn-outline btn-block">Quiero repartir 🚲</a>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="section section-white">
-  <div class="container text-center">
-    <h2 class="section-title" style="margin:0 auto 10px;">¿Ya hiciste un pedido?</h2>
-    <p class="section-sub" style="margin-left:auto;margin-right:auto;">Rastrea el estado de tu pedido y encuentra tu PIN de entrega.</p>
-    <a href="pedido.html" class="btn btn-secondary">Rastrear mi pedido</a>
   </div>
 </section>
 
@@ -157,5 +147,44 @@
   </div>
 </footer>
 
+<nav class="tabbar">
+  <a href="index.html" class="tabbar-item activo"><span class="tabbar-icon">🏠</span>Inicio</a>
+  <a href="catalogo.html" class="tabbar-item"><span class="tabbar-icon">🔍</span>Catálogo</a>
+  <a href="pedido.html" class="tabbar-item"><span class="tabbar-icon">📦</span>Pedidos</a>
+  <a href="carrito.html" class="tabbar-item">
+    <span class="tabbar-icon">🛒</span>Carrito
+    <span class="tabbar-badge hidden" data-cart-count>0</span>
+  </a>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script>
+async function cargarTiendasDestacadas() {
+  const cont = document.getElementById('store-scroll');
+  const ICONOS = { comida:'🍢', bebidas:'🥤', ropa:'👙', servicios:'⛱️', artesanias:'🎨', otros:'🛍️' };
+  try {
+    const tiendas = await Api.getTiendas();
+    if (tiendas.length === 0) {
+      cont.innerHTML = '<div class="text-muted text-sm" style="padding:16px 18px;">Muy pronto tendremos tiendas aquí.</div>';
+      return;
+    }
+    cont.innerHTML = tiendas.slice(0, 8).map((t) => `
+      <a href="catalogo.html?categoria=${t.categoria}" class="store-mini">
+        <div class="store-mini-media">${ICONOS[t.categoria] || '🛍️'}</div>
+        <div class="store-mini-body">
+          <strong>${t.nombre}</strong>
+          <span class="tag">${t.categoria}</span>
+          <span class="delivery-badge">🚲 S/5.00 · ${t.zona || 'Playa Ancón'}</span>
+        </div>
+      </a>
+    `).join('');
+  } catch (err) {
+    cont.innerHTML = '<div class="text-muted text-sm" style="padding:16px 18px;">No se pudo cargar el catálogo en este momento.</div>';
+  }
+}
+cargarTiendasDestacadas();
+</script>
 </body>
 </html>

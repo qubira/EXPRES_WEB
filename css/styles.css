@@ -43,6 +43,7 @@
 html, body {
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
 body {
@@ -151,66 +152,283 @@ p { margin: 0 0 1rem; }
   .nav-links { display: flex; }
 }
 
-/* ---------- Hero ---------- */
+/* Barra de ubicacion (estilo "Entregar en...") */
+.location-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: var(--cielo-100);
+  color: var(--mar-900);
+  font-size: 13px;
+  font-weight: 700;
+}
+.location-bar .chevron { color: var(--mar-500); font-size: 11px; }
+
+/* Barra de busqueda tipo pildora (sticky, estilo apps de delivery) */
+.search-bar-wrap {
+  background: var(--blanco);
+  padding: 12px 18px 14px;
+}
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-bar .search-icon {
+  position: absolute;
+  left: 16px;
+  font-size: 16px;
+  pointer-events: none;
+}
+.search-bar input {
+  padding: 13px 16px 13px 44px;
+  border-radius: 30px;
+  border: 2px solid var(--arena-300);
+  background: var(--arena-100);
+  font-size: 15px;
+}
+.search-bar input:focus { background: var(--blanco); border-color: var(--coral-500); }
+
+/* Botón flotante de carrito (icono redondo con badge) */
+.icon-btn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--cielo-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+.icon-btn .badge-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--coral-600);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid white;
+}
+
+/* ---------- Hero (search-first, estilo apps de delivery) ---------- */
 .hero {
   position: relative;
-  background: linear-gradient(160deg, var(--mar-700) 0%, var(--mar-900) 100%);
+  background: linear-gradient(160deg, var(--coral-500) 0%, var(--coral-600) 55%, #d13d1f 100%);
   color: var(--blanco);
   overflow: hidden;
-  padding: 48px 0 64px;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 60px;
-  background: var(--arena-100);
-  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-  transform: scale(1.4);
+  padding: 26px 0 34px;
 }
 .hero-inner {
   position: relative;
   z-index: 1;
-  display: grid;
-  gap: 28px;
-  align-items: center;
 }
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.18);
   padding: 6px 14px;
   border-radius: 30px;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 .hero h1 {
-  font-size: clamp(28px, 6vw, 46px);
-  margin-bottom: 14px;
+  font-size: clamp(24px, 5.5vw, 36px);
+  margin-bottom: 4px;
 }
 .hero p.lead {
-  font-size: 17px;
-  color: var(--cielo-100);
+  font-size: 15px;
+  color: rgba(255,255,255,0.9);
   max-width: 480px;
+  margin-bottom: 18px;
 }
-.hero-actions {
+.hero .search-bar-wrap { background: transparent; padding: 0; }
+.hero .search-bar input {
+  border: none;
+  background: var(--blanco);
+  box-shadow: var(--sombra-media);
+  font-weight: 600;
+  color: var(--tinta-900);
+}
+.hero .search-bar .search-icon { color: var(--tinta-300); }
+
+/* ---------- Carrusel de categorias (iconos circulares) ---------- */
+.cat-strip {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 22px;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 18px 18px 6px;
+  -webkit-overflow-scrolling: touch;
 }
-.hero-art {
-  font-size: 90px;
+.cat-strip::-webkit-scrollbar { display: none; }
+.cat-icon {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 74px;
   text-align: center;
-  filter: drop-shadow(0 12px 20px rgba(0,0,0,0.25));
+}
+.cat-icon-circle {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--blanco);
+  box-shadow: var(--sombra-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.cat-icon:active .cat-icon-circle { transform: scale(0.93); }
+.cat-icon span.cat-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tinta-600);
+  line-height: 1.2;
 }
 
-@media (min-width: 780px) {
-  .hero-inner { grid-template-columns: 1.1fr 0.9fr; }
-  .hero-art { font-size: 140px; }
+/* ---------- Banner promocional ---------- */
+.promo-banner {
+  border-radius: var(--radio-m);
+  background: linear-gradient(120deg, var(--mar-700), var(--mar-900));
+  color: white;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  overflow: hidden;
+  position: relative;
 }
+.promo-banner .promo-text strong { display: block; font-size: 18px; margin-bottom: 4px; }
+.promo-banner .promo-text span { font-size: 13px; color: var(--mar-300); }
+.promo-banner .promo-emoji { font-size: 46px; flex-shrink: 0; }
+
+/* ---------- Tarjetas de tienda (scroll horizontal, estilo restaurante) ---------- */
+.store-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 18px 14px;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.store-scroll::-webkit-scrollbar { display: none; }
+.store-mini {
+  flex: 0 0 auto;
+  width: 220px;
+  background: var(--blanco);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-suave);
+  overflow: hidden;
+  scroll-snap-align: start;
+  transition: transform .15s ease;
+}
+.store-mini:active { transform: scale(0.98); }
+.store-mini-media {
+  height: 92px;
+  background: linear-gradient(135deg, var(--mar-300), var(--mar-500));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px;
+  color: white;
+  position: relative;
+}
+.store-mini-body { padding: 12px 14px; }
+.store-mini-body strong { display: block; font-size: 14px; margin-bottom: 4px; }
+.delivery-badge {
+  display: block;
+  font-size: 12px;
+  color: var(--tinta-300);
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* ---------- Grid de productos (estilo denso, 2 col en movil) ---------- */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+@media (min-width: 620px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.pcard {
+  background: var(--blanco);
+  border-radius: var(--radio-m);
+  box-shadow: var(--sombra-suave);
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.pcard:active { transform: scale(0.98); }
+.pcard-media {
+  position: relative;
+  aspect-ratio: 1 / 0.85;
+  background: linear-gradient(135deg, var(--mar-300), var(--mar-500));
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  color: white;
+}
+.pcard-add {
+  position: absolute;
+  right: 8px;
+  bottom: -14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--coral-600);
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(240,83,47,0.4);
+  cursor: pointer;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+.pcard-add:active { transform: scale(0.9); }
+.pcard-body { padding: 18px 12px 12px; }
+.pcard-name {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pcard-store {
+  display: block;
+  font-size: 11.5px;
+  color: var(--tinta-300);
+  font-weight: 600;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pcard-price { font-size: 15px; font-weight: 800; color: var(--mar-900); }
 
 /* ---------- Secciones ---------- */
 .section { padding: 56px 0; }
@@ -394,7 +612,8 @@ textarea { resize: vertical; min-height: 80px; }
 /* ---------- Carrito flotante (barra inferior movil) ---------- */
 .cart-bar {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 0; right: 0;
+  bottom: var(--tabbar-h);
   z-index: 200;
   background: var(--mar-900);
   color: white;
@@ -403,6 +622,10 @@ textarea { resize: vertical; min-height: 80px; }
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 -6px 20px rgba(0,0,0,0.2);
+  border-radius: var(--radio-m) var(--radio-m) 0 0;
+}
+@media (min-width: 860px) {
+  .cart-bar { bottom: 0; border-radius: 0; }
 }
 .cart-bar-info { font-size: 13px; color: var(--mar-300); }
 .cart-bar-total { font-size: 18px; font-weight: 800; }
@@ -574,3 +797,55 @@ th { color: var(--tinta-300); font-size: 12px; text-transform: uppercase; letter
   color: var(--tinta-300);
 }
 .empty-state .icon { font-size: 46px; margin-bottom: 12px; }
+
+/* ---------- Barra de navegacion inferior (paginas publicas, movil) ---------- */
+:root { --tabbar-h: 62px; }
+
+.tabbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: var(--tabbar-h);
+  background: var(--blanco);
+  display: flex;
+  box-shadow: 0 -2px 14px rgba(7,59,76,0.1);
+  z-index: 150;
+}
+.tabbar-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tinta-300);
+  position: relative;
+}
+.tabbar-icon { font-size: 21px; }
+.tabbar-item.activo { color: var(--coral-600); }
+.tabbar-badge {
+  position: absolute;
+  top: 2px;
+  right: calc(50% - 22px);
+  background: var(--coral-600);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+.tabbar-badge.hidden { display: none !important; }
+
+body.con-tabbar { padding-bottom: var(--tabbar-h); }
+
+@media (min-width: 860px) {
+  .tabbar { display: none; }
+  body.con-tabbar { padding-bottom: 0; }
+}

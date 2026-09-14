@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="con-tabbar">
 
 <nav class="navbar">
   <div class="container navbar-inner">
@@ -17,41 +17,49 @@
       <a href="index.html#como-funciona">Cómo funciona</a>
       <a href="pedido.html">Rastrear pedido</a>
     </div>
-    <div class="nav-cta">
-      <a href="carrito.html" class="btn btn-ghost btn-sm">
-        🛒 <span data-cart-count>0</span>
-      </a>
+    <a href="carrito.html" class="icon-btn">
+      🛒 <span class="badge-count hidden" data-cart-count>0</span>
+    </a>
+  </div>
+  <div class="location-bar">📍 Entregando en Playa Ancón <span class="chevron">▾</span></div>
+  <div class="search-bar-wrap">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="buscador" placeholder="Buscar producto (ej. anticucho, sombrero...)">
     </div>
   </div>
 </nav>
 
-<div class="container mt-24">
-  <h1 class="section-title" style="margin-bottom:4px;">Catálogo</h1>
-  <p class="text-muted">Productos de tiendas y ambulantes cerca de la playa.</p>
-
-  <div class="form-grupo" style="max-width:420px;">
-    <input type="search" id="buscador" placeholder="Buscar producto (ej. anticucho, sombrero...)">
-  </div>
-
+<div class="container mt-16">
   <div class="filtros" id="filtros"></div>
 
   <div id="estado-carga" class="text-center text-muted" style="padding:40px 0;">Cargando productos...</div>
-  <div class="grid-cols grid-cols-3" id="grid-productos"></div>
+  <div class="product-grid" id="grid-productos"></div>
   <div id="vacio" class="empty-state hidden">
     <div class="icon">🐚</div>
     <p>No encontramos productos con ese filtro.</p>
   </div>
 </div>
 
-<div style="height:90px;"></div>
+<div style="height:20px;"></div>
 
-<div class="cart-bar" id="cart-bar" style="display:none;">
+<div class="cart-bar hidden" id="cart-bar">
   <div>
     <div class="cart-bar-info">Tu carrito</div>
     <div class="cart-bar-total" data-cart-total>S/ 0.00</div>
   </div>
   <a href="carrito.html" class="btn btn-primary">Ver carrito (<span data-cart-count>0</span>)</a>
 </div>
+
+<nav class="tabbar">
+  <a href="index.html" class="tabbar-item"><span class="tabbar-icon">🏠</span>Inicio</a>
+  <a href="catalogo.html" class="tabbar-item activo"><span class="tabbar-icon">🔍</span>Catálogo</a>
+  <a href="pedido.html" class="tabbar-item"><span class="tabbar-icon">📦</span>Pedidos</a>
+  <a href="carrito.html" class="tabbar-item">
+    <span class="tabbar-icon">🛒</span>Carrito
+    <span class="tabbar-badge hidden" data-cart-count>0</span>
+  </a>
+</nav>
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
