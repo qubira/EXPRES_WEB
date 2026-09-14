@@ -209,6 +209,17 @@ async function cargarTiendasDestacadas() {
   }
 }
 cargarTiendasDestacadas();
+
+// Busqueda automatica: al dejar de escribir, lleva al catalogo filtrado sin necesidad de Enter
+const heroSearchForm = document.querySelector('.search-bar-wrap');
+const heroSearchInput = heroSearchForm.querySelector('input[name="q"]');
+let heroSearchTimer = null;
+heroSearchInput.addEventListener('input', () => {
+  clearTimeout(heroSearchTimer);
+  const valor = heroSearchInput.value.trim();
+  if (!valor) return;
+  heroSearchTimer = setTimeout(() => heroSearchForm.submit(), 600);
+});
 </script>
 </body>
 </html>
