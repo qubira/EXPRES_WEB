@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar sesión | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:420px;">
+  <div class="text-center">
+    <div style="font-size:38px;">👤</div>
+    <h1 class="section-title" style="margin-bottom:4px;">Inicia sesión</h1>
+    <p class="text-muted">Consulta tu historial de pedidos y su PIN de entrega.</p>
+  </div>
+
+  <form id="form-login" class="card card-pad mt-16">
+    <div class="form-grupo">
+      <label>Celular</label>
+      <input type="tel" name="telefono" required placeholder="Ej. 987654321">
+    </div>
+    <div class="form-grupo">
+      <label>Contraseña</label>
+      <input type="password" name="password" required placeholder="••••••••">
+    </div>
+    <div id="error-login" class="form-error hidden"></div>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-login">Ingresar</button>
+  </form>
+
+  <p class="text-center mt-16">¿Aún no tienes cuenta? <a href="registro.html" style="color:var(--coral-600);font-weight:700;">Regístrate</a></p>
+</div>
+
+<div style="height:40px;"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth-cliente.js"></script>
+<script>
+document.getElementById('form-login').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-login');
+  const errorBox = document.getElementById('error-login');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Ingresando...';
+  try {
+    const fd = new FormData(e.target);
+    const data = await Api.clienteLogin({ telefono: fd.get('telefono'), password: fd.get('password') });
+    guardarSesionCliente(data.token, data.nombre);
+    const next = new URLSearchParams(location.search).get('next') || 'mis-pedidos.html';
+    location.href = next;
+  } catch (err) {
+    errorBox.textContent = err.message || 'Error al iniciar sesión';
+    errorBox.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear cuenta | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:420px;">
+  <div class="text-center">
+    <div style="font-size:38px;">🏖️</div>
+    <h1 class="section-title" style="margin-bottom:4px;">Crea tu cuenta</h1>
+    <p class="text-muted">Guarda tu historial de pedidos y agiliza tu próxima compra.</p>
+  </div>
+
+  <form id="form-registro" class="card card-pad mt-16">
+    <div class="form-grupo">
+      <label>Nombre completo</label>
+      <input type="text" name="nombre" required placeholder="Ej. María Torres">
+    </div>
+    <div class="form-grupo">
+      <label>Celular</label>
+      <input type="tel" name="telefono" required placeholder="Ej. 987654321">
+    </div>
+    <div class="form-grupo">
+      <label>Contraseña</label>
+      <input type="password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div id="error-registro" class="form-error hidden"></div>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-registro">Crear cuenta</button>
+  </form>
+
+  <p class="text-center mt-16">¿Ya tienes cuenta? <a href="login.html" style="color:var(--coral-600);font-weight:700;">Inicia sesión</a></p>
+</div>
+
+<div style="height:40px;"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth-cliente.js"></script>
+<script>
+document.getElementById('form-registro').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-registro');
+  const errorBox = document.getElementById('error-registro');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Creando cuenta...';
+  try {
+    const fd = new FormData(e.target);
+    const data = await Api.clienteRegistro({
+      nombre: fd.get('nombre'),
+      telefono: fd.get('telefono'),
+      password: fd.get('password'),
+    });
+    guardarSesionCliente(data.token, data.nombre);
+    const next = new URLSearchParams(location.search).get('next') || 'mis-pedidos.html';
+    location.href = next;
+  } catch (err) {
+    errorBox.textContent = err.message || 'Error al crear la cuenta';
+    errorBox.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Crear cuenta';
+  }
+});
+</script>
+</body>
+</html>

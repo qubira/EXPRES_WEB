@@ -87,3 +87,13 @@ if (typeof getZonaGuardada === 'function') {
     campoZona.value = zonaGuardada;
   }
 }
+
+// Si el cliente tiene sesion iniciada, precargamos su nombre y celular
+if (typeof clienteEstaLogueado === 'function' && clienteEstaLogueado()) {
+  Api.clientePerfil().then((perfil) => {
+    const campoNombre = document.querySelector('input[name="cliente_nombre"]');
+    const campoTelefono = document.querySelector('input[name="cliente_telefono"]');
+    if (campoNombre && !campoNombre.value) campoNombre.value = perfil.nombre;
+    if (campoTelefono && !campoTelefono.value) campoTelefono.value = perfil.telefono;
+  }).catch(() => {});
+}

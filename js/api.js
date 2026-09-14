@@ -44,7 +44,7 @@ const Api = {
     const qs = new URLSearchParams(params).toString();
     return apiRequest(`/productos${qs ? `?${qs}` : ''}`);
   },
-  crearPedido: (data) => apiRequest('/pedidos', { method: 'POST', body: data }),
+  crearPedido: (data) => apiRequest('/pedidos', { method: 'POST', body: data, role: 'cliente' }),
   subirComprobante: (pedidoId, formData) => apiRequest(`/pedidos/${pedidoId}/pago`, { method: 'POST', body: formData, isForm: true }),
   getPedido: (id) => apiRequest(`/pedidos/${id}`),
   solicitarTienda: (data) => apiRequest('/tiendas/solicitud', { method: 'POST', body: data }),
@@ -88,6 +88,12 @@ const Api = {
   repartidorPedido: (id) => apiRequest(`/repartidor/pedidos/${id}`, { role: 'repartidor' }),
   repartidorRecogido: (id) => apiRequest(`/repartidor/pedidos/${id}/recogido`, { method: 'POST', role: 'repartidor' }),
   repartidorEntregar: (id, pin) => apiRequest(`/repartidor/pedidos/${id}/entregar`, { method: 'POST', body: { pin }, role: 'repartidor' }),
+
+  // Cliente (cuenta de usuario)
+  clienteRegistro: (data) => apiRequest('/cliente/registro', { method: 'POST', body: data }),
+  clienteLogin: (data) => apiRequest('/cliente/login', { method: 'POST', body: data }),
+  clientePerfil: () => apiRequest('/cliente/perfil', { role: 'cliente' }),
+  clientePedidos: () => apiRequest('/cliente/pedidos', { role: 'cliente' }),
 };
 
 function uploadsUrl(path) {

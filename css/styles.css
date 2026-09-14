@@ -140,6 +140,7 @@ p { margin: 0 0 1rem; }
   .navbar-inner .brand { justify-self: start; }
   .navbar-inner .nav-links { justify-self: center; }
   .navbar-inner .icon-btn { justify-self: end; }
+  .navbar-inner .nav-cta-group { justify-self: end; }
 }
 .brand {
   display: flex;
@@ -243,6 +244,18 @@ p { margin: 0 0 1rem; }
   padding: 0 4px;
   border: 2px solid white;
 }
+.account-btn.con-sesion::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--verde-palma);
+  border: 2px solid white;
+}
+.nav-cta-group { display: flex; align-items: center; gap: 10px; }
 
 /* ---------- Hero (search-first, estilo apps de delivery) ---------- */
 .hero {

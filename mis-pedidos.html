@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis pedidos | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="con-tabbar">
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+    <div class="nav-cta-group">
+      <a href="pedido.html" class="btn btn-ghost btn-sm">Buscar por ID</a>
+      <button class="btn btn-outline btn-sm" id="btn-salir">Salir</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:640px;">
+  <h1 class="section-title" style="margin-bottom:4px;">Mis pedidos</h1>
+  <p class="text-muted" id="saludo-cliente"></p>
+
+  <div id="contenido" class="mt-16"></div>
+</div>
+
+<div style="height:20px;"></div>
+
+<nav class="tabbar">
+  <a href="index.html" class="tabbar-item"><span class="tabbar-icon">🏠</span>Inicio</a>
+  <a href="catalogo.html" class="tabbar-item"><span class="tabbar-icon">🔍</span>Catálogo</a>
+  <a href="mis-pedidos.html" class="tabbar-item activo"><span class="tabbar-icon">📦</span>Pedidos</a>
+  <a href="carrito.html" class="tabbar-item">
+    <span class="tabbar-icon">🛒</span>Carrito
+    <span class="tabbar-badge hidden" data-cart-count>0</span>
+  </a>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth-cliente.js"></script>
+<script>
+if (!clienteEstaLogueado()) {
+  location.href = 'login.html?next=mis-pedidos.html';
+}
+document.getElementById('saludo-cliente').textContent = `Hola, ${getClienteNombre()} 👋`;
+
+document.getElementById('btn-salir').addEventListener('click', () => {
+  cerrarSesionCliente();
+  location.href = 'index.html';
+});
+
+function tarjetaPedido(p) {
+  return `
+    <a href="pedido.html?id=${p.id}" class="card card-pad mt-16" style="display:block;">
+      <div class="flex justify-between items-center">
+        <div>
+          <div class="text-sm text-muted">Pedido #${p.id.slice(0,8).toUpperCase()}</div>
+          <strong>${formatoSoles(p.monto_total)}</strong>
+        </div>
+        <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
+      </div>
+      <div class="text-sm text-muted mt-8">📍 ${p.zona_entrega}</div>
+      <div class="text-sm text-muted">${new Date(p.created_at).toLocaleString('es-PE')}</div>
+      ${p.pin_entrega ? `<div class="mt-8"><span class="tag" style="background:#fff3d6;color:#b7690a;">🔑 PIN: ${p.pin_entrega}</span></div>` : ''}
+    </a>
+  `;
+}
+
+async function cargarPedidos() {
+  const cont = document.getElementById('contenido');
+  cont.innerHTML = '<p class="text-center text-muted">Cargando...</p>';
+  try {
+    const pedidos = await Api.clientePedidos();
+    if (pedidos.length === 0) {
+      cont.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🛍️</div>
+          <p>Aún no tienes pedidos.</p>
+          <a href="catalogo.html" class="btn btn-primary">Ver catálogo</a>
+        </div>
+      `;
+      return;
+    }
+    cont.innerHTML = pedidos.map(tarjetaPedido).join('');
+  } catch (err) {
+    if (err.status === 401) {
+      cerrarSesionCliente();
+      location.href = 'login.html?next=mis-pedidos.html';
+      return;
+    }
+    cont.innerHTML = `<p class="text-center form-error">${err.message}</p>`;
+  }
+}
+
+cargarPedidos();
+</script>
+</body>
+</html>
