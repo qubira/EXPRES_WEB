@@ -72,6 +72,8 @@ const Api = {
   // Tienda
   tiendaLogin: (data) => apiRequest('/tienda/login', { method: 'POST', body: data }),
   tiendaPerfil: () => apiRequest('/tienda/perfil', { role: 'tienda' }),
+  tiendaActualizarPerfil: (data) => apiRequest('/tienda/perfil', { method: 'PUT', body: data, role: 'tienda' }),
+  tiendaCambiarPassword: (data) => apiRequest('/tienda/perfil/password', { method: 'POST', body: data, role: 'tienda' }),
   tiendaProductos: () => apiRequest('/tienda/productos', { role: 'tienda' }),
   tiendaCrearProducto: (data) => apiRequest('/tienda/productos', { method: 'POST', body: data, role: 'tienda' }),
   tiendaSubirImagen: (formData) => apiRequest('/tienda/upload', { method: 'POST', body: formData, isForm: true, role: 'tienda' }),

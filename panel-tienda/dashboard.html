@@ -15,6 +15,7 @@
     <div class="brand"><img src="../assets/logo-navbar.png" alt="Express" class="brand-logo-sm"> Mi tienda</div>
     <div class="panel-link activo" data-view="pedidos">📦 Pedidos</div>
     <div class="panel-link" data-view="productos">🛍️ Productos</div>
+    <div class="panel-link" data-view="perfil">✏️ Mi perfil</div>
     <div style="flex:1"></div>
     <div class="panel-link" id="btn-logout">🚪 Salir</div>
   </aside>
@@ -35,12 +36,54 @@
       <button class="btn btn-primary btn-sm" id="btn-nuevo-producto">+ Nuevo producto</button>
       <div class="grid-cols grid-cols-3 mt-16" id="grid-productos-tienda"></div>
     </section>
+
+    <section id="view-perfil" class="view hidden">
+      <div class="grid-cols grid-cols-2">
+        <form id="form-perfil-tienda" class="card card-pad">
+          <h3>Datos de mi tienda</h3>
+          <div class="form-grupo">
+            <label>Logo</label>
+            <input type="file" id="tp-logo-file" accept="image/*">
+            <img id="tp-logo-preview" style="max-height:90px;border-radius:10px;margin-top:8px;display:none;">
+          </div>
+          <div class="form-grupo"><label>Nombre</label><input id="tp-nombre" required></div>
+          <div class="form-grupo"><label>Categoría</label>
+            <select id="tp-categoria">
+              <option value="ropa">ropa</option><option value="comida">comida</option>
+              <option value="bebidas">bebidas</option><option value="servicios">servicios</option>
+              <option value="artesanias">artesanias</option><option value="otros">otros</option>
+            </select>
+          </div>
+          <div class="form-grupo"><label>Descripción</label><textarea id="tp-descripcion"></textarea></div>
+          <div class="form-grupo"><label>Zona en la playa</label><input id="tp-zona" placeholder="Ej. Playa Ancón - Malecón Sur"></div>
+          <div class="form-grupo"><label>Teléfono</label><input id="tp-telefono"></div>
+          <div class="form-grupo"><label>WhatsApp</label><input id="tp-whatsapp"></div>
+          <div id="error-perfil-tienda" class="form-error hidden"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-guardar-perfil-tienda">Guardar cambios</button>
+        </form>
+
+        <div>
+          <form id="form-password-tienda" class="card card-pad">
+            <h3>Cambiar contraseña</h3>
+            <div class="form-grupo"><label>Contraseña actual</label><input type="password" id="tp-pass-actual" required placeholder="••••••••"></div>
+            <div class="form-grupo"><label>Nueva contraseña</label><input type="password" id="tp-pass-nueva" required minlength="6" placeholder="Mínimo 6 caracteres"></div>
+            <div id="error-password-tienda" class="form-error hidden"></div>
+            <button type="submit" class="btn btn-secondary btn-block" id="btn-cambiar-password-tienda">Actualizar contraseña</button>
+          </form>
+          <div class="card card-pad mt-16">
+            <h3 style="margin-bottom:4px;">Comisión pactada</h3>
+            <p class="text-sm text-muted">La comisión y la activación de tu tienda las administra Express. Si necesitas cambiarlas, contáctanos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
 <nav class="panel-mobile-nav">
   <div class="panel-link activo" data-view="pedidos"><span class="icon">📦</span>Pedidos</div>
   <div class="panel-link" data-view="productos"><span class="icon">🛍️</span>Productos</div>
+  <div class="panel-link" data-view="perfil"><span class="icon">✏️</span>Perfil</div>
 </nav>
 
 <div id="modal-root"></div>

@@ -17,7 +17,7 @@ function manejarError401(err) {
   return false;
 }
 
-const TITULOS = { pedidos: 'Pedidos', productos: 'Mis productos' };
+const TITULOS = { pedidos: 'Pedidos', productos: 'Mis productos', perfil: 'Mi perfil' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -26,6 +26,7 @@ function irAVista(vista) {
   document.getElementById('titulo-vista').textContent = TITULOS[vista];
   if (vista === 'pedidos') cargarPedidos();
   if (vista === 'productos') cargarProductos();
+  if (vista === 'perfil') cargarPerfilTienda();
 }
 document.querySelectorAll('.panel-link[data-view]').forEach((link) => link.addEventListener('click', () => irAVista(link.dataset.view)));
 
@@ -200,5 +201,95 @@ function abrirModalProducto(p) {
 }
 
 document.getElementById('btn-nuevo-producto').addEventListener('click', () => abrirModalProducto(null));
+
+// ---------- Mi perfil ----------
+async function cargarPerfilTienda() {
+  try {
+    const p = await Api.tiendaPerfil();
+    document.getElementById('tp-nombre').value = p.nombre || '';
+    document.getElementById('tp-categoria').value = p.categoria || 'otros';
+    document.getElementById('tp-descripcion').value = p.descripcion || '';
+    document.getElementById('tp-zona').value = p.zona || '';
+    document.getElementById('tp-telefono').value = p.contacto_telefono || '';
+    document.getElementById('tp-whatsapp').value = p.contacto_whatsapp || '';
+    const preview = document.getElementById('tp-logo-preview');
+    if (p.logo_url) {
+      preview.src = p.logo_url;
+      preview.style.display = 'block';
+    }
+  } catch (err) {
+    if (!manejarError401(err)) mostrarToast(err.message, 'error');
+  }
+}
+
+let logoUrlActual = '';
+document.getElementById('tp-logo-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const preview = document.getElementById('tp-logo-preview');
+  try {
+    const fd = new FormData();
+    fd.append('imagen', file);
+    mostrarToast('Subiendo logo...', '');
+    const { url } = await Api.tiendaSubirImagen(fd);
+    logoUrlActual = url;
+    preview.src = url;
+    preview.style.display = 'block';
+    mostrarToast('Logo subido', 'success');
+  } catch (err) {
+    mostrarToast(err.message || 'No se pudo subir el logo', 'error');
+  }
+});
+
+document.getElementById('form-perfil-tienda').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar-perfil-tienda');
+  const errorBox = document.getElementById('error-perfil-tienda');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+  try {
+    const preview = document.getElementById('tp-logo-preview');
+    await Api.tiendaActualizarPerfil({
+      nombre: document.getElementById('tp-nombre').value,
+      categoria: document.getElementById('tp-categoria').value,
+      descripcion: document.getElementById('tp-descripcion').value,
+      zona: document.getElementById('tp-zona').value,
+      contacto_telefono: document.getElementById('tp-telefono').value,
+      contacto_whatsapp: document.getElementById('tp-whatsapp').value,
+      logo_url: logoUrlActual || (preview.style.display !== 'none' ? preview.src : ''),
+    });
+    mostrarToast('Perfil actualizado', 'success');
+  } catch (err) {
+    errorBox.textContent = err.message || 'No se pudo actualizar el perfil';
+    errorBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar cambios';
+  }
+});
+
+document.getElementById('form-password-tienda').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-cambiar-password-tienda');
+  const errorBox = document.getElementById('error-password-tienda');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Actualizando...';
+  try {
+    await Api.tiendaCambiarPassword({
+      password_actual: document.getElementById('tp-pass-actual').value,
+      password_nueva: document.getElementById('tp-pass-nueva').value,
+    });
+    mostrarToast('Contraseña actualizada', 'success');
+    e.target.reset();
+  } catch (err) {
+    errorBox.textContent = err.message || 'No se pudo cambiar la contraseña';
+    errorBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Actualizar contraseña';
+  }
+});
 
 cargarPedidos();
