@@ -68,7 +68,7 @@ function tarjetaProducto(p, index) {
       </div>
       <div class="pcard-body">
         <span class="pcard-name">${p.nombre}</span>
-        <span class="pcard-store">${p.tienda_nombre} · ${labelUnidad(p.unidad)}</span>
+        <span class="pcard-store">${p.tienda_nombre} · ${formatoContenido(p.contenido, p.unidad)}</span>
         <span class="pcard-price">${formatoSoles(p.precio)}</span>
       </div>
     </div>

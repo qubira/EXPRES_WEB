@@ -139,6 +139,16 @@ function labelUnidad(unidad) {
   return UNIDAD_LABELS[unidad] || unidad || 'unidad';
 }
 
+// Combina el numero (contenido) con el tipo de unidad, ej: 500 + 'g' -> "500 g".
+// Si no hay numero (productos viejos sin este dato), muestra solo el tipo de unidad.
+function formatoContenido(contenido, unidad) {
+  const etiqueta = labelUnidad(unidad);
+  if (contenido == null || contenido === '') return etiqueta;
+  const numero = Number(contenido);
+  const numeroTexto = Number.isInteger(numero) ? numero : numero.toFixed(2).replace(/\.?0+$/, '');
+  return `${numeroTexto} ${etiqueta}`;
+}
+
 // Conecta un boton "Buscar" a un input de DNI: al hacer click, consulta RENIEC
 // y autocompleta el input de nombre. Si falla, no bloquea (se llena a mano).
 function habilitarBuscarDni(dniInputId, nombreInputId, btnId) {

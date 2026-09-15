@@ -99,7 +99,7 @@ async function cargarProductos() {
         <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
         <strong>${p.nombre}</strong>
         ${p.marca ? `<div class="text-sm text-muted">${p.marca}</div>` : ''}
-        <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${labelUnidad(p.unidad)}</span></div>
+        <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
         <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
         <div class="flex gap-8 mt-8">
           <button class="btn btn-outline btn-sm w-full" data-editar="${p.id}">Editar</button>
@@ -164,12 +164,14 @@ function abrirModalProducto(p) {
           </div>
           <div class="form-grupo"><label>Subcategoría</label><input id="p-subcategoria" value="${p ? (p.subcategoria||'') : ''}" placeholder="Ej. jugos, sombreros..." required></div>
         </div>
+        <div class="form-grupo"><label>Precio de venta (S/)</label><input id="p-precio" type="number" step="0.10" value="${p ? p.precio : ''}" required></div>
         <div class="grid-cols grid-cols-2">
-          <div class="form-grupo"><label>Precio de venta (S/)</label><input id="p-precio" type="number" step="0.10" value="${p ? p.precio : ''}" required></div>
+          <div class="form-grupo"><label>Cantidad</label><input id="p-contenido" type="number" step="0.01" min="0" value="${p && p.contenido != null ? p.contenido : ''}" placeholder="Ej. 500"></div>
           <div class="form-grupo"><label>Unidad</label>
             <select id="p-unidad">${UNIDADES.map((u) => `<option value="${u}" ${p && p.unidad===u?'selected':''}>${labelUnidad(u)}</option>`).join('')}</select>
           </div>
         </div>
+        <div class="form-hint" style="margin-top:-8px;margin-bottom:12px;">Ej. Cantidad 500 + Unidad "g" se vera como "500 g" para el cliente.</div>
         <div class="form-grupo"><label>Stock</label><input id="p-stock" type="number" value="${p ? p.stock : 10}" required></div>
       </div>
     </div>
@@ -207,6 +209,7 @@ function abrirModalProducto(p) {
       descripcion: document.getElementById('p-descripcion').value,
       precio: Number(document.getElementById('p-precio').value),
       unidad: document.getElementById('p-unidad').value,
+      contenido: document.getElementById('p-contenido').value ? Number(document.getElementById('p-contenido').value) : null,
       stock: Number(document.getElementById('p-stock').value),
       foto_url: document.getElementById('p-foto').value,
     };

@@ -133,7 +133,7 @@ function tarjetaSimilar(p, index) {
       </div>
       <div class="pcard-body">
         <span class="pcard-name">${p.nombre}</span>
-        <span class="pcard-store">${p.tienda_nombre} · ${labelUnidad(p.unidad)}</span>
+        <span class="pcard-store">${p.tienda_nombre} · ${formatoContenido(p.contenido, p.unidad)}</span>
         <span class="pcard-price">${formatoSoles(p.precio)}</span>
       </div>
     </div>
@@ -174,7 +174,7 @@ async function cargarProducto() {
     document.getElementById('producto-nombre').textContent = p.nombre;
     document.getElementById('producto-marca').textContent = p.marca ? `Marca: ${p.marca}` : '';
     document.getElementById('producto-precio').textContent = formatoSoles(p.precio);
-    document.getElementById('producto-unidad').textContent = `Por ${labelUnidad(p.unidad)}`;
+    document.getElementById('producto-unidad').textContent = `Por ${formatoContenido(p.contenido, p.unidad)}`;
 
     document.getElementById('detalle-control').innerHTML = controlDetalleHtml(p);
     enlazarControlDetalle(p.id);
