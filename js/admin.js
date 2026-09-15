@@ -228,10 +228,7 @@ async function abrirModalEditarTienda(t) {
     </div>
     <div class="form-grupo"><label>¿Qué vende?</label><input id="e-subcategoria" value="${t.subcategoria || ''}" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
     <div class="form-grupo"><label>Zona</label>
-      <div class="flex" style="gap:8px;">
-        <select id="e-zona" style="flex:1;">${zonaHtml}</select>
-        <button type="button" class="btn btn-outline btn-sm" id="e-zona-add" title="Agregar zona">+</button>
-      </div>
+      <select id="e-zona">${zonaHtml}</select>
     </div>
     <div class="form-grupo"><label>DNI del titular</label>
       <div class="flex" style="gap:8px;">
@@ -255,7 +252,6 @@ async function abrirModalEditarTienda(t) {
   `);
   habilitarBuscarDni('e-dni', 'e-nombre-titular', 'e-buscar-dni');
   habilitarAgregarTipoNegocio('e-categoria', 'e-categoria-add', 'admin');
-  habilitarAgregarZona('e-zona', 'e-zona-add', 'admin');
   document.getElementById('btn-guardar-tienda').addEventListener('click', async () => {
     try {
       await Api.adminActualizarTienda(t.id, {
@@ -323,7 +319,6 @@ async function initVistaRegistro() {
   document.getElementById('rt-zona').innerHTML = await zonaOptionsHtml('');
   habilitarBuscarDni('rt-dni', 'rt-nombre-titular', 'rt-buscar-dni');
   habilitarAgregarTipoNegocio('rt-categoria', 'rt-categoria-add', 'admin');
-  habilitarAgregarZona('rt-zona', 'rt-zona-add', 'admin');
 
   const btnTienda = document.getElementById('btn-tipo-tienda');
   const btnRepartidor = document.getElementById('btn-tipo-repartidor');

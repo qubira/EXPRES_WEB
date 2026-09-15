@@ -41,7 +41,6 @@ const Api = {
   getTiposNegocio: () => apiRequest('/tipos-negocio'),
   agregarTipoNegocio: (etiqueta, role) => apiRequest('/tipos-negocio', { method: 'POST', body: { etiqueta }, role }),
   getZonas: () => apiRequest('/zonas'),
-  agregarZona: (nombre, role) => apiRequest('/zonas', { method: 'POST', body: { nombre }, role }),
   getTiendas: (categoria) => apiRequest(`/tiendas${categoria ? `?categoria=${categoria}` : ''}`),
   getTienda: (id) => apiRequest(`/tiendas/${id}`),
   getProductos: (params = {}) => {
@@ -54,6 +53,9 @@ const Api = {
   getPedido: (id) => apiRequest(`/pedidos/${id}`),
   solicitarTienda: (data) => apiRequest('/tiendas/solicitud', { method: 'POST', body: data }),
   loginUnificado: (data) => apiRequest('/login', { method: 'POST', body: data }),
+  misSesiones: (role) => apiRequest('/mis-sesiones', { role }),
+  cerrarSesionRemota: (id, role) => apiRequest(`/mis-sesiones/${id}/cerrar`, { method: 'POST', role }),
+  cerrarOtrasSesiones: (role) => apiRequest('/mis-sesiones/cerrar-otras', { method: 'POST', role }),
   consultarDni: (numero) => apiRequest(`/consulta-dni/${numero}`),
 
   // Admin
@@ -207,26 +209,68 @@ function habilitarAgregarTipoNegocio(selectId, btnId, role) {
   });
 }
 
-// Igual que arriba, pero para agregar una zona/playa nueva al <select> de zona.
-function habilitarAgregarZona(selectId, btnId, role) {
-  const btn = document.getElementById(btnId);
-  const select = document.getElementById(selectId);
-  if (!btn || !select) return;
-  btn.addEventListener('click', async () => {
-    const nombre = (prompt('Nombre de la nueva zona (ej. Playa Ancón - Sector X):') || '').trim();
-    if (!nombre) return;
-    try {
-      await Api.agregarZona(nombre, role);
-      const opt = document.createElement('option');
-      opt.value = nombre;
-      opt.textContent = nombre;
-      select.appendChild(opt);
-      select.value = nombre;
-      mostrarToast('Zona agregada', 'success');
-    } catch (err) {
-      mostrarToast(err.message || 'No se pudo agregar', 'error');
+// ---------- Conectividad (sesiones activas de la cuenta) ----------
+function resumenDispositivo(ua) {
+  if (!ua) return 'Dispositivo desconocido';
+  let nav = 'Navegador';
+  if (/Edg\//.test(ua)) nav = 'Edge';
+  else if (/Chrome\//.test(ua) && !/Chromium/.test(ua)) nav = 'Chrome';
+  else if (/Firefox\//.test(ua)) nav = 'Firefox';
+  else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) nav = 'Safari';
+  let so = '';
+  if (/Windows/.test(ua)) so = 'Windows';
+  else if (/Android/.test(ua)) so = 'Android';
+  else if (/iPhone|iPad/.test(ua)) so = 'iOS';
+  else if (/Mac OS/.test(ua)) so = 'Mac';
+  else if (/Linux/.test(ua)) so = 'Linux';
+  return so ? `${nav} · ${so}` : nav;
+}
+
+// role: 'tienda' | 'repartidor' | 'admin' | 'cliente'. Reutilizable en cualquier panel.
+async function cargarConectividad(role, listaId, btnOtrasId) {
+  const cont = document.getElementById(listaId);
+  if (!cont) return;
+  cont.innerHTML = '<p class="text-muted">Cargando...</p>';
+  try {
+    const sesiones = await Api.misSesiones(role);
+    if (sesiones.length === 0) {
+      cont.innerHTML = '<p class="text-muted">No hay sesiones activas.</p>';
+      return;
     }
-  });
+    cont.innerHTML = sesiones.map((s) => `
+      <div class="card card-pad mt-16 flex justify-between items-center" style="flex-wrap:wrap; gap:8px;">
+        <div>
+          <strong>${resumenDispositivo(s.user_agent)}</strong>
+          ${s.actual ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);margin-left:6px;">Esta sesión</span>' : ''}
+          <div class="text-sm text-muted">IP: ${s.ip || '—'} · Conectado: ${new Date(s.creado_en).toLocaleString('es-PE')}</div>
+        </div>
+        ${s.actual ? '' : `<button class="btn btn-outline btn-sm" data-cerrar-sesion="${s.id}">Cerrar sesión</button>`}
+      </div>
+    `).join('');
+
+    cont.querySelectorAll('[data-cerrar-sesion]').forEach((btn) => btn.addEventListener('click', async () => {
+      if (!confirm('¿Cerrar esta sesión? Ese dispositivo tendrá que iniciar sesión de nuevo.')) return;
+      try {
+        await Api.cerrarSesionRemota(btn.dataset.cerrarSesion, role);
+        mostrarToast('Sesión cerrada', 'success');
+        cargarConectividad(role, listaId, btnOtrasId);
+      } catch (err) { mostrarToast(err.message, 'error'); }
+    }));
+  } catch (err) {
+    cont.innerHTML = `<p class="form-error">${err.message}</p>`;
+  }
+
+  const btnOtras = document.getElementById(btnOtrasId);
+  if (btnOtras) {
+    btnOtras.onclick = async () => {
+      if (!confirm('¿Cerrar todas las demás sesiones? Solo quedará activa esta.')) return;
+      try {
+        const r = await Api.cerrarOtrasSesiones(role);
+        mostrarToast(r.mensaje, 'success');
+        cargarConectividad(role, listaId, btnOtrasId);
+      } catch (err) { mostrarToast(err.message, 'error'); }
+    };
+  }
 }
 
 const TIPO_NEGOCIO_LABELS = {

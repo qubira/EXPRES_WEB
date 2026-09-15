@@ -17,7 +17,7 @@ function manejarError401(err) {
   return false;
 }
 
-const TITULOS = { activos: 'Mis entregas', historial: 'Historial' };
+const TITULOS = { activos: 'Mis entregas', historial: 'Historial', conectividad: 'Conectividad' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -26,6 +26,7 @@ function irAVista(vista) {
   document.getElementById('titulo-vista').textContent = TITULOS[vista];
   if (vista === 'activos') cargarActivos();
   if (vista === 'historial') cargarHistorial();
+  if (vista === 'conectividad') cargarConectividad('repartidor', 'lista-sesiones', 'btn-cerrar-otras-sesiones');
 }
 document.querySelectorAll('.panel-link[data-view]').forEach((link) => link.addEventListener('click', () => irAVista(link.dataset.view)));
 

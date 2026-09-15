@@ -15,6 +15,7 @@
     <div class="brand"><img src="../assets/logo-navbar.png" alt="Express" class="brand-logo-sm"> Repartidor</div>
     <div class="panel-link activo" data-view="activos">📦 Mis entregas</div>
     <div class="panel-link" data-view="historial">🗂️ Historial</div>
+    <div class="panel-link" data-view="conectividad">🔗 Conectividad</div>
     <div style="flex:1"></div>
     <div class="panel-link" id="btn-logout">🚪 Salir</div>
   </aside>
@@ -46,12 +47,21 @@
     <section id="view-historial" class="view hidden mt-24">
       <div id="lista-historial"></div>
     </section>
+
+    <section id="view-conectividad" class="view hidden mt-24">
+      <div class="flex justify-between items-center" style="flex-wrap:wrap;gap:12px;">
+        <p class="text-muted" style="max-width:480px;">Dispositivos donde tu cuenta tiene la sesión iniciada. Si ves uno que no reconoces, ciérralo.</p>
+        <button class="btn btn-outline btn-sm" id="btn-cerrar-otras-sesiones">Cerrar todas las demás</button>
+      </div>
+      <div id="lista-sesiones"></div>
+    </section>
   </main>
 </div>
 
 <nav class="panel-mobile-nav">
   <div class="panel-link activo" data-view="activos"><span class="icon">📦</span>Entregas</div>
   <div class="panel-link" data-view="historial"><span class="icon">🗂️</span>Historial</div>
+  <div class="panel-link" data-view="conectividad"><span class="icon">🔗</span>Conexión</div>
 </nav>
 
 <div id="modal-root"></div>

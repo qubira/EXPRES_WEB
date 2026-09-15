@@ -16,6 +16,7 @@
     <div class="panel-link activo" data-view="pedidos">📦 Pedidos</div>
     <div class="panel-link" data-view="productos">🛍️ Productos</div>
     <div class="panel-link" data-view="perfil">✏️ Mi perfil</div>
+    <div class="panel-link" data-view="conectividad">🔗 Conectividad</div>
     <div style="flex:1"></div>
     <div class="panel-link" id="btn-logout">🚪 Salir</div>
   </aside>
@@ -69,10 +70,7 @@
           <div class="form-grupo"><label>Descripción</label><textarea id="tp-descripcion"></textarea></div>
           <div class="form-grupo">
             <label>Zona en la playa</label>
-            <div class="flex" style="gap:8px;">
-              <select id="tp-zona" required style="flex:1;"></select>
-              <button type="button" class="btn btn-outline btn-sm" id="tp-zona-add" title="Agregar zona">+</button>
-            </div>
+            <select id="tp-zona" required></select>
           </div>
           <div class="form-grupo">
             <label>DNI del titular</label>
@@ -106,6 +104,14 @@
         </div>
       </div>
     </section>
+
+    <section id="view-conectividad" class="view hidden">
+      <div class="flex justify-between items-center" style="flex-wrap:wrap;gap:12px;">
+        <p class="text-muted" style="max-width:480px;">Dispositivos donde tu cuenta tiene la sesión iniciada. Si ves uno que no reconoces, ciérralo.</p>
+        <button class="btn btn-outline btn-sm" id="btn-cerrar-otras-sesiones">Cerrar todas las demás</button>
+      </div>
+      <div id="lista-sesiones"></div>
+    </section>
   </main>
 </div>
 
@@ -113,6 +119,7 @@
   <div class="panel-link activo" data-view="pedidos"><span class="icon">📦</span>Pedidos</div>
   <div class="panel-link" data-view="productos"><span class="icon">🛍️</span>Productos</div>
   <div class="panel-link" data-view="perfil"><span class="icon">✏️</span>Perfil</div>
+  <div class="panel-link" data-view="conectividad"><span class="icon">🔗</span>Conexión</div>
 </nav>
 
 <div id="modal-root"></div>

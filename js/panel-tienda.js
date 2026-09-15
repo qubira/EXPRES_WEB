@@ -19,7 +19,7 @@ function manejarError401(err) {
   return false;
 }
 
-const TITULOS = { pedidos: 'Pedidos', productos: 'Mis productos', perfil: 'Mi perfil' };
+const TITULOS = { pedidos: 'Pedidos', productos: 'Mis productos', perfil: 'Mi perfil', conectividad: 'Conectividad' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -29,6 +29,7 @@ function irAVista(vista) {
   if (vista === 'pedidos') cargarPedidos();
   if (vista === 'productos') cargarProductos();
   if (vista === 'perfil') cargarPerfilTienda();
+  if (vista === 'conectividad') cargarConectividad('tienda', 'lista-sesiones', 'btn-cerrar-otras-sesiones');
 }
 document.querySelectorAll('.panel-link[data-view]').forEach((link) => link.addEventListener('click', () => irAVista(link.dataset.view)));
 
@@ -239,7 +240,6 @@ async function cargarPerfilTienda() {
       const tipos = await Api.getTiposNegocio();
       document.getElementById('tp-categoria').innerHTML = tipos.map((t) => `<option value="${t.clave}">${t.etiqueta}</option>`).join('');
       habilitarAgregarTipoNegocio('tp-categoria', 'tp-categoria-add', 'tienda');
-      habilitarAgregarZona('tp-zona', 'tp-zona-add', 'tienda');
       tiposNegocioCargados = true;
     }
     const p = await Api.tiendaPerfil();
