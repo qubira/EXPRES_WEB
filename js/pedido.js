@@ -10,6 +10,7 @@ let mapaEntrega = null;
 let marcadorRepartidor = null;
 let marcadorCliente = null;
 let ultimoEstadoConocido = null;
+let pedidoIdRenderizado = null;
 
 function idInicial() {
   return new URLSearchParams(location.search).get('id') || localStorage.getItem('express_last_pedido') || '';
@@ -137,20 +138,39 @@ function cerrarModal() {
 
 async function cargarPedido(id) {
   const cont = document.getElementById('contenido');
-  // El HTML se reconstruye por completo en cada carga (incluido #mapa-entrega),
-  // asi que el mapa de Leaflet anterior queda huerfano y hay que recrearlo.
-  if (mapaEntrega) {
-    mapaEntrega.remove();
-    mapaEntrega = null;
-    marcadorRepartidor = null;
-    marcadorCliente = null;
+  // Solo mostramos "Buscando..." cuando aun no hay nada en pantalla o se
+  // esta cambiando a otro pedido; en los refrescos de fondo del mismo
+  // pedido no tiene sentido taparlo con un mensaje de carga cada vez.
+  if (pedidoIdRenderizado !== id) {
+    cont.innerHTML = '<p class="text-center text-muted mt-16">Buscando pedido...</p>';
   }
-  cont.innerHTML = '<p class="text-center text-muted mt-16">Buscando pedido...</p>';
 
   try {
     const pedido = await Api.getPedido(id);
     localStorage.setItem('express_last_pedido', pedido.id);
     ultimoEstadoConocido = pedido.estado;
+
+    // Mientras seguimos el mismo pedido "en camino" con el mapa ya montado,
+    // solo movemos el marcador en vez de reconstruir todo el HTML: si no,
+    // cada refresco de 5s destruye y recrea el mapa entero (recarga los
+    // tiles de OpenStreetMap y resetea el zoom/pan que el usuario haya
+    // hecho), convirtiendo el "tiempo real" en un parpadeo constante.
+    const puedeActualizarSoloElMapa = mapaEntrega && pedidoIdRenderizado === pedido.id
+      && pedido.estado === 'recogido' && pedido.lat_repartidor && pedido.lng_repartidor;
+    if (puedeActualizarSoloElMapa) {
+      inicializarMapa(pedido);
+      return;
+    }
+
+    // El HTML se reconstruye por completo en cada carga (incluido #mapa-entrega),
+    // asi que el mapa de Leaflet anterior queda huerfano y hay que recrearlo.
+    if (mapaEntrega) {
+      mapaEntrega.remove();
+      mapaEntrega = null;
+      marcadorRepartidor = null;
+      marcadorCliente = null;
+    }
+    pedidoIdRenderizado = pedido.id;
 
     const necesitaPago = pedido.estado === 'pendiente_pago';
     const rechazado = pedido.estado === 'pago_rechazado';
@@ -247,6 +267,15 @@ async function cargarPedido(id) {
       btnReclamo.addEventListener('click', () => renderReclamoModal(pedido.id));
     }
   } catch (err) {
+    // Si veniamos mostrando el pedido con el mapa montado y esta carga
+    // fallo (ej. se corto la conexion un instante), no dejamos las
+    // referencias apuntando a un mapa que ya no existe en el DOM: si no,
+    // la proxima carga exitosa creeria que solo tiene que mover el
+    // marcador y nunca reconstruiria la tarjeta con el mensaje de error.
+    pedidoIdRenderizado = null;
+    mapaEntrega = null;
+    marcadorRepartidor = null;
+    marcadorCliente = null;
     cont.innerHTML = `<p class="text-center form-error mt-16">${err.message || 'Pedido no encontrado'}</p>`;
   }
 }
@@ -260,14 +289,6 @@ document.getElementById('form-buscar').addEventListener('submit', (e) => {
   }
 });
 
-const idInit = idInicial();
-if (idInit) {
-  document.getElementById('input-id').value = idInit;
-  cargarPedido(idInit);
-} else {
-  document.getElementById('contenido').innerHTML = '<p class="text-center text-muted mt-16">Ingresa el ID de tu pedido para ver su estado.</p>';
-}
-
 // Mientras el repartidor esta en camino refrescamos mas seguido para que el
 // mapa en vivo se sienta realmente "en tiempo real"; en el resto de estados
 // alcanza con un refresco mas espaciado.
@@ -279,4 +300,15 @@ function programarSiguienteRefresco() {
     else programarSiguienteRefresco();
   }, intervalo);
 }
-programarSiguienteRefresco();
+
+const idInit = idInicial();
+if (idInit) {
+  document.getElementById('input-id').value = idInit;
+  // Se encadena para que, si el pedido ya esta "recogido" desde la primera
+  // carga, el refresco rapido de 5s arranque de inmediato (y no recien
+  // despues de un primer ciclo lento de 15s con el estado aun en null).
+  cargarPedido(idInit).finally(programarSiguienteRefresco);
+} else {
+  document.getElementById('contenido').innerHTML = '<p class="text-center text-muted mt-16">Ingresa el ID de tu pedido para ver su estado.</p>';
+  programarSiguienteRefresco();
+}
