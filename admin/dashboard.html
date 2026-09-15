@@ -66,43 +66,49 @@
         <button type="button" class="btn btn-outline btn-block" id="btn-tipo-repartidor" data-tipo="repartidor">🚴 Entrega</button>
       </div>
 
-      <form id="form-registro-tienda" class="card card-pad" style="max-width:480px;">
+      <form id="form-registro-tienda" class="card card-pad" style="max-width:820px;">
         <h3>Registrar tienda</h3>
-        <div class="form-grupo">
-          <label>Logo / imagen del negocio</label>
-          <label class="file-drop" id="rt-logo-drop">
-            <input type="file" id="rt-logo-file" accept="image/*" class="file-drop-input">
-            <img id="rt-logo-preview" class="file-drop-preview" style="display:none;">
-            <div id="rt-logo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-              <span class="file-drop-icon">🏪</span>
-              <span class="file-drop-text">Toca para subir el logo</span>
-              <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+        <div class="grid-cols grid-cols-2 mt-8">
+          <div>
+            <div class="form-grupo">
+              <label>Logo / imagen del negocio</label>
+              <label class="file-drop" id="rt-logo-drop">
+                <input type="file" id="rt-logo-file" accept="image/*" class="file-drop-input">
+                <img id="rt-logo-preview" class="file-drop-preview" style="display:none;">
+                <div id="rt-logo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                  <span class="file-drop-icon">🏪</span>
+                  <span class="file-drop-text">Toca para subir el logo</span>
+                  <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+                </div>
+              </label>
             </div>
-          </label>
-        </div>
-        <div class="form-grupo"><label>Nombre</label><input id="rt-nombre" required></div>
-        <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
-          <div class="flex" style="gap:8px;">
-            <select id="rt-categoria" style="flex:1;"></select>
-            <button type="button" class="btn btn-outline btn-sm" id="rt-categoria-add" title="Agregar tipo de negocio">+</button>
+            <div class="form-grupo"><label>Nombre</label><input id="rt-nombre" required></div>
+            <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
+              <div class="flex" style="gap:8px;">
+                <select id="rt-categoria" style="flex:1;"></select>
+                <button type="button" class="btn btn-outline btn-sm" id="rt-categoria-add" title="Agregar tipo de negocio">+</button>
+              </div>
+            </div>
+            <div class="form-grupo"><label>¿Qué vende?</label><input id="rt-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
+            <div class="form-grupo"><label>Zona</label>
+              <select id="rt-zona"></select>
+            </div>
+          </div>
+          <div>
+            <div class="form-grupo"><label>DNI del titular</label>
+              <div class="flex" style="gap:8px;">
+                <input id="rt-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+                <button type="button" class="btn btn-outline btn-sm" id="rt-buscar-dni">Buscar</button>
+              </div>
+            </div>
+            <div class="form-grupo"><label>Nombre del titular</label><input id="rt-nombre-titular" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
+            <div class="form-grupo"><label>Comisión (%)</label><input id="rt-comision" type="number" value="12" step="0.5"></div>
+            <div class="form-grupo"><label>WhatsApp</label><input id="rt-whatsapp"></div>
+            <div class="form-grupo"><label>Email de acceso</label><input id="rt-email" type="email" required></div>
+            <div class="form-grupo"><label>Contraseña</label><input id="rt-password" type="text" required></div>
           </div>
         </div>
-        <div class="form-grupo"><label>¿Qué vende?</label><input id="rt-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
-        <div class="form-grupo"><label>Zona</label>
-          <select id="rt-zona"></select>
-        </div>
-        <div class="form-grupo"><label>DNI del titular</label>
-          <div class="flex" style="gap:8px;">
-            <input id="rt-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
-            <button type="button" class="btn btn-outline btn-sm" id="rt-buscar-dni">Buscar</button>
-          </div>
-        </div>
-        <div class="form-grupo"><label>Nombre del titular</label><input id="rt-nombre-titular" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
-        <div class="form-grupo"><label>Comisión (%)</label><input id="rt-comision" type="number" value="12" step="0.5"></div>
-        <div class="form-grupo"><label>WhatsApp</label><input id="rt-whatsapp"></div>
-        <div class="form-grupo"><label>Email de acceso</label><input id="rt-email" type="email" required></div>
-        <div class="form-grupo"><label>Contraseña</label><input id="rt-password" type="text" required></div>
-        <button type="submit" class="btn btn-primary btn-block">Crear tienda</button>
+        <button type="submit" class="btn btn-primary btn-block mt-8">Crear tienda</button>
       </form>
 
       <form id="form-registro-repartidor" class="card card-pad hidden" style="max-width:820px;">
