@@ -39,54 +39,60 @@
     </section>
 
     <section id="view-perfil" class="view hidden">
-      <div class="grid-cols grid-cols-2">
-        <form id="form-perfil-tienda" class="card card-pad">
-          <h3>Datos de mi tienda</h3>
-          <div class="form-grupo">
-            <label>Logo</label>
-            <label class="file-drop" id="tp-logo-drop">
-              <input type="file" id="tp-logo-file" accept="image/*" class="file-drop-input">
-              <img id="tp-logo-preview" class="file-drop-preview" style="display:none;">
-              <div id="tp-logo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-                <span class="file-drop-icon">🏪</span>
-                <span class="file-drop-text">Toca para subir tu logo</span>
-                <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+      <div class="grid-cols grid-cols-3">
+        <form id="form-perfil-tienda" style="display:contents;">
+          <div class="card card-pad">
+            <h3>Datos de mi tienda</h3>
+            <div class="form-grupo">
+              <label>Logo</label>
+              <label class="file-drop" id="tp-logo-drop">
+                <input type="file" id="tp-logo-file" accept="image/*" class="file-drop-input">
+                <img id="tp-logo-preview" class="file-drop-preview" style="display:none;">
+                <div id="tp-logo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                  <span class="file-drop-icon">🏪</span>
+                  <span class="file-drop-text">Toca para subir tu logo</span>
+                  <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+                </div>
+              </label>
+            </div>
+            <div class="form-grupo"><label>Nombre</label><input id="tp-nombre" required></div>
+            <div class="form-grupo">
+              <label>Categoría (tipo de negocio)</label>
+              <div class="flex" style="gap:8px;">
+                <select id="tp-categoria" style="flex:1;"></select>
+                <button type="button" class="btn btn-outline btn-sm" id="tp-categoria-add" title="Agregar tipo de negocio">+</button>
               </div>
-            </label>
-          </div>
-          <div class="form-grupo"><label>Nombre</label><input id="tp-nombre" required></div>
-          <div class="form-grupo">
-            <label>Categoría (tipo de negocio)</label>
-            <div class="flex" style="gap:8px;">
-              <select id="tp-categoria" style="flex:1;"></select>
-              <button type="button" class="btn btn-outline btn-sm" id="tp-categoria-add" title="Agregar tipo de negocio">+</button>
+            </div>
+            <div class="form-grupo">
+              <label>¿Qué vendes?</label>
+              <input id="tp-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis...">
+              <div class="form-hint">Sepáralo por comas si vendes varias cosas.</div>
             </div>
           </div>
-          <div class="form-grupo">
-            <label>¿Qué vendes?</label>
-            <input id="tp-subcategoria" placeholder="Ej. Ropa, helados, libros, bikinis...">
-            <div class="form-hint">Sepáralo por comas si vendes varias cosas.</div>
-          </div>
-          <div class="form-grupo"><label>Descripción</label><textarea id="tp-descripcion"></textarea></div>
-          <div class="form-grupo">
-            <label>Zona en la playa</label>
-            <select id="tp-zona" required></select>
-          </div>
-          <div class="form-grupo">
-            <label>DNI del titular</label>
-            <div class="flex" style="gap:8px;">
-              <input id="tp-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
-              <button type="button" class="btn btn-outline btn-sm" id="tp-buscar-dni">Buscar</button>
+
+          <div class="card card-pad">
+            <h3>Más datos</h3>
+            <div class="form-grupo"><label>Descripción</label><textarea id="tp-descripcion"></textarea></div>
+            <div class="form-grupo">
+              <label>Zona en la playa</label>
+              <select id="tp-zona" required></select>
             </div>
+            <div class="form-grupo">
+              <label>DNI del titular</label>
+              <div class="flex" style="gap:8px;">
+                <input id="tp-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+                <button type="button" class="btn btn-outline btn-sm" id="tp-buscar-dni">Buscar</button>
+              </div>
+            </div>
+            <div class="form-grupo">
+              <label>Nombre del titular</label>
+              <input id="tp-nombre-titular" readonly placeholder="Se completa automáticamente al buscar tu DNI">
+            </div>
+            <div class="form-grupo"><label>Teléfono</label><input id="tp-telefono"></div>
+            <div class="form-grupo"><label>WhatsApp</label><input id="tp-whatsapp"></div>
+            <div id="error-perfil-tienda" class="form-error hidden"></div>
+            <button type="submit" class="btn btn-primary btn-block" id="btn-guardar-perfil-tienda">Guardar cambios</button>
           </div>
-          <div class="form-grupo">
-            <label>Nombre del titular</label>
-            <input id="tp-nombre-titular" readonly placeholder="Se completa automáticamente al buscar tu DNI">
-          </div>
-          <div class="form-grupo"><label>Teléfono</label><input id="tp-telefono"></div>
-          <div class="form-grupo"><label>WhatsApp</label><input id="tp-whatsapp"></div>
-          <div id="error-perfil-tienda" class="form-error hidden"></div>
-          <button type="submit" class="btn btn-primary btn-block" id="btn-guardar-perfil-tienda">Guardar cambios</button>
         </form>
 
         <div>

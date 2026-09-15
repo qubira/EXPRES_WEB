@@ -417,6 +417,7 @@ p { margin: 0 0 1rem; }
 /* ---------- Carrusel de categorias (iconos circulares) ---------- */
 .cat-strip {
   display: flex;
+  justify-content: center;
   gap: 18px;
   overflow-x: auto;
   padding: 18px max(18px, calc((100% - 1100px) / 2 + 18px)) 6px;
