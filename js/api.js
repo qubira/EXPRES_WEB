@@ -77,6 +77,7 @@ const Api = {
   adminLiquidarRepartidor: (id) => apiRequest(`/admin/repartidores/${id}/liquidar`, { method: 'POST', role: 'admin' }),
   adminGetProductos: (tiendaId) => apiRequest(`/admin/productos${tiendaId ? `?tienda_id=${tiendaId}` : ''}`, { role: 'admin' }),
   adminAuditoria: (rol) => apiRequest(`/admin/auditoria${rol ? `?rol=${rol}` : ''}`, { role: 'admin' }),
+  adminSubirImagen: (formData) => apiRequest('/admin/upload', { method: 'POST', body: formData, isForm: true, role: 'admin' }),
 
   // Tienda
   tiendaLogin: (data) => apiRequest('/tienda/login', { method: 'POST', body: data }),

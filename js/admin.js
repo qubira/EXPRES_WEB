@@ -285,7 +285,7 @@ async function cargarRepartidores() {
     tbody.innerHTML = reps.map((r) => `
       <tr>
         <td>${r.nombre}</td>
-        <td>${r.dni}</td>
+        <td>${r.tipo_documento === 'ce' ? 'CE' : 'DNI'} ${r.dni}</td>
         <td>${r.telefono}</td>
         <td>${r.disponible ? '🟢 Sí' : '⚪ No'}</td>
         <td>${formatoSoles(r.pago_pendiente)}</td>
@@ -360,18 +360,82 @@ async function initVistaRegistro() {
     } catch (err) { mostrarToast(err.message, 'error'); }
   });
 
+  // ---------- Repartidor: nacionalidad (DNI peruano vs CE extranjero) ----------
+  habilitarBuscarDni('rr-dni', 'rr-nombre-peru', 'rr-buscar-dni');
+  const btnPeruano = document.getElementById('rr-btn-peruano');
+  const btnExtranjero = document.getElementById('rr-btn-extranjero');
+  const bloquePeru = document.getElementById('rr-bloque-peru');
+  const bloqueExtranjero = document.getElementById('rr-bloque-extranjero');
+  let rrEsExtranjero = false;
+
+  btnPeruano.addEventListener('click', () => {
+    rrEsExtranjero = false;
+    btnPeruano.classList.replace('btn-outline', 'btn-primary');
+    btnExtranjero.classList.replace('btn-primary', 'btn-outline');
+    bloquePeru.classList.remove('hidden');
+    bloqueExtranjero.classList.add('hidden');
+  });
+  btnExtranjero.addEventListener('click', () => {
+    rrEsExtranjero = true;
+    btnExtranjero.classList.replace('btn-outline', 'btn-primary');
+    btnPeruano.classList.replace('btn-primary', 'btn-outline');
+    bloqueExtranjero.classList.remove('hidden');
+    bloquePeru.classList.add('hidden');
+  });
+
+  // ---------- Repartidor: foto ----------
+  let rrFotoUrl = '';
+  document.getElementById('rr-foto-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const preview = document.getElementById('rr-foto-preview');
+    const placeholder = document.getElementById('rr-foto-placeholder');
+    const drop = document.getElementById('rr-foto-drop');
+    try {
+      const fd = new FormData();
+      fd.append('imagen', file);
+      mostrarToast('Subiendo foto...', '');
+      const { url } = await Api.adminSubirImagen(fd);
+      rrFotoUrl = url;
+      preview.src = url;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+      drop.classList.add('con-imagen');
+      mostrarToast('Foto subida', 'success');
+    } catch (err) {
+      mostrarToast(err.message || 'No se pudo subir la foto', 'error');
+    }
+  });
+
   formRepartidor.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
-      await Api.adminCrearRepartidor({
-        nombre: document.getElementById('rr-nombre').value,
-        dni: document.getElementById('rr-dni').value,
+      const datos = {
+        nombre: rrEsExtranjero ? document.getElementById('rr-nombre-extranjero').value : document.getElementById('rr-nombre-peru').value,
+        dni: rrEsExtranjero ? document.getElementById('rr-ce').value : document.getElementById('rr-dni').value,
+        tipo_documento: rrEsExtranjero ? 'ce' : 'dni',
+        nacionalidad: rrEsExtranjero ? document.getElementById('rr-nacionalidad').value : 'Peruana',
+        edad: document.getElementById('rr-edad').value ? Number(document.getElementById('rr-edad').value) : null,
         telefono: document.getElementById('rr-telefono').value,
+        direccion: document.getElementById('rr-direccion').value,
+        contacto_emergencia_nombre: document.getElementById('rr-emergencia-nombre').value,
+        contacto_emergencia_telefono: document.getElementById('rr-emergencia-telefono').value,
+        antecedentes_penales: document.getElementById('rr-antecedentes').checked,
+        foto_url: rrFotoUrl,
         email: document.getElementById('rr-email').value,
         password: document.getElementById('rr-password').value,
-      });
+      };
+      if (!datos.nombre || !datos.dni) {
+        mostrarToast(rrEsExtranjero ? 'Completa el nombre y el CE' : 'Completa el nombre (usa Buscar) y el DNI', 'error');
+        return;
+      }
+      await Api.adminCrearRepartidor(datos);
       mostrarToast('Repartidor creado', 'success');
       formRepartidor.reset();
+      rrFotoUrl = '';
+      document.getElementById('rr-foto-preview').style.display = 'none';
+      document.getElementById('rr-foto-placeholder').style.display = 'flex';
+      document.getElementById('rr-foto-drop').classList.remove('con-imagen');
       cargarRepartidores();
     } catch (err) { mostrarToast(err.message, 'error'); }
   });

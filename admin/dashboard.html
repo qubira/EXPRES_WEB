@@ -93,14 +93,65 @@
         <button type="submit" class="btn btn-primary btn-block">Crear tienda</button>
       </form>
 
-      <form id="form-registro-repartidor" class="card card-pad hidden" style="max-width:480px;">
+      <form id="form-registro-repartidor" class="card card-pad hidden" style="max-width:820px;">
         <h3>Registrar repartidor</h3>
-        <div class="form-grupo"><label>Nombre</label><input id="rr-nombre" required></div>
-        <div class="form-grupo"><label>DNI</label><input id="rr-dni" required></div>
-        <div class="form-grupo"><label>Teléfono</label><input id="rr-telefono" required></div>
-        <div class="form-grupo"><label>Email de acceso</label><input id="rr-email" type="email" required></div>
-        <div class="form-grupo"><label>Contraseña</label><input id="rr-password" type="text" required></div>
-        <button type="submit" class="btn btn-primary btn-block">Crear repartidor</button>
+        <div class="form-grupo">
+          <label>Nacionalidad</label>
+          <div class="flex" style="gap:12px;">
+            <button type="button" class="btn btn-primary btn-sm" id="rr-btn-peruano">🇵🇪 Peruano</button>
+            <button type="button" class="btn btn-outline btn-sm" id="rr-btn-extranjero">🌎 Extranjero</button>
+          </div>
+        </div>
+
+        <div class="grid-cols grid-cols-2 mt-8">
+          <div>
+            <div id="rr-bloque-peru">
+              <div class="form-grupo"><label>DNI</label>
+                <div class="flex" style="gap:8px;">
+                  <input id="rr-dni" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+                  <button type="button" class="btn btn-outline btn-sm" id="rr-buscar-dni">Buscar</button>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Nombre completo</label><input id="rr-nombre-peru" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
+            </div>
+            <div id="rr-bloque-extranjero" class="hidden">
+              <div class="form-grupo"><label>Nacionalidad</label><input id="rr-nacionalidad" placeholder="Ej. Venezuela"></div>
+              <div class="form-grupo"><label>Carné de Extranjería (CE)</label><input id="rr-ce" placeholder="Ej. 001234567"></div>
+              <div class="form-grupo"><label>Nombre completo</label><input id="rr-nombre-extranjero" placeholder="Nombre y apellidos"></div>
+            </div>
+            <div class="form-grupo"><label>Edad</label><input id="rr-edad" type="number" min="18" max="80"></div>
+            <div class="form-grupo"><label>Correo electrónico</label><input id="rr-email" type="email" required></div>
+            <div class="form-grupo"><label>Celular</label><input id="rr-telefono" required></div>
+            <div class="form-grupo"><label>Dirección</label><input id="rr-direccion" placeholder="Dirección de domicilio"></div>
+          </div>
+
+          <div>
+            <div class="form-grupo">
+              <label>Foto (rostro visible)</label>
+              <label class="file-drop" id="rr-foto-drop">
+                <input type="file" id="rr-foto-file" accept="image/*" class="file-drop-input">
+                <img id="rr-foto-preview" class="file-drop-preview" style="display:none;">
+                <div id="rr-foto-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                  <span class="file-drop-icon">🚴</span>
+                  <span class="file-drop-text">Toca para subir una foto</span>
+                  <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+                </div>
+              </label>
+            </div>
+            <div class="form-grupo"><label>Nombre de contacto de emergencia</label><input id="rr-emergencia-nombre"></div>
+            <div class="form-grupo"><label>Número de emergencia</label><input id="rr-emergencia-telefono"></div>
+            <div class="form-grupo flex justify-between items-center">
+              <label class="mb-0">¿Cuenta con antecedentes penales?</label>
+              <span class="toggle-switch">
+                <input type="checkbox" id="rr-antecedentes">
+                <span class="toggle-slider"></span>
+              </span>
+            </div>
+            <div class="form-grupo"><label>Contraseña</label><input id="rr-password" type="text" required></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block mt-8">Crear repartidor</button>
       </form>
     </section>
 
@@ -137,7 +188,7 @@
     <section id="view-repartidores" class="view hidden">
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Nombre</th><th>DNI</th><th>Teléfono</th><th>Disponible</th><th>Por pagar</th><th></th></tr></thead>
+          <thead><tr><th>Nombre</th><th>Documento</th><th>Teléfono</th><th>Disponible</th><th>Por pagar</th><th></th></tr></thead>
           <tbody id="tabla-repartidores"></tbody>
         </table>
       </div>
