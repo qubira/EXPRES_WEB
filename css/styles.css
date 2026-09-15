@@ -863,7 +863,7 @@ textarea { resize: vertical; min-height: 80px; }
 .footer {
   background: var(--mar-900);
   color: var(--mar-300);
-  padding: 40px 0 24px;
+  padding: 24px 0;
 }
 .footer .brand { color: white; }
 .footer-cols {
@@ -876,6 +876,7 @@ textarea { resize: vertical; min-height: 80px; }
 .footer-cols h4 { color: white; font-size: 14px; }
 .footer-cols a, .footer-cols p { color: var(--mar-300); font-size: 14px; display: block; margin-bottom: 8px; }
 .footer-bottom a { color: white; text-decoration: underline; text-underline-offset: 2px; }
+.footer-bottom-solo { border-top: none; padding-top: 0; }
 .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.12);
   padding-top: 18px;
