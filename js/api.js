@@ -330,7 +330,7 @@ async function cargarConectividad(role, listaId, btnOtrasId) {
       return;
     }
     cont.innerHTML = sesiones.map((s) => `
-      <div class="card card-pad mt-16 flex justify-between items-center sesion-card ${s.actual ? 'sesion-actual' : ''}" style="flex-wrap:wrap; gap:8px;">
+      <div class="card card-pad-sm mt-8 flex justify-between items-center sesion-card ${s.actual ? 'sesion-actual' : ''}" style="flex-wrap:wrap; gap:8px;">
         <div class="flex items-center gap-8">
           <span class="sesion-icon">${iconoDispositivo(s.user_agent)}</span>
           <div>
@@ -339,7 +339,7 @@ async function cargarConectividad(role, listaId, btnOtrasId) {
             <div class="text-sm text-muted">IP: ${s.ip || '—'} · Conectado: ${new Date(s.creado_en).toLocaleString('es-PE')}</div>
           </div>
         </div>
-        ${s.actual ? '' : `<button class="btn btn-outline btn-sm" data-cerrar-sesion="${s.id}">Cerrar sesión</button>`}
+        ${s.actual ? '' : `<button class="btn btn-outline btn-xs" data-cerrar-sesion="${s.id}">Cerrar sesión</button>`}
       </div>
     `).join('');
 

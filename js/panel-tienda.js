@@ -70,34 +70,34 @@ async function cargarPedidos() {
       return;
     }
     cont.innerHTML = items.map((i) => `
-      <div class="card card-pad mt-16 pedido-card" data-estado="${i.pedido_estado}">
+      <div class="card card-pad-sm mt-10 pedido-card" data-estado="${i.pedido_estado}">
         <div class="flex justify-between items-center">
           <div>
             <strong>${i.cantidad}x ${i.nombre_producto}</strong>
-            <div class="text-sm text-muted">Pedido #${i.pedido_id.slice(0,8).toUpperCase()} · ${i.zona_entrega}</div>
+            <div class="text-sm text-muted">#${i.pedido_id.slice(0,8).toUpperCase()} · ${i.zona_entrega}</div>
           </div>
           <span class="badge badge-${i.pedido_estado}">${labelEstado(i.pedido_estado)}</span>
         </div>
-        <div class="mt-8">
+        <div class="mt-6">
           <div class="entrega-info-row">👤 <span>${i.cliente_nombre}</span></div>
           ${i.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${i.referencia_entrega}</span></div>` : ''}
         </div>
-        <div class="flex gap-8 mt-8">
-          <a href="tel:${i.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
-          <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-sm w-full">💬 WhatsApp</a>
+        <div class="flex gap-6 mt-6">
+          <a href="tel:${i.cliente_telefono}" class="btn btn-ghost btn-xs w-full">📞 Llamar</a>
+          <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-xs w-full">💬 WhatsApp</a>
+          ${i.lat_entrega && i.lng_entrega ? `
+            <a href="https://www.google.com/maps?q=${i.lat_entrega},${i.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-xs" style="flex:0 0 44px;" title="Ver ubicación del cliente">🗺️</a>
+          ` : ''}
         </div>
-        ${i.lat_entrega && i.lng_entrega ? `
-          <a href="https://www.google.com/maps?q=${i.lat_entrega},${i.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-block mt-8">🗺️ Ver ubicación del cliente</a>
-        ` : ''}
-        <div class="flex justify-between items-center mt-8 pedido-card-footer">
+        <div class="flex justify-between items-center mt-6">
           <span class="pedido-precio">${formatoSoles(i.subtotal)}</span>
           ${i.pedido_estado === 'cancelado'
             ? '<span class="tag" style="background:#f0f0f0;color:var(--tinta-300);">✕ Cancelado por el cliente</span>'
             : i.estado_tienda === 'listo'
               ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">✓ Listo para recoger</span>'
               : i.estado_tienda === 'confirmado'
-                ? `<button class="btn btn-success btn-sm" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`
-                : `<button class="btn btn-primary btn-sm" data-confirmar="${i.pedido_id}|${i.item_id}">Confirmar pedido</button>`}
+                ? `<button class="btn btn-success btn-xs" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`
+                : `<button class="btn btn-primary btn-xs" data-confirmar="${i.pedido_id}|${i.item_id}">Confirmar pedido</button>`}
         </div>
       </div>
     `).join('');
@@ -141,18 +141,17 @@ async function cargarProductos() {
     grid.innerHTML = productos.map((p) => `
       <div class="card producto-admin-card">
         <div class="pcard-media" style="${p.foto_url ? `background-image:url('${p.foto_url}')` : ''}">${p.foto_url ? '' : (p.es_combo ? '🎁' : '🛍️')}</div>
-        <div class="card-pad">
+        <div class="card-pad-sm">
           <div class="flex gap-6" style="flex-wrap:wrap;">
             <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
             ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
           </div>
-          <strong class="producto-admin-nombre">${p.nombre}</strong>
-          ${p.marca ? `<div class="text-sm text-muted">${p.marca}</div>` : ''}
+          <strong class="producto-admin-nombre">${p.nombre}${p.marca ? ` · ${p.marca}` : ''}</strong>
           <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
           <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
-          <div class="flex gap-8 mt-8">
-            <button class="btn btn-outline btn-sm w-full" data-editar="${p.id}">Editar</button>
-            <button class="btn btn-danger btn-sm" data-eliminar="${p.id}">🗑️</button>
+          <div class="flex gap-6 mt-6">
+            <button class="btn btn-outline btn-xs w-full" data-editar="${p.id}">Editar</button>
+            <button class="btn btn-danger btn-xs" data-eliminar="${p.id}">🗑️</button>
           </div>
         </div>
       </div>

@@ -118,6 +118,7 @@ p { margin: 0 0 1rem; }
 }
 .btn-block { width: 100%; }
 .btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-xs { padding: 6px 10px; font-size: 12.5px; border-radius: var(--radio-s); gap: 5px; }
 .btn-danger { background: var(--rojo-alerta); color: var(--blanco); }
 .btn-success { background: var(--verde-palma); color: var(--blanco); }
 .btn-whatsapp { background: #e3f9ec; color: var(--verde-palma); }
@@ -694,6 +695,7 @@ p { margin: 0 0 1rem; }
   overflow: hidden;
 }
 .card-pad { padding: 20px; }
+.card-pad-sm { padding: 12px 14px; }
 
 .grid-cols {
   display: grid;
@@ -890,28 +892,30 @@ textarea { resize: vertical; min-height: 80px; }
 
 /* ---------- Tarjeta de pedido (panel de tienda/repartidor) ---------- */
 .pedido-card {
-  border-left: 4px solid var(--tinta-300);
-  transition: box-shadow .15s ease, transform .15s ease;
+  border-left: 3px solid var(--tinta-300);
+  font-size: 13.5px;
 }
-.pedido-card:hover { box-shadow: var(--sombra-media); transform: translateY(-1px); }
+.pedido-card strong { font-size: 14px; }
 .pedido-card[data-estado="pendiente_pago"], .pedido-card[data-estado="preparando"] { border-left-color: #b7690a; }
 .pedido-card[data-estado="pagado"] { border-left-color: var(--mar-700); }
 .pedido-card[data-estado="listo_recoger"], .pedido-card[data-estado="entregado"] { border-left-color: var(--verde-palma); }
 .pedido-card[data-estado="recogido"] { border-left-color: #5b52d6; }
 .pedido-card[data-estado="cancelado"], .pedido-card[data-estado="rechazado_en_entrega"], .pedido-card[data-estado="pago_rechazado"] { border-left-color: var(--rojo-alerta); }
-.pedido-card-footer { border-top: 1px dashed var(--arena-300); padding-top: 10px; }
-.pedido-precio { font-size: 17px; font-weight: 800; color: var(--mar-900); }
+.pedido-card .entrega-info-row { font-size: 12.5px; margin-bottom: 2px; }
+.pedido-precio { font-size: 15px; font-weight: 800; color: var(--mar-900); }
 
 /* ---------- Tarjeta de producto (panel de tienda) ---------- */
-.producto-admin-card { display: flex; flex-direction: column; transition: box-shadow .15s ease, transform .15s ease; }
-.producto-admin-card:hover { box-shadow: var(--sombra-media); transform: translateY(-2px); }
-.producto-admin-card .pcard-media { font-size: 30px; }
-.producto-admin-nombre { display: block; margin-top: 8px; font-size: 15px; }
+.producto-admin-card { display: flex; flex-direction: row; }
+.producto-admin-card .pcard-media { width: 84px; height: 84px; flex-shrink: 0; font-size: 22px; aspect-ratio: auto; }
+.producto-admin-card .card-pad-sm { flex: 1; min-width: 0; }
+.producto-admin-nombre { display: block; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.producto-admin-card .tag { font-size: 10.5px; padding: 3px 8px; }
+.producto-admin-card .precio { font-size: 15px; }
 
 /* ---------- Fila de sesion (Conectividad) ---------- */
-.sesion-card { border-left: 4px solid var(--arena-300); }
+.sesion-card { border-left: 3px solid var(--arena-300); font-size: 13px; }
 .sesion-card.sesion-actual { border-left-color: var(--verde-palma); background: #f4fbf7; }
-.sesion-icon { font-size: 20px; flex-shrink: 0; }
+.sesion-icon { font-size: 16px; flex-shrink: 0; }
 
 /* ---------- Footer ---------- */
 .footer {
@@ -1005,10 +1009,13 @@ textarea { resize: vertical; min-height: 80px; }
 .flex-col { flex-direction: column; }
 .items-center { align-items: center; }
 .justify-between { justify-content: space-between; }
+.gap-6 { gap: 6px; }
 .gap-8 { gap: 8px; }
 .gap-12 { gap: 12px; }
 .gap-16 { gap: 16px; }
+.mt-6 { margin-top: 6px; }
 .mt-8 { margin-top: 8px; }
+.mt-10 { margin-top: 10px; }
 .mt-16 { margin-top: 16px; }
 .mt-24 { margin-top: 24px; }
 .mb-0 { margin-bottom: 0; }
@@ -1023,39 +1030,41 @@ textarea { resize: vertical; min-height: 80px; }
 .panel-shell { display: flex; height: 100vh; overflow: hidden; background: var(--arena-100); }
 .panel-sidebar {
   display: none;
-  width: 230px;
+  width: 200px;
   flex-shrink: 0;
   background: var(--mar-900);
   color: white;
-  padding: 24px 16px;
+  padding: 18px 12px;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
   height: 100vh;
   overflow-y: auto;
 }
 .panel-sidebar .brand {
   color: white;
-  margin-bottom: 20px;
-  padding-bottom: 18px;
+  font-size: 15px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 .panel-link {
-  padding: 11px 14px;
+  padding: 8px 10px;
   border-radius: var(--radio-s);
   font-weight: 600;
+  font-size: 13.5px;
   color: var(--mar-300);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   border-left: 3px solid transparent;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
 .panel-link:hover { background: rgba(255,255,255,0.08); color: white; }
 .panel-link.activo { background: rgba(255,255,255,0.12); color: white; border-left-color: var(--sol-400); }
-.panel-link .icon { font-size: 16px; width: 18px; text-align: center; flex-shrink: 0; }
-.panel-sidebar #btn-logout { margin-top: 6px; padding-top: 17px; border-top: 1px solid rgba(255,255,255,0.12); border-radius: 0; }
-.panel-main { flex: 1; padding: 18px; padding-bottom: 90px; max-width: 100%; height: 100vh; overflow-y: auto; }
+.panel-link .icon { font-size: 14px; width: 16px; text-align: center; flex-shrink: 0; }
+.panel-sidebar #btn-logout { margin-top: 4px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.12); border-radius: 0; }
+.panel-main { flex: 1; padding: 14px; padding-bottom: 84px; max-width: 100%; height: 100vh; overflow-y: auto; }
 .panel-topbar {
   display: flex;
   justify-content: space-between;
@@ -1068,15 +1077,15 @@ textarea { resize: vertical; min-height: 80px; }
   top: 0;
   z-index: 40;
   background: var(--arena-100);
-  margin: -18px -18px 20px -18px;
-  padding: 18px 18px 14px;
+  margin: -14px -14px 14px -14px;
+  padding: 14px 14px 10px;
   box-shadow: 0 4px 14px rgba(7,59,76,0.06);
 }
 .disponible-pill {
   background: var(--blanco);
   border: 1px solid var(--arena-300);
   border-radius: 30px;
-  padding: 8px 14px;
+  padding: 5px 12px;
   box-shadow: var(--sombra-suave);
 }
 .panel-mobile-nav {
@@ -1108,8 +1117,8 @@ textarea { resize: vertical; min-height: 80px; }
 @media (min-width: 900px) {
   .panel-sidebar { display: flex; }
   .panel-mobile-nav { display: none; }
-  .panel-main { padding: 32px; padding-bottom: 32px; }
-  .panel-topbar { margin: -32px -32px 20px -32px; padding: 32px 32px 20px; }
+  .panel-main { padding: 22px; padding-bottom: 22px; }
+  .panel-topbar { margin: -22px -22px 16px -22px; padding: 22px 22px 14px; }
 }
 
 .stat-card {
