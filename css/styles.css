@@ -202,7 +202,6 @@ p { margin: 0 0 1rem; }
   position: relative;
   display: flex;
   align-items: center;
-  max-width: 480px;
 }
 .search-bar .search-icon {
   position: absolute;
