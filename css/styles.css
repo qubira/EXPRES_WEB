@@ -634,7 +634,10 @@ p { margin: 0 0 1rem; }
   grid-template-columns: 1fr;
 }
 @media (min-width: 700px) {
-  .steps { grid-template-columns: repeat(3, 1fr); }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1000px) {
+  .steps { grid-template-columns: repeat(4, 1fr); }
 }
 .step-card {
   background: var(--blanco);
