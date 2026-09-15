@@ -54,8 +54,8 @@
 
   <h2 style="font-size:17px;margin-top:28px;color:var(--rojo-alerta);">Zona de peligro</h2>
   <div class="card card-pad mt-16" style="border:2px solid #fde3e1;">
-    <p class="text-sm text-muted">Al eliminar tu cuenta perderás el acceso a tu historial de pedidos guardado. Esta acción no se puede deshacer.</p>
-    <button type="button" class="btn btn-danger btn-block" id="btn-eliminar-cuenta">🗑️ Eliminar mi cuenta</button>
+    <p class="text-sm text-muted">Al cerrar tu cuenta ya no podrás iniciar sesión con ella. Por seguridad ante reclamos, tu historial de pedidos no se borra.</p>
+    <button type="button" class="btn btn-danger btn-block" id="btn-eliminar-cuenta">🔒 Cerrar mi cuenta</button>
   </div>
 </div>
 
@@ -137,8 +137,8 @@ document.getElementById('btn-eliminar-cuenta').addEventListener('click', () => {
   root.innerHTML = `
     <div class="modal-overlay" id="eliminar-overlay">
       <div class="modal-box">
-        <h3>¿Eliminar tu cuenta?</h3>
-        <p class="text-sm text-muted">Esta acción es permanente. Ingresa tu contraseña para confirmar.</p>
+        <h3>¿Cerrar tu cuenta?</h3>
+        <p class="text-sm text-muted">Ya no podrás iniciar sesión con esta cuenta. Ingresa tu contraseña para confirmar.</p>
         <div class="form-grupo mt-16">
           <label>Contraseña</label>
           <input type="password" id="password-confirmar-eliminar" placeholder="••••••••">
@@ -146,7 +146,7 @@ document.getElementById('btn-eliminar-cuenta').addEventListener('click', () => {
         <div id="error-eliminar" class="form-error hidden"></div>
         <div class="flex gap-8 mt-16">
           <button type="button" class="btn btn-outline btn-block" id="btn-cancelar-eliminar">Cancelar</button>
-          <button type="button" class="btn btn-danger btn-block" id="btn-confirmar-eliminar">Sí, eliminar</button>
+          <button type="button" class="btn btn-danger btn-block" id="btn-confirmar-eliminar">Sí, cerrar cuenta</button>
         </div>
       </div>
     </div>
@@ -169,19 +169,19 @@ document.getElementById('btn-eliminar-cuenta').addEventListener('click', () => {
       return;
     }
     btn.disabled = true;
-    btn.textContent = 'Eliminando...';
+    btn.textContent = 'Cerrando cuenta...';
     try {
       await Api.clienteEliminarCuenta(password);
       root.innerHTML = '';
       localStorage.removeItem('express_token_cliente');
       localStorage.removeItem('express_nombre_cliente');
-      mostrarToast('Tu cuenta fue eliminada', 'success');
+      mostrarToast('Tu cuenta fue cerrada', 'success');
       setTimeout(() => { location.href = 'index.html'; }, 1200);
     } catch (err) {
-      errorBox.textContent = err.message || 'No se pudo eliminar la cuenta';
+      errorBox.textContent = err.message || 'No se pudo cerrar la cuenta';
       errorBox.classList.remove('hidden');
       btn.disabled = false;
-      btn.textContent = 'Sí, eliminar';
+      btn.textContent = 'Sí, cerrar cuenta';
     }
   });
 });

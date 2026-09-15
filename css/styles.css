@@ -920,6 +920,10 @@ textarea { resize: vertical; min-height: 80px; }
 .badge-recogido { background: #eef0ff; color: #5b52d6; }
 .badge-entregado { background: #e9f9ee; color: var(--verde-palma); }
 .badge-cancelado { background: #f0f0f0; color: var(--tinta-300); }
+.badge-rechazado_en_entrega { background: #fde3e1; color: var(--rojo-alerta); }
+.badge-activo { background: #e9f9ee; color: var(--verde-palma); }
+.badge-suspendido { background: #fff2e0; color: #b7690a; }
+.badge-bloqueado { background: #fde3e1; color: var(--rojo-alerta); }
 
 /* ---------- PIN de entrega ---------- */
 .pin-box {
@@ -1037,8 +1041,8 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--arena-300); }
 th { color: var(--tinta-300); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 .table-wrap { overflow-x: auto; background: white; border-radius: var(--radio-m); box-shadow: var(--sombra-suave); }
-.fila-tienda:hover { background: var(--cielo-100); }
-.fila-productos-tienda td { background: var(--arena-100); }
+.fila-tienda:hover, .fila-repartidor:hover { background: var(--cielo-100); }
+.fila-productos-tienda td, .fila-historial-repartidor td { background: var(--arena-100); }
 
 .modal-overlay {
   position: fixed; inset: 0;

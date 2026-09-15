@@ -77,6 +77,7 @@ const Api = {
   adminActualizarTienda: (id, data) => apiRequest(`/admin/tiendas/${id}`, { method: 'PUT', body: data, role: 'admin' }),
   adminCambiarPasswordTienda: (id, password) => apiRequest(`/admin/tiendas/${id}/password`, { method: 'POST', body: { password }, role: 'admin' }),
   adminGetRepartidores: () => apiRequest('/admin/repartidores', { role: 'admin' }),
+  adminPedidosRepartidor: (id) => apiRequest(`/admin/repartidores/${id}/pedidos`, { role: 'admin' }),
   adminCrearRepartidor: (data) => apiRequest('/admin/repartidores', { method: 'POST', body: data, role: 'admin' }),
   adminActualizarRepartidor: (id, data) => apiRequest(`/admin/repartidores/${id}`, { method: 'PUT', body: data, role: 'admin' }),
   adminLiquidarRepartidor: (id) => apiRequest(`/admin/repartidores/${id}/liquidar`, { method: 'POST', role: 'admin' }),
@@ -85,6 +86,11 @@ const Api = {
   adminUsuarios: () => apiRequest('/admin/usuarios', { role: 'admin' }),
   adminActualizarUsuario: (id, data) => apiRequest(`/admin/usuarios/${id}`, { method: 'PUT', body: data, role: 'admin' }),
   adminCambiarPasswordUsuario: (id, password) => apiRequest(`/admin/usuarios/${id}/password`, { method: 'POST', body: { password }, role: 'admin' }),
+  adminIncidentesUsuario: (id) => apiRequest(`/admin/usuarios/${id}/incidentes`, { role: 'admin' }),
+  adminReportarIncidente: (id, tipo, descripcion) => apiRequest(`/admin/usuarios/${id}/incidentes`, { method: 'POST', body: { tipo, descripcion }, role: 'admin' }),
+  adminSuspenderUsuario: (id, motivo) => apiRequest(`/admin/usuarios/${id}/suspender`, { method: 'POST', body: { motivo }, role: 'admin' }),
+  adminBloquearUsuario: (id, motivo) => apiRequest(`/admin/usuarios/${id}/bloquear`, { method: 'POST', body: { motivo }, role: 'admin' }),
+  adminReactivarUsuario: (id) => apiRequest(`/admin/usuarios/${id}/reactivar`, { method: 'POST', role: 'admin' }),
   adminReclamos: (estado) => apiRequest(`/admin/reclamos${estado ? `?estado=${estado}` : ''}`, { role: 'admin' }),
   adminResolverReclamo: (id, data) => apiRequest(`/admin/reclamos/${id}/resolver`, { method: 'POST', body: data, role: 'admin' }),
   adminPedidosRetenidos: () => apiRequest('/admin/pedidos-retenidos', { role: 'admin' }),
@@ -354,6 +360,7 @@ const ESTADO_LABELS = {
   recogido: 'En camino',
   entregado: 'Entregado',
   cancelado: 'Cancelado',
+  rechazado_en_entrega: 'Rechazado en la entrega',
 };
 
 function labelEstado(estado) {

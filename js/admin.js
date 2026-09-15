@@ -399,7 +399,7 @@ async function cargarRepartidores() {
   try {
     const reps = await Api.adminGetRepartidores();
     tbody.innerHTML = reps.map((r) => `
-      <tr>
+      <tr class="fila-repartidor" data-fila-repartidor="${r.id}" style="cursor:pointer;">
         <td>${r.nombre}</td>
         <td>${r.tipo_documento === 'ce' ? 'CE' : 'DNI'} ${r.dni}</td>
         <td>${r.telefono}</td>
@@ -411,7 +411,8 @@ async function cargarRepartidores() {
       </tr>
     `).join('') || '<tr><td colspan="6" class="text-muted">Aún no hay repartidores</td></tr>';
 
-    tbody.querySelectorAll('[data-liquidar]').forEach((btn) => btn.addEventListener('click', async () => {
+    tbody.querySelectorAll('[data-liquidar]').forEach((btn) => btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
       if (!confirm('¿Marcar este pago como liquidado?')) return;
       try {
         await Api.adminLiquidarRepartidor(btn.dataset.liquidar);
@@ -419,8 +420,144 @@ async function cargarRepartidores() {
         cargarRepartidores();
       } catch (err) { mostrarToast(err.message, 'error'); }
     }));
+    tbody.querySelectorAll('[data-fila-repartidor]').forEach((fila) => fila.addEventListener('click', () => {
+      toggleHistorialRepartidor(fila, fila.dataset.filaRepartidor);
+    }));
   } catch (err) {
     if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="6" class="form-error">${err.message}</td></tr>`;
+  }
+}
+
+function labelCodigoEntrega(p) {
+  if (p.estado === 'entregado' && p.entrega_observada) return '<span class="text-muted">Sin código (observado)</span>';
+  if (p.estado === 'entregado') return `<strong>${p.pin_entrega}</strong>`;
+  return '<span class="text-muted">—</span>';
+}
+
+function labelHistorialEstado(p) {
+  if (p.estado === 'entregado' && p.entrega_observada) return '<span class="badge badge-pendiente_pago">Observado</span>';
+  return `<span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>`;
+}
+
+async function toggleHistorialRepartidor(filaRepartidor, repartidorId) {
+  const filaExistente = filaRepartidor.nextElementSibling;
+  if (filaExistente && filaExistente.classList.contains('fila-historial-repartidor')) {
+    filaExistente.remove();
+    return;
+  }
+  document.querySelectorAll('.fila-historial-repartidor').forEach((f) => f.remove());
+
+  const fila = document.createElement('tr');
+  fila.className = 'fila-historial-repartidor';
+  fila.innerHTML = `<td colspan="6"><p class="text-muted">Cargando historial...</p></td>`;
+  filaRepartidor.after(fila);
+
+  try {
+    const pedidos = await Api.adminPedidosRepartidor(repartidorId);
+    if (pedidos.length === 0) {
+      fila.innerHTML = `<td colspan="6"><p class="text-muted">Este repartidor aún no tiene pedidos.</p></td>`;
+      return;
+    }
+    fila.innerHTML = `
+      <td colspan="6" style="padding:0;">
+        <div class="table-wrap" style="box-shadow:none; border-radius:0; margin:4px 0 8px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Pedido</th><th>Fecha</th><th>Estado</th>
+                <th title="Codigo que el cliente le dio al repartidor. Sin codigo = se entrego sin validar o no se entrego">Código dado</th>
+                <th>Costo total</th><th>% ganancia envío</th><th>Ganancia envío</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pedidos.map((p) => {
+                const pct = Number(p.monto_total) > 0 ? ((Number(p.delivery_fee) / Number(p.monto_total)) * 100).toFixed(1) : '0.0';
+                return `
+                <tr class="fila-repartidor" data-ver-factura="${p.id}" style="cursor:pointer;">
+                  <td>#${p.id.slice(0,8).toUpperCase()}</td>
+                  <td>${new Date(p.created_at).toLocaleString('es-PE')}</td>
+                  <td>${labelHistorialEstado(p)}</td>
+                  <td>${labelCodigoEntrega(p)}</td>
+                  <td>${formatoSoles(p.monto_total)}</td>
+                  <td>${pct}%</td>
+                  <td>${formatoSoles(p.delivery_fee)}</td>
+                </tr>
+              `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </td>
+    `;
+    fila.querySelectorAll('[data-ver-factura]').forEach((tr) => tr.addEventListener('click', () => {
+      abrirModalFacturaPedido(tr.dataset.verFactura);
+    }));
+  } catch (err) {
+    fila.innerHTML = `<td colspan="6" class="form-error">${err.message}</td>`;
+  }
+}
+
+// ---------- Ventana flotante: factura/resumen completo de un pedido ----------
+async function abrirModalFacturaPedido(pedidoId) {
+  abrirModal(`<p class="text-muted">Cargando factura...</p>`);
+  try {
+    const p = await Api.adminPedido(pedidoId);
+    const tiendas = [...new Set(p.items.map((i) => i.tienda_nombre))];
+    abrirModal(`
+      <h3>Factura del pedido</h3>
+      <p class="text-sm text-muted">#${p.id.slice(0,8).toUpperCase()} · ${labelHistorialEstado(p)}</p>
+
+      <div class="card card-pad mt-16" style="background:var(--arena-100);">
+        <div class="text-sm"><strong>Cliente:</strong> ${p.cliente_nombre} · ${p.cliente_telefono}</div>
+        <div class="text-sm mt-8"><strong>Zona:</strong> ${p.zona_entrega}</div>
+        ${p.referencia_entrega ? `<div class="text-sm mt-8"><strong>Referencia:</strong> ${p.referencia_entrega}</div>` : ''}
+        <div class="text-sm mt-8"><strong>Tienda${tiendas.length > 1 ? 's' : ''}:</strong> ${tiendas.join(', ') || '—'}</div>
+        <div class="text-sm mt-8"><strong>Repartidor:</strong> ${p.repartidor_nombre || '—'}</div>
+      </div>
+
+      <div class="mt-16">
+        <h4 class="mb-0">Productos</h4>
+        ${p.items.map((i) => `
+          <div class="flex justify-between mt-8 text-sm">
+            <div>
+              <strong>${i.cantidad}x ${i.nombre_producto}</strong>
+              <div class="text-muted">${i.tienda_nombre}</div>
+            </div>
+            <span>${formatoSoles(i.subtotal)}</span>
+          </div>
+        `).join('')}
+        <hr class="divider">
+        <div class="flex justify-between text-sm"><span>Productos</span><span>${formatoSoles(p.monto_productos)}</span></div>
+        <div class="flex justify-between text-sm mt-8"><span>Delivery</span><span>${formatoSoles(p.delivery_fee)}</span></div>
+        <div class="flex justify-between text-sm mt-8"><span>Comisión plataforma</span><span>${formatoSoles(p.comision_total)}</span></div>
+        <div class="flex justify-between mt-8"><strong>Total</strong><strong>${formatoSoles(p.monto_total)}</strong></div>
+      </div>
+
+      <div class="mt-16">
+        <h4 class="mb-0">Línea de tiempo</h4>
+        <div class="text-sm text-muted mt-8">🕐 Creado: ${new Date(p.created_at).toLocaleString('es-PE')}</div>
+        ${p.asignado_at ? `<div class="text-sm text-muted mt-8">🚴 Asignado: ${new Date(p.asignado_at).toLocaleString('es-PE')}</div>` : ''}
+        ${p.recogido_at ? `<div class="text-sm text-muted mt-8">📦 Recogido: ${new Date(p.recogido_at).toLocaleString('es-PE')}</div>` : ''}
+        ${p.entregado_at ? `<div class="text-sm text-muted mt-8">✅ Entregado: ${new Date(p.entregado_at).toLocaleString('es-PE')}</div>` : ''}
+      </div>
+
+      <div class="mt-16">
+        <h4 class="mb-0">Código de entrega</h4>
+        <div class="text-sm mt-8">${labelCodigoEntrega(p)}</div>
+        ${p.pago_retenido ? `<div class="text-sm mt-8" style="color:var(--rojo-alerta);">⚠️ Pago del repartidor retenido, pendiente de revisión</div>` : ''}
+      </div>
+
+      ${p.pagos && p.pagos.length > 0 ? `
+        <div class="mt-16">
+          <h4 class="mb-0">Pagos</h4>
+          ${p.pagos.map((pg) => `
+            <div class="text-sm mt-8">${pg.tipo} · ${pg.estado} · Ref: ${pg.referencia || '—'} · ${new Date(pg.created_at).toLocaleString('es-PE')}</div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `);
+  } catch (err) {
+    abrirModal(`<p class="form-error">${err.message}</p>`);
   }
 }
 
@@ -590,14 +727,16 @@ async function initVistaRegistro() {
 // ---------- Cuentas de usuario (clientes) ----------
 let usuariosCache = [];
 
+const ESTADO_CUENTA_LABELS = { activo: 'Activa', suspendido: 'Suspendida', bloqueado: 'Bloqueada' };
+
 async function cargarUsuarios() {
   const tbody = document.getElementById('tabla-usuarios');
-  tbody.innerHTML = '<tr><td colspan="8" class="text-muted">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" class="text-muted">Cargando...</td></tr>';
   try {
     const usuarios = await Api.adminUsuarios();
     usuariosCache = usuarios;
     if (usuarios.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="text-muted">Aún no hay cuentas de clientes</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="10" class="text-muted">Aún no hay cuentas de clientes</td></tr>';
       return;
     }
     tbody.innerHTML = usuarios.map((u) => `
@@ -606,10 +745,12 @@ async function cargarUsuarios() {
         <td>${u.email || '—'}</td>
         <td>${u.telefono}</td>
         <td>${u.zona || '—'}</td>
-        <td>${u.total_pedidos}</td>
+        <td>${u.compras_efectivas}</td>
         <td>${formatoSoles(u.total_gastado)}</td>
+        <td>${u.incidentes > 0 ? `<span class="tag" style="background:#fde3e1;color:var(--rojo-alerta);">⚠️ ${u.incidentes}</span>` : '0'}</td>
+        <td><span class="badge badge-${u.estado_cuenta}">${ESTADO_CUENTA_LABELS[u.estado_cuenta] || u.estado_cuenta}</span></td>
         <td>${new Date(u.created_at).toLocaleDateString('es-PE')}</td>
-        <td><button class="btn btn-outline btn-sm" data-editar-usuario="${u.id}">Editar</button></td>
+        <td><button class="btn btn-outline btn-sm" data-editar-usuario="${u.id}">Ver / Editar</button></td>
       </tr>
     `).join('');
     tbody.querySelectorAll('[data-editar-usuario]').forEach((btn) => btn.addEventListener('click', () => {
@@ -617,15 +758,67 @@ async function cargarUsuarios() {
       if (u) abrirModalEditarUsuario(u);
     }));
   } catch (err) {
-    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="8" class="form-error">${err.message}</td></tr>`;
+    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="10" class="form-error">${err.message}</td></tr>`;
   }
 }
 
+const MOTIVO_INCIDENTE_LABELS = { falta_respeto: 'Falta de respeto', acoso: 'Acoso', otro: 'Otro' };
+
 async function abrirModalEditarUsuario(u) {
-  const zonaHtml = await zonaOptionsHtml(u.zona || '');
+  const [zonaHtml, incidentes] = await Promise.all([
+    zonaOptionsHtml(u.zona || ''),
+    Api.adminIncidentesUsuario(u.id).catch(() => []),
+  ]);
+
+  const suspendidoHastaTexto = u.suspendido_hasta ? new Date(u.suspendido_hasta).toLocaleDateString('es-PE') : null;
+
   abrirModal(`
     <h3>${u.nombre}</h3>
-    <p class="text-sm text-muted">${u.total_pedidos} pedido(s) · ${formatoSoles(u.total_gastado)} comprado</p>
+    <p class="text-sm text-muted">${u.total_pedidos} pedido(s) · ${u.compras_efectivas} compra(s) efectiva(s) · ${formatoSoles(u.total_gastado)} comprado</p>
+
+    <div class="card card-pad mt-16" style="background:var(--arena-100);">
+      <div class="flex justify-between items-center">
+        <div>
+          <strong>Estado de la cuenta:</strong>
+          <span class="badge badge-${u.estado_cuenta}">${ESTADO_CUENTA_LABELS[u.estado_cuenta] || u.estado_cuenta}</span>
+        </div>
+      </div>
+      ${suspendidoHastaTexto ? `<div class="text-sm text-muted mt-8">Suspendida hasta: ${suspendidoHastaTexto}</div>` : ''}
+      ${u.estado_cuenta_motivo ? `<div class="text-sm text-muted mt-8">Motivo: ${u.estado_cuenta_motivo}</div>` : ''}
+      <div class="flex gap-8 mt-8" style="flex-wrap:wrap;">
+        ${u.estado_cuenta !== 'suspendido' ? `<button class="btn btn-outline btn-sm" id="btn-suspender-usuario">⏸️ Suspender (5 días hábiles)</button>` : ''}
+        ${u.estado_cuenta !== 'bloqueado' ? `<button class="btn btn-danger btn-sm" id="btn-bloquear-usuario">🚫 Bloquear</button>` : ''}
+        ${u.estado_cuenta !== 'activo' ? `<button class="btn btn-success btn-sm" id="btn-reactivar-usuario">✓ Reactivar</button>` : ''}
+      </div>
+    </div>
+
+    <div class="mt-16">
+      <div class="flex justify-between items-center">
+        <h4 class="mb-0">Incidentes (${incidentes.length})</h4>
+        <button class="btn btn-outline btn-sm" id="btn-reportar-incidente">+ Reportar</button>
+      </div>
+      <div id="lista-incidentes" class="mt-8">
+        ${incidentes.length === 0 ? '<p class="text-sm text-muted">Sin incidentes registrados.</p>' : incidentes.map((i) => `
+          <div class="text-sm mt-8" style="border-bottom:1px solid var(--arena-300); padding-bottom:8px;">
+            <strong>${MOTIVO_INCIDENTE_LABELS[i.tipo] || i.tipo}</strong> · ${new Date(i.created_at).toLocaleString('es-PE')}
+            ${i.descripcion ? `<div class="text-muted">${i.descripcion}</div>` : ''}
+            <div class="text-muted">Reportado por: ${i.reportado_por_nombre || i.reportado_por_rol || '—'}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div id="form-incidente" class="hidden mt-8">
+        <div class="form-grupo">
+          <label>Tipo</label>
+          <select id="inc-tipo">
+            ${Object.entries(MOTIVO_INCIDENTE_LABELS).map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-grupo"><label>Descripción</label><textarea id="inc-descripcion" placeholder="¿Qué pasó?"></textarea></div>
+        <button class="btn btn-primary btn-block btn-sm" id="btn-guardar-incidente">Guardar incidente</button>
+      </div>
+    </div>
+
+    <hr class="divider">
     <div class="form-grupo"><label>Nombre</label><input id="eu-nombre" value="${u.nombre}"></div>
     <div class="form-grupo"><label>Correo</label><input id="eu-email" type="email" value="${u.email || ''}"></div>
     <div class="form-grupo"><label>Teléfono</label><input id="eu-telefono" value="${u.telefono}"></div>
@@ -635,6 +828,57 @@ async function abrirModalEditarUsuario(u) {
     <div id="eu-error" class="form-error hidden"></div>
     <button class="btn btn-primary btn-block" id="btn-guardar-usuario">Guardar cambios</button>
   `);
+
+  const btnSuspender = document.getElementById('btn-suspender-usuario');
+  if (btnSuspender) btnSuspender.addEventListener('click', async () => {
+    if (!confirm('¿Suspender esta cuenta por 5 días hábiles?')) return;
+    const motivo = prompt('¿Motivo de la suspensión? (opcional)') || '';
+    try {
+      const r = await Api.adminSuspenderUsuario(u.id, motivo);
+      mostrarToast(`Cuenta suspendida hasta el ${new Date(r.suspendido_hasta).toLocaleDateString('es-PE')}`, 'success');
+      cerrarModal();
+      cargarUsuarios();
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  });
+
+  const btnBloquear = document.getElementById('btn-bloquear-usuario');
+  if (btnBloquear) btnBloquear.addEventListener('click', async () => {
+    if (!confirm('¿Bloquear esta cuenta? Ya no podrá iniciar sesión, pero su historial se conserva.')) return;
+    const motivo = prompt('¿Motivo del bloqueo? (opcional)') || '';
+    try {
+      await Api.adminBloquearUsuario(u.id, motivo);
+      mostrarToast('Cuenta bloqueada', 'success');
+      cerrarModal();
+      cargarUsuarios();
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  });
+
+  const btnReactivar = document.getElementById('btn-reactivar-usuario');
+  if (btnReactivar) btnReactivar.addEventListener('click', async () => {
+    try {
+      await Api.adminReactivarUsuario(u.id);
+      mostrarToast('Cuenta reactivada', 'success');
+      cerrarModal();
+      cargarUsuarios();
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  });
+
+  document.getElementById('btn-reportar-incidente').addEventListener('click', () => {
+    document.getElementById('form-incidente').classList.remove('hidden');
+  });
+  document.getElementById('btn-guardar-incidente').addEventListener('click', async () => {
+    const tipo = document.getElementById('inc-tipo').value;
+    const descripcion = document.getElementById('inc-descripcion').value.trim();
+    try {
+      await Api.adminReportarIncidente(u.id, tipo, descripcion);
+      mostrarToast('Incidente registrado', 'success');
+      cerrarModal();
+      await cargarUsuarios();
+      const uActualizado = usuariosCache.find((x) => x.id === u.id);
+      abrirModalEditarUsuario(uActualizado || u);
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  });
+
   document.getElementById('btn-guardar-usuario').addEventListener('click', async () => {
     const errBox = document.getElementById('eu-error');
     errBox.classList.add('hidden');
