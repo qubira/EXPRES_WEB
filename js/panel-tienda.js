@@ -91,11 +91,13 @@ async function cargarPedidos() {
         ` : ''}
         <div class="flex justify-between items-center mt-8">
           <span>${formatoSoles(i.subtotal)}</span>
-          ${i.estado_tienda === 'listo'
-            ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">✓ Listo para recoger</span>'
-            : i.estado_tienda === 'confirmado'
-              ? `<button class="btn btn-success btn-sm" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`
-              : `<button class="btn btn-primary btn-sm" data-confirmar="${i.pedido_id}|${i.item_id}">Confirmar pedido</button>`}
+          ${i.pedido_estado === 'cancelado'
+            ? '<span class="tag" style="background:#f0f0f0;color:var(--tinta-300);">✕ Cancelado por el cliente</span>'
+            : i.estado_tienda === 'listo'
+              ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">✓ Listo para recoger</span>'
+              : i.estado_tienda === 'confirmado'
+                ? `<button class="btn btn-success btn-sm" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`
+                : `<button class="btn btn-primary btn-sm" data-confirmar="${i.pedido_id}|${i.item_id}">Confirmar pedido</button>`}
         </div>
       </div>
     `).join('');
