@@ -9,8 +9,27 @@ const CATEGORIAS_ICONOS = {
 
 let categoriaActiva = new URLSearchParams(location.search).get('categoria') || '';
 let terminoBusqueda = new URLSearchParams(location.search).get('q') || '';
+let tiendaIdActiva = new URLSearchParams(location.search).get('tienda_id') || '';
 let debounceTimer = null;
 let ultimosProductos = [];
+
+async function mostrarFiltroTienda() {
+  const banner = document.getElementById('filtro-tienda');
+  if (!tiendaIdActiva) { banner.classList.add('hidden'); return; }
+  try {
+    const tienda = await Api.getTienda(tiendaIdActiva);
+    document.getElementById('filtro-tienda-nombre').textContent = tienda.nombre;
+    banner.classList.remove('hidden');
+  } catch (err) {
+    banner.classList.add('hidden');
+  }
+}
+document.getElementById('btn-quitar-filtro-tienda').addEventListener('click', () => {
+  tiendaIdActiva = '';
+  history.replaceState(null, '', 'catalogo.html');
+  document.getElementById('filtro-tienda').classList.add('hidden');
+  cargarProductos();
+});
 
 function skeletonGrid(n) {
   return Array.from({ length: n }).map(() => `
@@ -137,8 +156,15 @@ async function cargarProductos(mostrarCarga = true) {
     const params = {};
     if (categoriaActiva) params.categoria = categoriaActiva;
     if (terminoBusqueda) params.q = terminoBusqueda;
-    const zona = getZonaGuardada();
-    if (zona) params.zona = zona;
+    if (tiendaIdActiva) {
+      // Al ver una tienda especifica no aplicamos el filtro de zona: ya se
+      // eligio esa tienda a proposito, no tendria sentido que desaparezca
+      // por un desfase entre la zona guardada y la zona de la tienda.
+      params.tienda_id = tiendaIdActiva;
+    } else {
+      const zona = getZonaGuardada();
+      if (zona) params.zona = zona;
+    }
     const productos = await Api.getProductos(params);
 
     // Evita volver a pintar la grilla si no cambio nada (sin parpadeos innecesarios).
@@ -195,6 +221,7 @@ document.getElementById('buscador').addEventListener('input', (e) => {
 
 cargarFiltros();
 cargarProductos();
+mostrarFiltroTienda();
 actualizarCartBar();
 iniciarAutoRefresco(() => cargarProductos(false));
 document.addEventListener('zona-actualizada', () => cargarProductos());

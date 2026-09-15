@@ -56,6 +56,10 @@
 </nav>
 
 <div class="container mt-16">
+  <div id="filtro-tienda" class="hidden card card-pad flex justify-between items-center mb-16">
+    <span class="text-sm">Mostrando productos de: <strong id="filtro-tienda-nombre"></strong></span>
+    <button type="button" class="btn btn-ghost btn-sm" id="btn-quitar-filtro-tienda">✕ Quitar</button>
+  </div>
   <div class="filtros" id="filtros"></div>
 
   <div id="estado-carga" class="text-center text-muted" style="padding:40px 0;">Cargando productos...</div>
