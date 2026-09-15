@@ -305,6 +305,81 @@ document.getElementById('form-buscar').addEventListener('submit', (e) => {
   }
 });
 
+// ---------- Mis pedidos (filtrado por fecha, sin tener que pegar el codigo) ----------
+function esMismoDia(fechaA, fechaB) {
+  return fechaA.getFullYear() === fechaB.getFullYear()
+    && fechaA.getMonth() === fechaB.getMonth()
+    && fechaA.getDate() === fechaB.getDate();
+}
+
+function tarjetaMiPedido(p) {
+  return `
+    <div class="card card-pad mt-8">
+      <div class="flex justify-between items-center">
+        <div>
+          <div class="text-sm text-muted">Pedido #${p.id.slice(0,8).toUpperCase()}</div>
+          <strong>${formatoSoles(p.monto_total)}</strong>
+        </div>
+        <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
+      </div>
+      <div class="text-sm text-muted mt-8">📍 ${p.zona_entrega}</div>
+      <div class="text-sm text-muted">${new Date(p.created_at).toLocaleString('es-PE')}</div>
+      <a href="pedido.html?id=${p.id}" class="btn btn-secondary btn-sm btn-block mt-8" data-ver-pedido="${p.id}">Ver detalle del pedido →</a>
+    </div>
+  `;
+}
+
+let rangoFechaActivo = 'hoy';
+async function cargarMisPedidosBrowser() {
+  const cont = document.getElementById('lista-mis-pedidos');
+  cont.innerHTML = '<p class="text-muted">Cargando...</p>';
+  try {
+    const pedidos = await Api.clientePedidos();
+    const ahora = new Date();
+    const ayer = new Date(ahora);
+    ayer.setDate(ayer.getDate() - 1);
+
+    const filtrados = pedidos.filter((p) => {
+      if (rangoFechaActivo === 'todos') return true;
+      const fecha = new Date(p.created_at);
+      if (rangoFechaActivo === 'hoy') return esMismoDia(fecha, ahora);
+      if (rangoFechaActivo === 'ayer') return esMismoDia(fecha, ayer);
+      return true;
+    });
+
+    if (filtrados.length === 0) {
+      cont.innerHTML = `
+        <div class="empty-state card card-pad">
+          <div class="icon">📦</div>
+          <p>${rangoFechaActivo === 'todos' ? 'Aún no tienes pedidos.' : 'No tienes pedidos en ese rango.'}</p>
+          ${rangoFechaActivo !== 'todos' ? '<button type="button" class="btn btn-outline btn-sm mt-8" data-ver-todos>Ver todos mis pedidos</button>' : '<a href="catalogo.html" class="btn btn-primary btn-sm mt-8">Ver catálogo</a>'}
+        </div>
+      `;
+      const btnVerTodos = cont.querySelector('[data-ver-todos]');
+      if (btnVerTodos) {
+        btnVerTodos.addEventListener('click', () => {
+          rangoFechaActivo = 'todos';
+          document.querySelectorAll('#filtro-fecha-pedidos .chip').forEach((c) => c.classList.toggle('activo', c.dataset.rango === 'todos'));
+          cargarMisPedidosBrowser();
+        });
+      }
+      return;
+    }
+    cont.innerHTML = filtrados.map(tarjetaMiPedido).join('');
+  } catch (err) {
+    cont.innerHTML = `<p class="form-error">${err.message}</p>`;
+  }
+}
+
+document.querySelectorAll('#filtro-fecha-pedidos .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    rangoFechaActivo = chip.dataset.rango;
+    document.querySelectorAll('#filtro-fecha-pedidos .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    cargarMisPedidosBrowser();
+  });
+});
+
 // Mientras el repartidor esta en camino refrescamos mas seguido para que el
 // mapa en vivo se sienta realmente "en tiempo real"; en el resto de estados
 // alcanza con un refresco mas espaciado.
@@ -318,20 +393,29 @@ function programarSiguienteRefresco() {
 }
 
 const idInit = idInicial();
+const logueadoInicio = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
+
 if (idInit) {
   document.getElementById('input-id').value = idInit;
   // Se encadena para que, si el pedido ya esta "recogido" desde la primera
   // carga, el refresco rapido de 5s arranque de inmediato (y no recien
   // despues de un primer ciclo lento de 15s con el estado aun en null).
   cargarPedido(idInit).finally(programarSiguienteRefresco);
+} else if (logueadoInicio) {
+  // En vez de pedirle el codigo (largo y tedioso de pegar), a un cliente con
+  // sesion iniciada se le muestran directamente sus pedidos filtrables por
+  // fecha; el buscador por codigo queda disponible pero colapsado, para
+  // cuando busca un pedido que no es suyo o le compartieron el link.
+  document.getElementById('bloque-mis-pedidos').classList.remove('hidden');
+  document.getElementById('slot-form-buscar').appendChild(document.getElementById('form-buscar'));
+  cargarMisPedidosBrowser();
+  programarSiguienteRefresco();
 } else {
-  const logueado = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
   document.getElementById('contenido').innerHTML = `
     <div class="empty-state card card-pad">
       <div class="icon">📦</div>
       <p><strong>Sigue tu pedido en tiempo real</strong></p>
       <p class="text-sm">Pega el ID que te dimos al hacer tu compra para ver en qué va: preparación, camino y entrega.</p>
-      ${logueado ? '<a href="mis-pedidos.html" class="btn btn-secondary btn-sm mt-8">Ver mis pedidos</a>' : ''}
     </div>
   `;
   programarSiguienteRefresco();

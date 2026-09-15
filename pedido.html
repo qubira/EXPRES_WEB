@@ -52,6 +52,19 @@
 <div class="container mt-24" style="max-width:560px;">
   <h1 class="section-title">Rastrear pedido</h1>
 
+  <div id="bloque-mis-pedidos" class="hidden">
+    <div class="filtros" id="filtro-fecha-pedidos">
+      <button class="chip activo" data-rango="hoy">Hoy</button>
+      <button class="chip" data-rango="ayer">Ayer</button>
+      <button class="chip" data-rango="todos">Todos</button>
+    </div>
+    <div id="lista-mis-pedidos" class="mt-16"></div>
+    <details class="mt-16" id="detalle-buscar-codigo">
+      <summary class="text-sm text-muted" style="cursor:pointer;">¿Tienes el código de otro pedido?</summary>
+      <div id="slot-form-buscar" class="mt-8"></div>
+    </details>
+  </div>
+
   <form id="form-buscar" class="card card-pad flex gap-8" style="align-items:flex-end;">
     <div class="form-grupo mb-0" style="flex:1;">
       <label>ID de tu pedido</label>
@@ -59,13 +72,6 @@
     </div>
     <button class="btn btn-secondary" type="submit">Buscar</button>
   </form>
-
-  <div id="banner-cuenta" class="hidden card card-pad mt-16" style="background:var(--cielo-100);">
-    <div class="flex justify-between items-center">
-      <span class="text-sm">¿Quieres ver todos tus pedidos sin buscar el ID?</span>
-      <a href="mis-pedidos.html" class="btn btn-secondary btn-sm">Mis pedidos</a>
-    </div>
-  </div>
 
   <div id="contenido" class="mt-16"></div>
 </div>
@@ -87,11 +93,6 @@
 <script src="js/api.js"></script>
 <script src="js/cart.js"></script>
 <script src="js/auth-cliente.js"></script>
-<script>
-if (clienteEstaLogueado()) {
-  document.getElementById('banner-cuenta').classList.remove('hidden');
-}
-</script>
 <script src="js/pedido.js"></script>
 </body>
 </html>
