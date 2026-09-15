@@ -64,6 +64,8 @@ async function cargarActivos() {
   cont.innerHTML = '<p class="text-muted">Cargando...</p>';
   try {
     const pedidos = await Api.repartidorPedidos();
+    actualizarSeguimientoGPS(pedidos);
+
     if (pedidos.length === 0) {
       cont.innerHTML = '<div class="empty-state"><div class="icon">🚴</div><p>No tienes entregas asignadas por ahora.</p></div>';
       return;
@@ -83,13 +85,20 @@ async function cargarActivos() {
           <a href="tel:${p.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
           <a href="https://wa.me/51${p.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
         </div>
+        ${p.lat_entrega && p.lng_entrega ? `
+          <a href="https://www.google.com/maps?q=${p.lat_entrega},${p.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-block mt-8">🗺️ Ver ubicación del cliente</a>
+        ` : ''}
         <div class="entrega-tarifa">
           <span class="text-sm">Tarifa de entrega</span>
           <strong>${formatoSoles(p.delivery_fee)}</strong>
         </div>
         <div class="mt-16">
           ${p.estado === 'listo_recoger' ? `<button class="btn btn-secondary btn-block" data-recoger="${p.id}">🚲 He recogido el pedido</button>` : ''}
-          ${p.estado === 'recogido' ? `<button class="btn btn-success btn-block" data-entregar="${p.id}">🔑 Confirmar entrega (PIN)</button>` : ''}
+          ${p.estado === 'recogido' ? `
+            <button class="btn btn-success btn-block" data-entregar="${p.id}">🔑 Confirmar entrega (PIN)</button>
+            <button class="btn btn-outline btn-block mt-8" data-rechazado="${p.id}">❌ El cliente rechazó el pedido</button>
+            <button class="btn btn-ghost btn-block mt-8" data-sin-pin="${p.id}" style="color:var(--tinta-300);">Entregó pero no dio el código</button>
+          ` : ''}
           ${!['listo_recoger','recogido'].includes(p.estado) ? `<div class="text-sm text-muted text-center">⏳ Esperando que la tienda prepare el pedido...</div>` : ''}
         </div>
       </div>
@@ -104,9 +113,97 @@ async function cargarActivos() {
       } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
     }));
     cont.querySelectorAll('[data-entregar]').forEach((btn) => btn.addEventListener('click', () => abrirModalPin(btn.dataset.entregar)));
+    cont.querySelectorAll('[data-rechazado]').forEach((btn) => btn.addEventListener('click', () => abrirModalRechazado(btn.dataset.rechazado)));
+    cont.querySelectorAll('[data-sin-pin]').forEach((btn) => btn.addEventListener('click', () => abrirModalSinPin(btn.dataset.sinPin)));
   } catch (err) {
     if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
   }
+}
+
+function abrirModalRechazado(pedidoId) {
+  abrirModal(`
+    <div class="text-center">
+      <div style="font-size:38px;">❌</div>
+      <h3>El cliente rechazó el pedido</h3>
+      <p class="text-muted text-sm">Úsalo solo si el cliente no acepta el producto al momento de la entrega (llegó dañado, no es lo que pidió, etc). No recibirás pago por esta entrega.</p>
+    </div>
+    <div class="form-grupo mt-16">
+      <label>¿Qué pasó? (opcional)</label>
+      <textarea id="rechazado-motivo" placeholder="Ej. El cliente dijo que no era su pedido"></textarea>
+    </div>
+    <div id="rechazado-error" class="form-error hidden text-center"></div>
+    <button class="btn btn-outline btn-block mt-8" id="btn-confirmar-rechazado">Confirmar rechazo</button>
+  `);
+  document.getElementById('btn-confirmar-rechazado').addEventListener('click', async () => {
+    const motivo = document.getElementById('rechazado-motivo').value.trim();
+    try {
+      await Api.repartidorRechazado(pedidoId, motivo);
+      mostrarToast('Pedido marcado como rechazado por el cliente', 'success');
+      cerrarModal();
+      cargarActivos();
+    } catch (err) {
+      const errorBox = document.getElementById('rechazado-error');
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    }
+  });
+}
+
+function abrirModalSinPin(pedidoId) {
+  abrirModal(`
+    <div class="text-center">
+      <div style="font-size:38px;">⚠️</div>
+      <h3>Entregar sin código de confirmación</h3>
+      <p class="text-muted text-sm">Úsalo solo si ya le diste el producto al cliente pero no pudo o no quiso darte el código. Tu pago por esta entrega quedará retenido hasta que un administrador lo revise.</p>
+    </div>
+    <div id="sin-pin-error" class="form-error hidden text-center"></div>
+    <button class="btn btn-ghost btn-block mt-8" id="btn-confirmar-sin-pin">Sí, ya entregué el producto</button>
+  `);
+  document.getElementById('btn-confirmar-sin-pin').addEventListener('click', async () => {
+    try {
+      const r = await Api.repartidorEntregarSinPin(pedidoId);
+      mostrarToast(r.mensaje || 'Entrega registrada como observada', 'success');
+      cerrarModal();
+      cargarActivos();
+      cargarPerfil();
+    } catch (err) {
+      const errorBox = document.getElementById('sin-pin-error');
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    }
+  });
+}
+
+// ---------- Compartir ubicacion GPS en vivo (mientras hay pedidos "recogido") ----------
+let gpsWatchId = null;
+let ultimoEnvioGPS = 0;
+let pedidosRecogidoActuales = [];
+
+function actualizarSeguimientoGPS(pedidos) {
+  pedidosRecogidoActuales = pedidos.filter((p) => p.estado === 'recogido').map((p) => p.id);
+
+  if (pedidosRecogidoActuales.length === 0) {
+    if (gpsWatchId !== null) {
+      navigator.geolocation.clearWatch(gpsWatchId);
+      gpsWatchId = null;
+    }
+    return;
+  }
+  if (gpsWatchId !== null || !navigator.geolocation) return;
+
+  gpsWatchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      const ahora = Date.now();
+      if (ahora - ultimoEnvioGPS < 8000) return; // no saturar la API
+      ultimoEnvioGPS = ahora;
+      const { latitude, longitude } = pos.coords;
+      pedidosRecogidoActuales.forEach((pedidoId) => {
+        Api.repartidorUbicacion(pedidoId, latitude, longitude).catch(() => {});
+      });
+    },
+    () => {},
+    { enableHighAccuracy: true, maximumAge: 5000 }
+  );
 }
 
 function abrirModalPin(pedidoId) {

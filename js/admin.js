@@ -19,7 +19,7 @@ function manejarError401(err) {
 }
 
 // ---------- Navegacion entre vistas ----------
-const TITULOS = { resumen: 'Resumen', registro: 'Registrar cuenta', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores', auditoria: 'Auditoría' };
+const TITULOS = { resumen: 'Resumen', registro: 'Registrar cuenta', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores', reclamos: 'Reclamos', auditoria: 'Auditoría' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -33,6 +33,7 @@ function irAVista(vista) {
   if (vista === 'pedidos') cargarPedidos();
   if (vista === 'tiendas') cargarTiendas();
   if (vista === 'repartidores') cargarRepartidores();
+  if (vista === 'reclamos') { cargarReclamos(); cargarPagosRetenidos(); }
   if (vista === 'auditoria') cargarAuditoria();
 }
 
@@ -506,6 +507,107 @@ async function initVistaRegistro() {
       cargarRepartidores();
     } catch (err) { mostrarToast(err.message, 'error'); }
   });
+}
+
+// ---------- Reclamos y pagos retenidos ----------
+const MOTIVO_RECLAMO_LABELS = {
+  producto_incorrecto: 'No era lo que pidió',
+  producto_danado: 'Llegó dañado/golpeado',
+  no_recibido: 'No recibió el pedido',
+  otro: 'Otro',
+};
+const ESTADO_RECLAMO_LABELS = { abierto: 'Abierto', en_revision: 'En revisión', resuelto: 'Resuelto' };
+
+async function cargarReclamos(estado = '') {
+  const tbody = document.getElementById('tabla-reclamos');
+  tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Cargando...</td></tr>';
+  try {
+    const reclamos = await Api.adminReclamos(estado);
+    if (reclamos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Sin reclamos por ahora</td></tr>';
+      return;
+    }
+    tbody.innerHTML = reclamos.map((r) => `
+      <tr>
+        <td>${new Date(r.created_at).toLocaleString('es-PE')}</td>
+        <td>#${r.pedido_id.slice(0,8).toUpperCase()}</td>
+        <td>${r.cliente_nombre || '—'}</td>
+        <td>${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</td>
+        <td class="text-sm" style="max-width:220px;">${r.descripcion || '—'}</td>
+        <td><span class="badge badge-${r.estado === 'resuelto' ? 'entregado' : 'pendiente_pago'}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span></td>
+        <td>${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-sm" data-resolver="${r.id}">Resolver</button>` : '—'}</td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('[data-resolver]').forEach((btn) => btn.addEventListener('click', () => abrirModalResolverReclamo(btn.dataset.resolver)));
+  } catch (err) {
+    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="7" class="form-error">${err.message}</td></tr>`;
+  }
+}
+
+document.querySelectorAll('#filtro-reclamos .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#filtro-reclamos .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    cargarReclamos(chip.dataset.estado);
+  });
+});
+
+function abrirModalResolverReclamo(id) {
+  abrirModal(`
+    <h3>Resolver reclamo</h3>
+    <div class="form-grupo mt-16">
+      <label>¿Qué se hizo / decidió?</label>
+      <textarea id="resolucion-texto" placeholder="Ej. Se coordinó reembolso con la tienda"></textarea>
+    </div>
+    <div class="flex gap-8 mt-8">
+      <button class="btn btn-outline btn-block" id="btn-marcar-revision">Marcar en revisión</button>
+      <button class="btn btn-primary btn-block" id="btn-marcar-resuelto">Marcar resuelto</button>
+    </div>
+  `);
+  const enviar = async (estado) => {
+    const resolucion = document.getElementById('resolucion-texto').value.trim();
+    try {
+      await Api.adminResolverReclamo(id, { estado, resolucion });
+      mostrarToast('Reclamo actualizado', 'success');
+      cerrarModal();
+      cargarReclamos();
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  };
+  document.getElementById('btn-marcar-revision').addEventListener('click', () => enviar('en_revision'));
+  document.getElementById('btn-marcar-resuelto').addEventListener('click', () => enviar('resuelto'));
+}
+
+async function cargarPagosRetenidos() {
+  const tbody = document.getElementById('tabla-pagos-retenidos');
+  tbody.innerHTML = '<tr><td colspan="6" class="text-muted">Cargando...</td></tr>';
+  try {
+    const pedidos = await Api.adminPedidosRetenidos();
+    if (pedidos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-muted">No hay pagos retenidos</td></tr>';
+      return;
+    }
+    tbody.innerHTML = pedidos.map((p) => `
+      <tr>
+        <td>#${p.id.slice(0,8).toUpperCase()}</td>
+        <td>${p.repartidor_nombre}</td>
+        <td>${p.zona_entrega}</td>
+        <td>${formatoSoles(p.delivery_fee)}</td>
+        <td>${new Date(p.entregado_at).toLocaleString('es-PE')}</td>
+        <td><button class="btn btn-success btn-sm" data-liberar="${p.id}">Liberar pago</button></td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('[data-liberar]').forEach((btn) => btn.addEventListener('click', async () => {
+      if (!confirm('¿Confirmas que la entrega fue correcta y se debe pagar al repartidor?')) return;
+      btn.disabled = true;
+      try {
+        await Api.adminLiberarPago(btn.dataset.liberar);
+        mostrarToast('Pago liberado', 'success');
+        cargarPagosRetenidos();
+      } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
+    }));
+  } catch (err) {
+    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="6" class="form-error">${err.message}</td></tr>`;
+  }
 }
 
 // ---------- Auditoria (conexiones del equipo) ----------

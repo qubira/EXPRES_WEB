@@ -19,6 +19,7 @@
     <div class="panel-link" data-view="pedidos">📦 Pedidos</div>
     <div class="panel-link" data-view="tiendas">🏪 Tiendas</div>
     <div class="panel-link" data-view="repartidores">🚴 Repartidores</div>
+    <div class="panel-link" data-view="reclamos">📣 Reclamos</div>
     <div class="panel-link" data-view="auditoria">🛡️ Auditoría</div>
     <div style="flex:1"></div>
     <div class="panel-link" id="btn-logout">🚪 Salir</div>
@@ -218,6 +219,35 @@
       </div>
     </section>
 
+    <section id="view-reclamos" class="view hidden">
+      <div class="card card-pad mb-16" id="card-pagos-retenidos">
+        <h3>Pagos retenidos</h3>
+        <p class="text-muted text-sm">Entregas marcadas por el repartidor como "sin código válido" — se registraron como entregadas pero hay que revisar qué pasó antes de pagarle al repartidor.</p>
+        <div class="table-wrap mt-8">
+          <table>
+            <thead><tr><th>Pedido</th><th>Repartidor</th><th>Zona</th><th>Tarifa</th><th>Entregado</th><th></th></tr></thead>
+            <tbody id="tabla-pagos-retenidos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <h3>Reclamos de clientes</h3>
+        <div class="filtros" id="filtro-reclamos">
+          <button class="chip activo" data-estado="">Todos</button>
+          <button class="chip" data-estado="abierto">Abiertos</button>
+          <button class="chip" data-estado="en_revision">En revisión</button>
+          <button class="chip" data-estado="resuelto">Resueltos</button>
+        </div>
+        <div class="table-wrap mt-8">
+          <table>
+            <thead><tr><th>Fecha</th><th>Pedido</th><th>Cliente</th><th>Motivo</th><th>Descripción</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="tabla-reclamos"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <section id="view-auditoria" class="view hidden">
       <p class="text-muted mb-16">Historial de conexiones del equipo (admin, tiendas y repartidores): quién entró, desde qué IP y cuándo. Útil para detectar accesos sospechosos.</p>
       <div class="filtros" id="filtro-auditoria">
@@ -243,6 +273,7 @@
   <div class="panel-link" data-view="pedidos"><span class="icon">📦</span>Pedidos</div>
   <div class="panel-link" data-view="tiendas"><span class="icon">🏪</span>Tiendas</div>
   <div class="panel-link" data-view="repartidores"><span class="icon">🚴</span>Bici</div>
+  <div class="panel-link" data-view="reclamos"><span class="icon">📣</span>Reclamos</div>
 </nav>
 
 <div id="modal-root"></div>

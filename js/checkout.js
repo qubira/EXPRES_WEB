@@ -55,6 +55,34 @@ function renderCarrito() {
   document.getElementById('r-total').textContent = formatoSoles(subtotal + delivery);
 }
 
+let ubicacionEntrega = null;
+
+const btnGps = document.getElementById('btn-gps-entrega');
+const gpsEstado = document.getElementById('gps-entrega-estado');
+if (btnGps) {
+  btnGps.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      gpsEstado.textContent = 'Tu navegador no permite compartir ubicación GPS.';
+      return;
+    }
+    btnGps.disabled = true;
+    gpsEstado.textContent = 'Obteniendo tu ubicación...';
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        ubicacionEntrega = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        gpsEstado.textContent = '✓ Ubicación GPS lista. El repartidor podrá verla al llegar a tu zona.';
+        btnGps.textContent = '📍 Ubicación compartida';
+        btnGps.disabled = false;
+      },
+      () => {
+        gpsEstado.textContent = 'No se pudo obtener tu ubicación. Puedes continuar igual con la referencia escrita.';
+        btnGps.disabled = false;
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+}
+
 document.getElementById('form-checkout').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-continuar');
@@ -70,6 +98,8 @@ document.getElementById('form-checkout').addEventListener('submit', async (e) =>
       cliente_telefono: fd.get('cliente_telefono'),
       zona_entrega: fd.get('zona_entrega'),
       referencia_entrega: fd.get('referencia_entrega'),
+      lat_entrega: ubicacionEntrega ? ubicacionEntrega.lat : null,
+      lng_entrega: ubicacionEntrega ? ubicacionEntrega.lng : null,
       items,
     });
 

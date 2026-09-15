@@ -82,11 +82,22 @@ async function cargarPedidos() {
           <span>${formatoSoles(i.subtotal)}</span>
           ${i.estado_tienda === 'listo'
             ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">✓ Listo para recoger</span>'
-            : `<button class="btn btn-success btn-sm" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`}
+            : i.estado_tienda === 'confirmado'
+              ? `<button class="btn btn-success btn-sm" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`
+              : `<button class="btn btn-primary btn-sm" data-confirmar="${i.pedido_id}|${i.item_id}">Confirmar pedido</button>`}
         </div>
       </div>
     `).join('');
 
+    cont.querySelectorAll('[data-confirmar]').forEach((btn) => btn.addEventListener('click', async () => {
+      const [pedidoId, itemId] = btn.dataset.confirmar.split('|');
+      btn.disabled = true;
+      try {
+        await Api.tiendaConfirmarItem(pedidoId, itemId);
+        mostrarToast('Pedido confirmado, ¡a prepararlo!', 'success');
+        cargarPedidos();
+      } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
+    }));
     cont.querySelectorAll('[data-listo]').forEach((btn) => btn.addEventListener('click', async () => {
       const [pedidoId, itemId] = btn.dataset.listo.split('|');
       btn.disabled = true;

@@ -1,4 +1,14 @@
 const PASOS = ['pagado', 'preparando', 'listo_recoger', 'recogido', 'entregado'];
+const MOTIVOS_RECLAMO = {
+  producto_incorrecto: 'No es lo que pedí',
+  producto_danado: 'Llegó golpeado o malogrado',
+  no_recibido: 'No recibí mi pedido',
+  otro: 'Otro motivo',
+};
+
+let mapaEntrega = null;
+let marcadorRepartidor = null;
+let marcadorCliente = null;
 
 function idInicial() {
   return new URLSearchParams(location.search).get('id') || localStorage.getItem('express_last_pedido') || '';
@@ -23,8 +33,103 @@ function renderTimeline(estado) {
   `;
 }
 
+function renderMapa(pedido) {
+  const tieneRepartidor = pedido.estado === 'recogido' && pedido.lat_repartidor && pedido.lng_repartidor;
+  if (!tieneRepartidor) {
+    mapaEntrega = null;
+    marcadorRepartidor = null;
+    marcadorCliente = null;
+    return '';
+  }
+  return `
+    <div class="card card-pad mt-16">
+      <h3>🚴 Tu repartidor está en camino</h3>
+      <div id="mapa-entrega" style="height:280px; border-radius:12px; margin-top:8px;"></div>
+      <div class="text-sm text-muted mt-8">La ubicación se actualiza automáticamente.</div>
+    </div>
+  `;
+}
+
+function inicializarMapa(pedido) {
+  const el = document.getElementById('mapa-entrega');
+  if (!el || typeof L === 'undefined') return;
+  const lat = Number(pedido.lat_repartidor);
+  const lng = Number(pedido.lng_repartidor);
+
+  if (!mapaEntrega) {
+    mapaEntrega = L.map('mapa-entrega').setView([lat, lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(mapaEntrega);
+    marcadorRepartidor = L.marker([lat, lng], { title: 'Repartidor' }).addTo(mapaEntrega).bindPopup('🚴 Repartidor');
+    if (pedido.lat_entrega && pedido.lng_entrega) {
+      marcadorCliente = L.marker([Number(pedido.lat_entrega), Number(pedido.lng_entrega)], { title: 'Tu ubicación' })
+        .addTo(mapaEntrega).bindPopup('📍 Tu ubicación');
+      mapaEntrega.fitBounds([[lat, lng], [Number(pedido.lat_entrega), Number(pedido.lng_entrega)]], { padding: [30, 30] });
+    }
+  } else {
+    marcadorRepartidor.setLatLng([lat, lng]);
+    mapaEntrega.panTo([lat, lng]);
+  }
+}
+
+function renderReclamoModal(pedidoId) {
+  abrirModal(`
+    <h3>Hacer un reclamo</h3>
+    <p class="text-sm text-muted">Cuéntanos qué pasó con tu pedido.</p>
+    <div class="form-grupo mt-16">
+      <label>Motivo</label>
+      <select id="reclamo-motivo">
+        ${Object.entries(MOTIVOS_RECLAMO).map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-grupo">
+      <label>Cuéntanos más (opcional)</label>
+      <textarea id="reclamo-descripcion" placeholder="Describe lo que pasó..."></textarea>
+    </div>
+    <div id="reclamo-error" class="form-error hidden"></div>
+    <button class="btn btn-primary btn-block mt-8" id="btn-enviar-reclamo">Enviar reclamo</button>
+  `);
+  document.getElementById('btn-enviar-reclamo').addEventListener('click', async () => {
+    const motivo = document.getElementById('reclamo-motivo').value;
+    const descripcion = document.getElementById('reclamo-descripcion').value.trim();
+    const errBox = document.getElementById('reclamo-error');
+    try {
+      await Api.clienteReclamo(pedidoId, motivo, descripcion);
+      cerrarModal();
+      mostrarToast('Reclamo enviado. Un administrador lo revisará pronto.', 'success');
+    } catch (err) {
+      errBox.textContent = err.message;
+      errBox.classList.remove('hidden');
+    }
+  });
+}
+
+function abrirModal(html) {
+  let root = document.getElementById('modal-root');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'modal-root';
+    document.body.appendChild(root);
+  }
+  root.innerHTML = `<div class="modal-overlay" id="modal-overlay"><div class="modal-box">${html}</div></div>`;
+  document.getElementById('modal-overlay').addEventListener('click', (e) => { if (e.target.id === 'modal-overlay') cerrarModal(); });
+}
+function cerrarModal() {
+  const root = document.getElementById('modal-root');
+  if (root) root.innerHTML = '';
+}
+
 async function cargarPedido(id) {
   const cont = document.getElementById('contenido');
+  // El HTML se reconstruye por completo en cada carga (incluido #mapa-entrega),
+  // asi que el mapa de Leaflet anterior queda huerfano y hay que recrearlo.
+  if (mapaEntrega) {
+    mapaEntrega.remove();
+    mapaEntrega = null;
+    marcadorRepartidor = null;
+    marcadorCliente = null;
+  }
   cont.innerHTML = '<p class="text-center text-muted mt-16">Buscando pedido...</p>';
 
   try {
@@ -33,6 +138,11 @@ async function cargarPedido(id) {
 
     const necesitaPago = pedido.estado === 'pendiente_pago';
     const rechazado = pedido.estado === 'pago_rechazado';
+    const rechazadoEnEntrega = pedido.estado === 'rechazado_en_entrega';
+    const logueado = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
+    const puedeCancelar = logueado && ['pendiente_pago', 'pagado', 'preparando'].includes(pedido.estado);
+    const puedeReclamar = logueado && ['entregado', 'rechazado_en_entrega'].includes(pedido.estado);
+    const esperandoEnPunto = ['listo_recoger', 'recogido'].includes(pedido.estado);
 
     cont.innerHTML = `
       <div class="card card-pad">
@@ -54,6 +164,15 @@ async function cargarPedido(id) {
           <p class="form-error mt-16">Tu comprobante fue rechazado. Escríbenos por WhatsApp para resolverlo.</p>
           <a href="https://wa.me/51987000000" target="_blank" class="btn btn-outline btn-block">Contactar soporte</a>
         ` : ''}
+        ${rechazadoEnEntrega ? `
+          <p class="form-error mt-16">Este pedido fue rechazado en la entrega. Si crees que fue un error, contáctanos.</p>
+        ` : ''}
+        ${esperandoEnPunto ? `
+          <p class="text-sm text-muted mt-16">Si el producto llega dañado o incorrecto, no lo recibas: puedes generar un reclamo aquí mismo apenas termine la entrega.</p>
+        ` : ''}
+
+        ${puedeCancelar ? `<button class="btn btn-outline btn-block mt-16" id="btn-cancelar-pedido">Cancelar pedido</button>` : ''}
+        ${puedeReclamar ? `<button class="btn btn-outline btn-block mt-16" id="btn-reclamo-pedido">📣 Hacer un reclamo</button>` : ''}
       </div>
 
       ${pedido.pin_entrega ? `
@@ -63,6 +182,8 @@ async function cargarPedido(id) {
           <div class="text-sm">Dáselo al repartidor solo cuando recibas tu pedido</div>
         </div>
       ` : ''}
+
+      ${renderMapa(pedido)}
 
       <div class="card card-pad mt-16">
         <h3>Detalle del pedido</h3>
@@ -81,6 +202,28 @@ async function cargarPedido(id) {
         <div class="flex justify-between mt-8"><strong>Total</strong><strong>${formatoSoles(pedido.monto_total)}</strong></div>
       </div>
     `;
+
+    inicializarMapa(pedido);
+
+    const btnCancelar = document.getElementById('btn-cancelar-pedido');
+    if (btnCancelar) {
+      btnCancelar.addEventListener('click', async () => {
+        if (!confirm('¿Seguro que quieres cancelar este pedido?')) return;
+        btnCancelar.disabled = true;
+        try {
+          const r = await Api.clienteCancelarPedido(pedido.id);
+          mostrarToast(r.mensaje || 'Pedido cancelado', 'success');
+          cargarPedido(pedido.id);
+        } catch (err) {
+          mostrarToast(err.message, 'error');
+          btnCancelar.disabled = false;
+        }
+      });
+    }
+    const btnReclamo = document.getElementById('btn-reclamo-pedido');
+    if (btnReclamo) {
+      btnReclamo.addEventListener('click', () => renderReclamoModal(pedido.id));
+    }
   } catch (err) {
     cont.innerHTML = `<p class="text-center form-error mt-16">${err.message || 'Pedido no encontrado'}</p>`;
   }

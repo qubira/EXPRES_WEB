@@ -81,6 +81,10 @@ const Api = {
   adminLiquidarRepartidor: (id) => apiRequest(`/admin/repartidores/${id}/liquidar`, { method: 'POST', role: 'admin' }),
   adminGetProductos: (tiendaId) => apiRequest(`/admin/productos${tiendaId ? `?tienda_id=${tiendaId}` : ''}`, { role: 'admin' }),
   adminAuditoria: (rol) => apiRequest(`/admin/auditoria${rol ? `?rol=${rol}` : ''}`, { role: 'admin' }),
+  adminReclamos: (estado) => apiRequest(`/admin/reclamos${estado ? `?estado=${estado}` : ''}`, { role: 'admin' }),
+  adminResolverReclamo: (id, data) => apiRequest(`/admin/reclamos/${id}/resolver`, { method: 'POST', body: data, role: 'admin' }),
+  adminPedidosRetenidos: () => apiRequest('/admin/pedidos-retenidos', { role: 'admin' }),
+  adminLiberarPago: (pedidoId) => apiRequest(`/admin/pedidos/${pedidoId}/liberar-pago`, { method: 'POST', role: 'admin' }),
   adminSubirImagen: (formData, carpeta = 'repartidores') => apiRequest(`/admin/upload?carpeta=${carpeta}`, { method: 'POST', body: formData, isForm: true, role: 'admin' }),
 
   // Tienda
@@ -95,6 +99,7 @@ const Api = {
   tiendaActualizarProducto: (id, data) => apiRequest(`/tienda/productos/${id}`, { method: 'PUT', body: data, role: 'tienda' }),
   tiendaEliminarProducto: (id) => apiRequest(`/tienda/productos/${id}`, { method: 'DELETE', role: 'tienda' }),
   tiendaPedidos: () => apiRequest('/tienda/pedidos', { role: 'tienda' }),
+  tiendaConfirmarItem: (pedidoId, itemId) => apiRequest(`/tienda/pedidos/${pedidoId}/items/${itemId}/confirmar`, { method: 'POST', role: 'tienda' }),
   tiendaMarcarListo: (pedidoId, itemId) => apiRequest(`/tienda/pedidos/${pedidoId}/items/${itemId}/listo`, { method: 'POST', role: 'tienda' }),
 
   // Repartidor
@@ -106,6 +111,9 @@ const Api = {
   repartidorPedido: (id) => apiRequest(`/repartidor/pedidos/${id}`, { role: 'repartidor' }),
   repartidorRecogido: (id) => apiRequest(`/repartidor/pedidos/${id}/recogido`, { method: 'POST', role: 'repartidor' }),
   repartidorEntregar: (id, pin) => apiRequest(`/repartidor/pedidos/${id}/entregar`, { method: 'POST', body: { pin }, role: 'repartidor' }),
+  repartidorEntregarSinPin: (id) => apiRequest(`/repartidor/pedidos/${id}/entregar-sin-pin`, { method: 'POST', role: 'repartidor' }),
+  repartidorRechazado: (id, motivo) => apiRequest(`/repartidor/pedidos/${id}/rechazado`, { method: 'POST', body: { motivo }, role: 'repartidor' }),
+  repartidorUbicacion: (id, lat, lng) => apiRequest(`/repartidor/pedidos/${id}/ubicacion`, { method: 'POST', body: { lat, lng }, role: 'repartidor' }),
 
   // Cliente (cuenta de usuario)
   clienteRegistro: (data) => apiRequest('/cliente/registro', { method: 'POST', body: data }),
@@ -116,6 +124,9 @@ const Api = {
   clienteEliminarCuenta: (password) => apiRequest('/cliente/perfil', { method: 'DELETE', body: { password }, role: 'cliente' }),
   clienteActualizarZona: (zona) => apiRequest('/cliente/zona', { method: 'POST', body: { zona }, role: 'cliente' }),
   clientePedidos: () => apiRequest('/cliente/pedidos', { role: 'cliente' }),
+  clienteCancelarPedido: (id) => apiRequest(`/cliente/pedidos/${id}/cancelar`, { method: 'POST', role: 'cliente' }),
+  clienteReclamo: (id, motivo, descripcion) => apiRequest(`/cliente/pedidos/${id}/reclamo`, { method: 'POST', body: { motivo, descripcion }, role: 'cliente' }),
+  clienteReclamosPedido: (id) => apiRequest(`/cliente/pedidos/${id}/reclamos`, { role: 'cliente' }),
 };
 
 function uploadsUrl(path) {
