@@ -34,7 +34,7 @@ function irAVista(vista) {
   if (vista === 'tiendas') cargarTiendas();
   if (vista === 'repartidores') cargarRepartidores();
   if (vista === 'usuarios') cargarUsuarios();
-  if (vista === 'reclamos') { cargarReclamos(); cargarPagosRetenidos(); }
+  if (vista === 'reclamos') { cargarReclamos(); cargarPagosRetenidos(); cargarObservaciones(); }
   if (vista === 'auditoria') cargarAuditoria();
 }
 
@@ -906,33 +906,239 @@ const MOTIVO_RECLAMO_LABELS = {
   producto_incorrecto: 'No era lo que pidió',
   producto_danado: 'Llegó dañado/golpeado',
   no_recibido: 'No recibió el pedido',
+  trato_del_personal: 'Trato del personal',
   otro: 'Otro',
 };
 const ESTADO_RECLAMO_LABELS = { abierto: 'Abierto', en_revision: 'En revisión', resuelto: 'Resuelto' };
 
 async function cargarReclamos(estado = '') {
-  const tbody = document.getElementById('tabla-reclamos');
-  tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Cargando...</td></tr>';
+  const cont = document.getElementById('lista-reclamos');
+  cont.innerHTML = '<p class="text-muted">Cargando...</p>';
   try {
     const reclamos = await Api.adminReclamos(estado);
     if (reclamos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-muted">Sin reclamos por ahora</td></tr>';
+      cont.innerHTML = '<p class="text-muted">Sin reclamos por ahora.</p>';
       return;
     }
-    tbody.innerHTML = reclamos.map((r) => `
-      <tr>
-        <td>${new Date(r.created_at).toLocaleString('es-PE')}</td>
-        <td>#${r.pedido_id.slice(0,8).toUpperCase()}</td>
-        <td>${r.cliente_nombre || '—'}</td>
-        <td>${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</td>
-        <td class="text-sm" style="max-width:220px;">${r.descripcion || '—'}</td>
-        <td><span class="badge badge-${r.estado === 'resuelto' ? 'entregado' : 'pendiente_pago'}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span></td>
-        <td>${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-sm" data-resolver="${r.id}">Resolver</button>` : '—'}</td>
-      </tr>
-    `).join('');
-    tbody.querySelectorAll('[data-resolver]').forEach((btn) => btn.addEventListener('click', () => abrirModalResolverReclamo(btn.dataset.resolver)));
+    cont.innerHTML = reclamos.map((r) => {
+      const dias = r.dias_habiles_restantes;
+      let plazoHtml = '';
+      if (r.estado !== 'resuelto' && dias !== null && dias !== undefined) {
+        const urgente = dias <= 1;
+        const texto = dias <= 0 ? 'Plazo vencido' : `${dias} ${dias === 1 ? 'día hábil' : 'días hábiles'} para responder`;
+        plazoHtml = `<span style="display:inline-block; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; background:${urgente ? '#fde3e1' : '#fff2e0'};color:${urgente ? 'var(--rojo-alerta)' : '#b7690a'};">⏳ ${texto}</span>`;
+      }
+      return `
+      <div class="card card-pad mt-8" style="background:var(--arena-100);">
+        <div class="flex justify-between items-center" style="flex-wrap:wrap; gap:8px;">
+          <div class="text-sm text-muted">${new Date(r.created_at).toLocaleString('es-PE')} · ${r.origen === 'admin' ? '☎️ Registrado por admin' : '📱 Desde la app'}</div>
+          <span class="badge badge-${r.estado === 'resuelto' ? 'entregado' : 'pendiente_pago'}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span>
+        </div>
+        <div class="mt-8"><strong>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</strong>${r.dni_ce ? ` · ${(r.tipo_documento || '').toUpperCase()} ${r.dni_ce}` : ''}</div>
+        <div class="text-sm text-muted mt-8">
+          ${r.telefono_contacto ? `📞 ${r.telefono_contacto}${r.permite_whatsapp ? ' (acepta WhatsApp)' : ''}` : ''}
+          ${r.email_contacto ? ` · ✉️ ${r.email_contacto}` : ''}
+        </div>
+        ${r.cuenta_nombre ? `<div class="text-sm text-muted mt-8">Cuenta registrada: ${r.cuenta_nombre} (${r.cuenta_email || 'sin correo'})</div>` : ''}
+        ${r.pedido_id ? `<div class="text-sm text-muted mt-8">Pedido #${r.pedido_id.slice(0,8).toUpperCase()} · ${r.pedido_estado || ''}</div>` : ''}
+        <div class="mt-8"><strong>${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</strong></div>
+        ${r.descripcion ? `<div class="text-sm mt-8">${r.descripcion}</div>` : ''}
+        ${r.imagenes && r.imagenes.length > 0 ? `
+          <div class="flex gap-8 mt-8" style="flex-wrap:wrap;">
+            ${r.imagenes.map((url) => `<a href="${url}" target="_blank"><img src="${url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;"></a>`).join('')}
+          </div>
+        ` : ''}
+        ${r.resolucion ? `<div class="text-sm mt-8" style="color:var(--verde-palma);"><strong>Resolución:</strong> ${r.resolucion}</div>` : ''}
+        <div class="flex justify-between items-center mt-8">
+          <div>${plazoHtml}</div>
+          ${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-sm" data-resolver="${r.id}">Resolver</button>` : ''}
+        </div>
+      </div>
+    `;
+    }).join('');
+    cont.querySelectorAll('[data-resolver]').forEach((btn) => btn.addEventListener('click', () => abrirModalResolverReclamo(btn.dataset.resolver)));
   } catch (err) {
-    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="7" class="form-error">${err.message}</td></tr>`;
+    if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
+  }
+}
+
+// ---------- Registrar reclamo (intake manual: telefono/WhatsApp) ----------
+document.getElementById('btn-registrar-reclamo').addEventListener('click', () => abrirModalRegistrarReclamo());
+
+function abrirModalRegistrarReclamo() {
+  let cuentaEncontrada = null;
+  const imagenesSubidas = [];
+
+  abrirModal(`
+    <h3>Registrar reclamo</h3>
+    <p class="text-sm text-muted">Para reclamos recibidos por teléfono, WhatsApp o en persona.</p>
+
+    <div class="form-grupo mt-16"><label>Tipo de documento</label>
+      <select id="rr-tipo-doc"><option value="dni">DNI</option><option value="ce">Carné de Extranjería (CE)</option></select>
+    </div>
+    <div class="form-grupo"><label>Número de documento</label>
+      <div class="flex" style="gap:8px;">
+        <input id="rr-dni-ce" inputmode="numeric" style="flex:1;">
+        <button type="button" class="btn btn-outline btn-sm" id="rr-buscar-doc">Buscar</button>
+      </div>
+    </div>
+    <div class="form-grupo"><label>Nombre</label><input id="rr-nombre" placeholder="Se completa automáticamente al buscar"></div>
+    <div class="form-grupo"><label>Teléfono de contacto</label><input id="rr-telefono"></div>
+    <div class="form-grupo flex justify-between items-center">
+      <label class="mb-0">¿Acepta que lo contactemos por WhatsApp?</label>
+      <span class="toggle-switch"><input type="checkbox" id="rr-whatsapp"><span class="toggle-slider"></span></span>
+    </div>
+    <div class="form-grupo"><label>Correo (opcional)</label>
+      <div class="flex" style="gap:8px;">
+        <input id="rr-email" type="email" style="flex:1;">
+        <button type="button" class="btn btn-outline btn-sm" id="rr-buscar-cuenta">Buscar cuenta</button>
+      </div>
+      <p class="text-sm text-muted mt-8" id="rr-cuenta-resultado"></p>
+    </div>
+    <div class="form-grupo"><label>ID del pedido (opcional)</label><input id="rr-pedido-id" placeholder="Cópialo de la pestaña Pedidos"></div>
+    <div class="form-grupo"><label>Motivo</label>
+      <select id="rr-motivo">${Object.entries(MOTIVO_RECLAMO_LABELS).map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select>
+    </div>
+    <div class="form-grupo"><label>Descripción</label><textarea id="rr-descripcion" placeholder="¿Qué pasó?"></textarea></div>
+    <div class="form-grupo"><label>Imágenes como evidencia (opcional)</label><input type="file" id="rr-imagenes" accept="image/*" multiple></div>
+    <div id="rr-error" class="form-error hidden"></div>
+    <button class="btn btn-primary btn-block" id="btn-guardar-reclamo">Registrar reclamo</button>
+  `);
+
+  document.getElementById('rr-buscar-doc').addEventListener('click', async () => {
+    const tipo = document.getElementById('rr-tipo-doc').value;
+    const numero = document.getElementById('rr-dni-ce').value.trim();
+    const btn = document.getElementById('rr-buscar-doc');
+    if (!numero) { mostrarToast('Ingresa el número de documento', 'error'); return; }
+    btn.disabled = true; btn.textContent = 'Buscando...';
+    try {
+      const { nombre } = tipo === 'dni' ? await Api.consultarDni(numero) : await Api.consultarCe(numero);
+      document.getElementById('rr-nombre').value = nombre || '';
+      mostrarToast(nombre ? 'Nombre encontrado' : 'No se encontró, ingresa el nombre manualmente', nombre ? 'success' : 'error');
+    } catch (err) {
+      mostrarToast(err.message || 'No se pudo consultar', 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Buscar';
+    }
+  });
+
+  document.getElementById('rr-buscar-cuenta').addEventListener('click', async () => {
+    const email = document.getElementById('rr-email').value.trim();
+    const resultado = document.getElementById('rr-cuenta-resultado');
+    if (!email) { mostrarToast('Ingresa un correo', 'error'); return; }
+    try {
+      const cuenta = await Api.adminBuscarUsuarioPorEmail(email);
+      cuentaEncontrada = cuenta;
+      if (cuenta) {
+        resultado.textContent = `✓ Cuenta encontrada: ${cuenta.nombre} · ${cuenta.telefono}`;
+        resultado.style.color = 'var(--verde-palma)';
+        if (!document.getElementById('rr-nombre').value) document.getElementById('rr-nombre').value = cuenta.nombre;
+        if (!document.getElementById('rr-telefono').value) document.getElementById('rr-telefono').value = cuenta.telefono;
+      } else {
+        resultado.textContent = 'No hay ninguna cuenta registrada con ese correo.';
+        resultado.style.color = 'var(--tinta-300)';
+      }
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  });
+
+  document.getElementById('btn-guardar-reclamo').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-guardar-reclamo');
+    const errBox = document.getElementById('rr-error');
+    errBox.classList.add('hidden');
+    const nombre_reclamante = document.getElementById('rr-nombre').value.trim();
+    const telefono_contacto = document.getElementById('rr-telefono').value.trim();
+    if (!nombre_reclamante || !telefono_contacto) {
+      errBox.textContent = 'Nombre y teléfono de contacto son obligatorios';
+      errBox.classList.remove('hidden');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Registrando...';
+    try {
+      const archivos = Array.from(document.getElementById('rr-imagenes').files || []);
+      for (const file of archivos) {
+        const fd = new FormData();
+        fd.append('imagen', file);
+        const { url } = await Api.adminSubirImagen(fd, 'reclamos');
+        imagenesSubidas.push(url);
+      }
+      await Api.adminRegistrarReclamo({
+        pedido_id: document.getElementById('rr-pedido-id').value.trim() || null,
+        usuario_id: cuentaEncontrada ? cuentaEncontrada.id : null,
+        motivo: document.getElementById('rr-motivo').value,
+        descripcion: document.getElementById('rr-descripcion').value.trim(),
+        tipo_documento: document.getElementById('rr-tipo-doc').value,
+        dni_ce: document.getElementById('rr-dni-ce').value.trim(),
+        nombre_reclamante,
+        telefono_contacto,
+        email_contacto: document.getElementById('rr-email').value.trim(),
+        permite_whatsapp: document.getElementById('rr-whatsapp').checked,
+        imagenes: imagenesSubidas,
+      });
+      mostrarToast('Reclamo registrado', 'success');
+      cerrarModal();
+      cargarReclamos();
+    } catch (err) {
+      errBox.textContent = err.message;
+      errBox.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Registrar reclamo';
+    }
+  });
+}
+
+// ---------- Observaciones de repartidores ----------
+const TIPO_OBSERVACION_LABELS = {
+  entrega_incorrecta: 'Entrega incorrecta',
+  producto_danado: 'Producto dañado',
+  falta_respeto: 'Falta de respeto',
+  acoso: 'Acoso',
+  otro: 'Otro',
+};
+
+async function cargarObservaciones() {
+  const cont = document.getElementById('lista-observaciones');
+  cont.innerHTML = '<p class="text-muted">Cargando...</p>';
+  try {
+    const obs = await Api.adminObservacionesRepartidor('pendiente_revision');
+    if (obs.length === 0) {
+      cont.innerHTML = '<p class="text-muted">No hay observaciones pendientes de revisión.</p>';
+      return;
+    }
+    cont.innerHTML = obs.map((o) => `
+      <div class="card card-pad mt-8">
+        <div class="flex justify-between items-center">
+          <div class="text-sm text-muted">${new Date(o.created_at).toLocaleString('es-PE')} · Repartidor: ${o.repartidor_nombre}</div>
+          <span class="tag" style="background:${o.dirigido_a === 'cliente' ? '#fde3e1' : '#fff2e0'};color:${o.dirigido_a === 'cliente' ? 'var(--rojo-alerta)' : '#b7690a'};">
+            Sobre ${o.dirigido_a === 'cliente' ? 'el cliente' : 'la tienda'}
+          </span>
+        </div>
+        <div class="mt-8"><strong>${TIPO_OBSERVACION_LABELS[o.tipo] || o.tipo}</strong> · Pedido #${o.pedido_id.slice(0,8).toUpperCase()} · Cliente: ${o.cliente_nombre}</div>
+        ${o.descripcion ? `<div class="text-sm mt-8">${o.descripcion}</div>` : ''}
+        <div class="flex gap-8 mt-8">
+          <button class="btn btn-outline btn-sm w-full" data-descartar-obs="${o.id}">Descartar</button>
+          <button class="btn btn-primary btn-sm w-full" data-confirmar-obs="${o.id}">Confirmar</button>
+        </div>
+      </div>
+    `).join('');
+    cont.querySelectorAll('[data-confirmar-obs]').forEach((btn) => btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      try {
+        const r = await Api.adminConfirmarObservacion(btn.dataset.confirmarObs);
+        mostrarToast(r.accion_automatica ? `Confirmado. Cuenta del cliente: ${r.accion_automatica}` : 'Observación confirmada', 'success');
+        cargarObservaciones();
+      } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
+    }));
+    cont.querySelectorAll('[data-descartar-obs]').forEach((btn) => btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      try {
+        await Api.adminDescartarObservacion(btn.dataset.descartarObs);
+        mostrarToast('Observación descartada', 'success');
+        cargarObservaciones();
+      } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
+    }));
+  } catch (err) {
+    if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
   }
 }
 

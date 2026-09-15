@@ -100,6 +100,7 @@ async function cargarActivos() {
             <button class="btn btn-ghost btn-block mt-8" data-sin-pin="${p.id}" style="color:var(--tinta-300);">Entregó pero no dio el código</button>
           ` : ''}
           ${!['listo_recoger','recogido'].includes(p.estado) ? `<div class="text-sm text-muted text-center">⏳ Esperando que la tienda prepare el pedido...</div>` : ''}
+          ${['listo_recoger','recogido'].includes(p.estado) ? `<button class="btn btn-ghost btn-block mt-8" data-observacion="${p.id}" style="color:var(--rojo-alerta);">⚠️ Reportar un problema</button>` : ''}
         </div>
       </div>
     `).join('');
@@ -115,6 +116,7 @@ async function cargarActivos() {
     cont.querySelectorAll('[data-entregar]').forEach((btn) => btn.addEventListener('click', () => abrirModalPin(btn.dataset.entregar)));
     cont.querySelectorAll('[data-rechazado]').forEach((btn) => btn.addEventListener('click', () => abrirModalRechazado(btn.dataset.rechazado)));
     cont.querySelectorAll('[data-sin-pin]').forEach((btn) => btn.addEventListener('click', () => abrirModalSinPin(btn.dataset.sinPin)));
+    cont.querySelectorAll('[data-observacion]').forEach((btn) => btn.addEventListener('click', () => abrirModalObservacion(btn.dataset.observacion)));
   } catch (err) {
     if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
   }
@@ -149,6 +151,60 @@ function abrirModalRechazado(pedidoId) {
   });
 }
 
+const TIPOS_OBSERVACION_REPARTIDOR = {
+  tienda: { entrega_incorrecta: 'La tienda me entregó el producto equivocado', producto_danado: 'El producto ya venía dañado', otro: 'Otro problema con la tienda' },
+  cliente: { falta_respeto: 'El cliente me faltó el respeto', acoso: 'El cliente me acosó', otro: 'Otro problema con el cliente' },
+};
+
+function abrirModalObservacion(pedidoId) {
+  abrirModal(`
+    <div class="text-center">
+      <div style="font-size:38px;">⚠️</div>
+      <h3>Reportar un problema</h3>
+      <p class="text-muted text-sm">Un administrador lo revisará antes de que quede registrado.</p>
+    </div>
+    <div class="form-grupo mt-16">
+      <label>¿Sobre quién es?</label>
+      <select id="obs-dirigido">
+        <option value="tienda">La tienda</option>
+        <option value="cliente">El cliente</option>
+      </select>
+    </div>
+    <div class="form-grupo">
+      <label>Tipo</label>
+      <select id="obs-tipo"></select>
+    </div>
+    <div class="form-grupo">
+      <label>Cuéntanos qué pasó</label>
+      <textarea id="obs-descripcion" placeholder="Describe la situación..."></textarea>
+    </div>
+    <div id="obs-error" class="form-error hidden text-center"></div>
+    <button class="btn btn-primary btn-block mt-8" id="btn-enviar-observacion">Enviar reporte</button>
+  `);
+
+  const selectDirigido = document.getElementById('obs-dirigido');
+  const selectTipo = document.getElementById('obs-tipo');
+  function actualizarTipos() {
+    const opciones = TIPOS_OBSERVACION_REPARTIDOR[selectDirigido.value];
+    selectTipo.innerHTML = Object.entries(opciones).map(([v, t]) => `<option value="${v}">${t}</option>`).join('');
+  }
+  actualizarTipos();
+  selectDirigido.addEventListener('change', actualizarTipos);
+
+  document.getElementById('btn-enviar-observacion').addEventListener('click', async () => {
+    const descripcion = document.getElementById('obs-descripcion').value.trim();
+    const errorBox = document.getElementById('obs-error');
+    try {
+      await Api.repartidorObservacion(pedidoId, selectDirigido.value, selectTipo.value, descripcion);
+      mostrarToast('Reporte enviado. Un administrador lo revisará.', 'success');
+      cerrarModal();
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.remove('hidden');
+    }
+  });
+}
+
 function abrirModalSinPin(pedidoId) {
   abrirModal(`
     <div class="text-center">
@@ -163,9 +219,9 @@ function abrirModalSinPin(pedidoId) {
     try {
       const r = await Api.repartidorEntregarSinPin(pedidoId);
       mostrarToast(r.mensaje || 'Entrega registrada como observada', 'success');
-      cerrarModal();
       cargarActivos();
       cargarPerfil();
+      abrirModalEncuesta(pedidoId);
     } catch (err) {
       const errorBox = document.getElementById('sin-pin-error');
       errorBox.textContent = err.message;
@@ -227,12 +283,57 @@ function abrirModalPin(pedidoId) {
     try {
       await Api.repartidorEntregar(pedidoId, pin);
       mostrarToast('¡Entrega confirmada!', 'success');
-      cerrarModal();
       cargarActivos();
       cargarPerfil();
+      abrirModalEncuesta(pedidoId);
     } catch (err) {
       errorBox.textContent = err.message || 'PIN incorrecto';
       errorBox.classList.remove('hidden');
+    }
+  });
+}
+
+// ---------- Encuesta de entrega (obligatoria tras cada entrega) ----------
+function abrirModalEncuesta(pedidoId) {
+  const root = document.getElementById('modal-root');
+  // Sin cierre al tocar fuera: la encuesta es obligatoria tras cada entrega.
+  root.innerHTML = `
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal-box">
+        <div class="text-center">
+          <div style="font-size:38px;">📋</div>
+          <h3>¿Cómo fue la entrega?</h3>
+          <p class="text-muted text-sm">Ayúdanos a mantener la comunidad segura respondiendo esto.</p>
+        </div>
+        <div class="form-grupo mt-16 flex justify-between items-center">
+          <label class="mb-0">¿El cliente fue amable contigo?</label>
+          <span class="toggle-switch"><input type="checkbox" id="enc-amable" checked><span class="toggle-slider"></span></span>
+        </div>
+        <div class="form-grupo flex justify-between items-center">
+          <label class="mb-0">¿Hubo algún problema?</label>
+          <span class="toggle-switch"><input type="checkbox" id="enc-problema"><span class="toggle-slider"></span></span>
+        </div>
+        <div class="form-grupo">
+          <label>Comentario (opcional)</label>
+          <textarea id="enc-comentario" placeholder="Cuéntanos si quieres agregar algo..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-block mt-8" id="btn-enviar-encuesta">Enviar</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('btn-enviar-encuesta').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-enviar-encuesta');
+    btn.disabled = true;
+    try {
+      await Api.repartidorEncuesta(pedidoId, {
+        cliente_amable: document.getElementById('enc-amable').checked,
+        hubo_problema: document.getElementById('enc-problema').checked,
+        comentario: document.getElementById('enc-comentario').value.trim(),
+      });
+      cerrarModal();
+    } catch (err) {
+      mostrarToast(err.message, 'error');
+      btn.disabled = false;
     }
   });
 }

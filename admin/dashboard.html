@@ -242,20 +242,24 @@
         </div>
       </div>
 
+      <div class="card card-pad mb-16" id="card-observaciones-repartidor">
+        <h3>Observaciones de repartidores</h3>
+        <p class="text-muted text-sm">Reportes de repartidores sobre una tienda que entregó mal, o un cliente que se portó mal. Al confirmar una dirigida a un cliente, se suma a su historial de incidentes.</p>
+        <div id="lista-observaciones" class="mt-8"></div>
+      </div>
+
       <div class="card card-pad">
-        <h3>Reclamos de clientes</h3>
-        <div class="filtros" id="filtro-reclamos">
+        <div class="flex justify-between items-center" style="flex-wrap:wrap; gap:8px;">
+          <h3 class="mb-0">Reclamos de clientes</h3>
+          <button class="btn btn-primary btn-sm" id="btn-registrar-reclamo">+ Registrar reclamo</button>
+        </div>
+        <div class="filtros mt-8" id="filtro-reclamos">
           <button class="chip activo" data-estado="">Todos</button>
           <button class="chip" data-estado="abierto">Abiertos</button>
           <button class="chip" data-estado="en_revision">En revisión</button>
           <button class="chip" data-estado="resuelto">Resueltos</button>
         </div>
-        <div class="table-wrap mt-8">
-          <table>
-            <thead><tr><th>Fecha</th><th>Pedido</th><th>Cliente</th><th>Motivo</th><th>Descripción</th><th>Estado</th><th></th></tr></thead>
-            <tbody id="tabla-reclamos"></tbody>
-          </table>
-        </div>
+        <div id="lista-reclamos" class="mt-8"></div>
       </div>
     </section>
 

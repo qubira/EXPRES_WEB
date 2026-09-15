@@ -103,20 +103,28 @@ function renderReclamoModal(pedidoId) {
       <label>Cuéntanos más (opcional)</label>
       <textarea id="reclamo-descripcion" placeholder="Describe lo que pasó..."></textarea>
     </div>
+    <div class="form-grupo">
+      <label>Fotos como evidencia (opcional, hasta 4)</label>
+      <input type="file" id="reclamo-imagenes" accept="image/*" multiple>
+    </div>
     <div id="reclamo-error" class="form-error hidden"></div>
     <button class="btn btn-primary btn-block mt-8" id="btn-enviar-reclamo">Enviar reclamo</button>
   `);
-  document.getElementById('btn-enviar-reclamo').addEventListener('click', async () => {
+  document.getElementById('btn-enviar-reclamo').addEventListener('click', async (e) => {
     const motivo = document.getElementById('reclamo-motivo').value;
     const descripcion = document.getElementById('reclamo-descripcion').value.trim();
+    const imagenes = Array.from(document.getElementById('reclamo-imagenes').files || []);
     const errBox = document.getElementById('reclamo-error');
+    const btn = e.currentTarget;
+    btn.disabled = true;
     try {
-      await Api.clienteReclamo(pedidoId, motivo, descripcion);
+      await Api.clienteReclamo(pedidoId, motivo, descripcion, imagenes);
       cerrarModal();
       mostrarToast('Reclamo enviado. Un administrador lo revisará pronto.', 'success');
     } catch (err) {
       errBox.textContent = err.message;
       errBox.classList.remove('hidden');
+      btn.disabled = false;
     }
   });
 }

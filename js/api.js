@@ -93,8 +93,13 @@ const Api = {
   adminReactivarUsuario: (id) => apiRequest(`/admin/usuarios/${id}/reactivar`, { method: 'POST', role: 'admin' }),
   adminReclamos: (estado) => apiRequest(`/admin/reclamos${estado ? `?estado=${estado}` : ''}`, { role: 'admin' }),
   adminResolverReclamo: (id, data) => apiRequest(`/admin/reclamos/${id}/resolver`, { method: 'POST', body: data, role: 'admin' }),
+  adminRegistrarReclamo: (data) => apiRequest('/admin/reclamos', { method: 'POST', body: data, role: 'admin' }),
+  adminBuscarUsuarioPorEmail: (email) => apiRequest(`/admin/usuarios/buscar-por-email?email=${encodeURIComponent(email)}`, { role: 'admin' }),
   adminPedidosRetenidos: () => apiRequest('/admin/pedidos-retenidos', { role: 'admin' }),
   adminLiberarPago: (pedidoId) => apiRequest(`/admin/pedidos/${pedidoId}/liberar-pago`, { method: 'POST', role: 'admin' }),
+  adminObservacionesRepartidor: (estado) => apiRequest(`/admin/observaciones-repartidor${estado ? `?estado=${estado}` : ''}`, { role: 'admin' }),
+  adminConfirmarObservacion: (id) => apiRequest(`/admin/observaciones-repartidor/${id}/confirmar`, { method: 'POST', role: 'admin' }),
+  adminDescartarObservacion: (id) => apiRequest(`/admin/observaciones-repartidor/${id}/descartar`, { method: 'POST', role: 'admin' }),
   adminSubirImagen: (formData, carpeta = 'repartidores') => apiRequest(`/admin/upload?carpeta=${carpeta}`, { method: 'POST', body: formData, isForm: true, role: 'admin' }),
 
   // Tienda
@@ -124,6 +129,8 @@ const Api = {
   repartidorEntregarSinPin: (id) => apiRequest(`/repartidor/pedidos/${id}/entregar-sin-pin`, { method: 'POST', role: 'repartidor' }),
   repartidorRechazado: (id, motivo) => apiRequest(`/repartidor/pedidos/${id}/rechazado`, { method: 'POST', body: { motivo }, role: 'repartidor' }),
   repartidorUbicacion: (id, lat, lng) => apiRequest(`/repartidor/pedidos/${id}/ubicacion`, { method: 'POST', body: { lat, lng }, role: 'repartidor' }),
+  repartidorObservacion: (id, dirigido_a, tipo, descripcion) => apiRequest(`/repartidor/pedidos/${id}/observacion`, { method: 'POST', body: { dirigido_a, tipo, descripcion }, role: 'repartidor' }),
+  repartidorEncuesta: (id, data) => apiRequest(`/repartidor/pedidos/${id}/encuesta`, { method: 'POST', body: data, role: 'repartidor' }),
 
   // Cliente (cuenta de usuario)
   clienteRegistro: (data) => apiRequest('/cliente/registro', { method: 'POST', body: data }),
@@ -135,7 +142,16 @@ const Api = {
   clienteActualizarZona: (zona) => apiRequest('/cliente/zona', { method: 'POST', body: { zona }, role: 'cliente' }),
   clientePedidos: () => apiRequest('/cliente/pedidos', { role: 'cliente' }),
   clienteCancelarPedido: (id) => apiRequest(`/cliente/pedidos/${id}/cancelar`, { method: 'POST', role: 'cliente' }),
-  clienteReclamo: (id, motivo, descripcion) => apiRequest(`/cliente/pedidos/${id}/reclamo`, { method: 'POST', body: { motivo, descripcion }, role: 'cliente' }),
+  clienteReclamo: (id, motivo, descripcion, imagenes = []) => {
+    if (imagenes.length === 0) {
+      return apiRequest(`/cliente/pedidos/${id}/reclamo`, { method: 'POST', body: { motivo, descripcion }, role: 'cliente' });
+    }
+    const fd = new FormData();
+    fd.append('motivo', motivo);
+    fd.append('descripcion', descripcion || '');
+    imagenes.forEach((f) => fd.append('imagenes', f));
+    return apiRequest(`/cliente/pedidos/${id}/reclamo`, { method: 'POST', body: fd, isForm: true, role: 'cliente' });
+  },
   clienteReclamosPedido: (id) => apiRequest(`/cliente/pedidos/${id}/reclamos`, { role: 'cliente' }),
 };
 
