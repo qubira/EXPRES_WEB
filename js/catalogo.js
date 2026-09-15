@@ -64,6 +64,7 @@ function tarjetaProducto(p, index) {
     <div class="pcard fade-in-up" data-id="${p.id}" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
         ${media}
+        <button class="heart-btn ${esFavorito(p.id) ? 'activo' : ''}" data-fav="${p.id}" aria-label="Favorito">${esFavorito(p.id) ? '❤️' : '🤍'}</button>
         <div class="pcard-control" data-control="${p.id}">${controlHtml(p)}</div>
       </div>
       <div class="pcard-body">
@@ -157,6 +158,15 @@ async function cargarProductos(mostrarCarga = true) {
       card.style.cursor = 'pointer';
       card.addEventListener('click', () => {
         location.href = `producto.html?id=${card.dataset.abrir}`;
+      });
+    });
+    grid.querySelectorAll('[data-fav]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const activo = toggleFavorito(btn.dataset.fav);
+        btn.textContent = activo ? '❤️' : '🤍';
+        btn.classList.toggle('activo', activo);
       });
     });
   } catch (err) {

@@ -584,6 +584,7 @@ p { margin: 0 0 1rem; }
 /* ---------- Pagina de detalle de producto ---------- */
 .producto-layout { overflow: hidden; }
 .producto-media {
+  position: relative;
   height: 280px;
   background: linear-gradient(135deg, var(--mar-300), var(--mar-500));
   background-size: cover;
@@ -1007,14 +1008,6 @@ textarea { resize: vertical; min-height: 80px; }
   .panel-sidebar { display: flex; }
   .panel-mobile-nav { display: none; }
   .panel-main { padding: 32px; padding-bottom: 32px; }
-}
-
-/* Centra el contenido de los paneles en monitores muy anchos */
-@media (min-width: 1300px) {
-  .panel-main {
-    padding-left: max(32px, calc((100% - 1200px) / 2));
-    padding-right: max(32px, calc((100% - 1200px) / 2));
-  }
 }
 
 .stat-card {

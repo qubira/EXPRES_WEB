@@ -129,6 +129,7 @@ function tarjetaSimilar(p, index) {
     <div class="pcard fade-in-up" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
         ${media}
+        <button class="heart-btn ${esFavorito(p.id) ? 'activo' : ''}" data-fav="${p.id}" aria-label="Favorito">${esFavorito(p.id) ? '❤️' : '🤍'}</button>
         <div class="pcard-control" data-control="${p.id}">${controlTarjetaHtml(p)}</div>
       </div>
       <div class="pcard-body">
@@ -163,9 +164,24 @@ async function cargarProducto() {
       media.style.backgroundImage = `url('${p.foto_url}')`;
       media.style.backgroundSize = 'cover';
       media.style.backgroundPosition = 'center';
+      media.textContent = '';
     } else {
       media.textContent = icon;
     }
+    // ojo: cargarProducto se re-ejecuta con el auto-refresco, asi que este boton
+    // se reutiliza si ya existe en vez de duplicarse en cada ciclo.
+    let btnFav = document.getElementById('btn-favorito-producto');
+    if (!btnFav) {
+      media.insertAdjacentHTML('beforeend', `<button class="heart-btn" id="btn-favorito-producto" aria-label="Favorito"></button>`);
+      btnFav = document.getElementById('btn-favorito-producto');
+      btnFav.addEventListener('click', () => {
+        const activo = toggleFavorito(p.id);
+        btnFav.textContent = activo ? '❤️' : '🤍';
+        btnFav.classList.toggle('activo', activo);
+      });
+    }
+    btnFav.textContent = esFavorito(p.id) ? '❤️' : '🤍';
+    btnFav.classList.toggle('activo', esFavorito(p.id));
 
     document.getElementById('producto-tags').innerHTML = `
       <span class="tag">${p.categoria}</span>
@@ -198,6 +214,15 @@ async function cargarProducto() {
         card.style.cursor = 'pointer';
         card.addEventListener('click', () => {
           location.href = `producto.html?id=${card.dataset.abrir}`;
+        });
+      });
+      gridSimilares.querySelectorAll('[data-fav]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const activo = toggleFavorito(btn.dataset.fav);
+          btn.textContent = activo ? '❤️' : '🤍';
+          btn.classList.toggle('activo', activo);
         });
       });
     }
