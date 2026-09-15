@@ -216,6 +216,18 @@ async function abrirModalEditarTienda(t) {
   const zonaHtml = await zonaOptionsHtml(t.zona || '');
   abrirModal(`
     <h3>${t.nombre}</h3>
+    <div class="form-grupo">
+      <label>Logo / imagen del negocio</label>
+      <label class="file-drop ${t.logo_url ? 'con-imagen' : ''}" id="e-logo-drop">
+        <input type="file" id="e-logo-file" accept="image/*" class="file-drop-input">
+        <img id="e-logo-preview" class="file-drop-preview" src="${t.logo_url || ''}" style="${t.logo_url ? '' : 'display:none;'}">
+        <div id="e-logo-placeholder" style="${t.logo_url ? 'display:none;' : 'display:flex;flex-direction:column;align-items:center;gap:6px;'}">
+          <span class="file-drop-icon">🏪</span>
+          <span class="file-drop-text">Toca para subir el logo</span>
+          <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+        </div>
+      </label>
+    </div>
     <div class="form-grupo"><label>Email (login)</label><input value="${t.email || ''}" readonly style="opacity:0.7;"></div>
     <div class="form-grupo"><label>Nombre</label><input id="e-nombre" value="${t.nombre}"></div>
     <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
@@ -252,11 +264,34 @@ async function abrirModalEditarTienda(t) {
   `);
   habilitarBuscarDni('e-dni', 'e-nombre-titular', 'e-buscar-dni');
   habilitarAgregarTipoNegocio('e-categoria', 'e-categoria-add', 'admin');
+  let eLogoUrl = t.logo_url || '';
+  document.getElementById('e-logo-file').addEventListener('change', async (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const preview = document.getElementById('e-logo-preview');
+    const placeholder = document.getElementById('e-logo-placeholder');
+    const drop = document.getElementById('e-logo-drop');
+    try {
+      const fd = new FormData();
+      fd.append('imagen', file);
+      mostrarToast('Subiendo logo...', '');
+      const { url } = await Api.adminSubirImagen(fd, 'tiendas');
+      eLogoUrl = url;
+      preview.src = url;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+      drop.classList.add('con-imagen');
+      mostrarToast('Logo subido', 'success');
+    } catch (err) {
+      mostrarToast(err.message || 'No se pudo subir el logo', 'error');
+    }
+  });
   document.getElementById('btn-guardar-tienda').addEventListener('click', async () => {
     try {
       await Api.adminActualizarTienda(t.id, {
         nombre: document.getElementById('e-nombre').value,
         categoria: document.getElementById('e-categoria').value,
+        logo_url: eLogoUrl,
         subcategoria: document.getElementById('e-subcategoria').value,
         descripcion: t.descripcion,
         dni_titular: document.getElementById('e-dni').value,
@@ -320,6 +355,29 @@ async function initVistaRegistro() {
   habilitarBuscarDni('rt-dni', 'rt-nombre-titular', 'rt-buscar-dni');
   habilitarAgregarTipoNegocio('rt-categoria', 'rt-categoria-add', 'admin');
 
+  let rtLogoUrl = '';
+  document.getElementById('rt-logo-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const preview = document.getElementById('rt-logo-preview');
+    const placeholder = document.getElementById('rt-logo-placeholder');
+    const drop = document.getElementById('rt-logo-drop');
+    try {
+      const fd = new FormData();
+      fd.append('imagen', file);
+      mostrarToast('Subiendo logo...', '');
+      const { url } = await Api.adminSubirImagen(fd, 'tiendas');
+      rtLogoUrl = url;
+      preview.src = url;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+      drop.classList.add('con-imagen');
+      mostrarToast('Logo subido', 'success');
+    } catch (err) {
+      mostrarToast(err.message || 'No se pudo subir el logo', 'error');
+    }
+  });
+
   const btnTienda = document.getElementById('btn-tipo-tienda');
   const btnRepartidor = document.getElementById('btn-tipo-repartidor');
   const formTienda = document.getElementById('form-registro-tienda');
@@ -352,10 +410,15 @@ async function initVistaRegistro() {
         contacto_whatsapp: document.getElementById('rt-whatsapp').value,
         email: document.getElementById('rt-email').value,
         password: document.getElementById('rt-password').value,
+        logo_url: rtLogoUrl,
       });
       mostrarToast('Tienda creada', 'success');
       formTienda.reset();
       document.getElementById('rt-nombre-titular').value = '';
+      rtLogoUrl = '';
+      document.getElementById('rt-logo-preview').style.display = 'none';
+      document.getElementById('rt-logo-placeholder').style.display = 'flex';
+      document.getElementById('rt-logo-drop').classList.remove('con-imagen');
       cargarTiendas();
     } catch (err) { mostrarToast(err.message, 'error'); }
   });

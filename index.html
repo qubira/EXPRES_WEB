@@ -199,7 +199,10 @@
 <script>
 async function cargarTiendasDestacadas() {
   const cont = document.getElementById('store-scroll');
-  const ICONOS = { comida:'🍢', bebidas:'🥤', ropa:'👙', servicios:'⛱️', artesanias:'🎨', otros:'🛍️' };
+  const ICONOS = {
+    tienda:'🏪', minimarket:'🏪', bazar:'🛍️', ferreteria:'🔧', heladeria:'🍦', restaurante:'🍢',
+    ambulante:'🛒', boutique:'👙', artesanias:'🎨', servicios_playa:'⛱️', otro:'🛍️',
+  };
   try {
     const tiendas = await Api.getTiendas();
     if (tiendas.length === 0) {
@@ -211,10 +214,10 @@ async function cargarTiendasDestacadas() {
       <div class="store-mini fade-in-up" style="animation-delay:${i * 60}ms; position:relative;">
         <button class="heart-btn ${esFavorito(t.id) ? 'activo' : ''}" data-fav="${t.id}" aria-label="Favorito">${esFavorito(t.id) ? '❤️' : '🤍'}</button>
         <a href="catalogo.html?categoria=${t.categoria}" style="display:block;">
-          <div class="store-mini-media">${ICONOS[t.categoria] || '🛍️'}</div>
+          <div class="store-mini-media">${t.logo_url ? `<img src="${t.logo_url}" alt="${t.nombre}" style="width:100%;height:100%;object-fit:cover;">` : (ICONOS[t.categoria] || '🛍️')}</div>
           <div class="store-mini-body">
             <strong>${t.nombre}</strong>
-            <span class="tag">${t.categoria}</span>
+            <span class="tag">${labelTipoNegocio(t.categoria)}</span>
             <span class="delivery-badge">🚲 S/5.00 · ${t.zona || 'Playa Ancón'}</span>
           </div>
         </a>

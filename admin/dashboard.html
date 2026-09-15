@@ -68,6 +68,18 @@
 
       <form id="form-registro-tienda" class="card card-pad" style="max-width:480px;">
         <h3>Registrar tienda</h3>
+        <div class="form-grupo">
+          <label>Logo / imagen del negocio</label>
+          <label class="file-drop" id="rt-logo-drop">
+            <input type="file" id="rt-logo-file" accept="image/*" class="file-drop-input">
+            <img id="rt-logo-preview" class="file-drop-preview" style="display:none;">
+            <div id="rt-logo-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <span class="file-drop-icon">🏪</span>
+              <span class="file-drop-text">Toca para subir el logo</span>
+              <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+            </div>
+          </label>
+        </div>
         <div class="form-grupo"><label>Nombre</label><input id="rt-nombre" required></div>
         <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
           <div class="flex" style="gap:8px;">
