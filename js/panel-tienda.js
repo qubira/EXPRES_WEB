@@ -266,6 +266,7 @@ async function cargarPerfilTienda() {
     document.getElementById('tp-categoria').value = p.categoria || 'tienda';
     document.getElementById('tp-subcategoria').value = p.subcategoria || '';
     document.getElementById('tp-descripcion').value = p.descripcion || '';
+    document.getElementById('tp-direccion').value = p.direccion || '';
     document.getElementById('tp-zona').innerHTML = await zonaOptionsHtml(p.zona || '');
     document.getElementById('tp-dni').value = p.dni_titular || '';
     document.getElementById('tp-nombre-titular').value = p.nombre_titular || '';
@@ -320,6 +321,7 @@ document.getElementById('form-perfil-tienda').addEventListener('submit', async (
       categoria: document.getElementById('tp-categoria').value,
       subcategoria: document.getElementById('tp-subcategoria').value,
       descripcion: document.getElementById('tp-descripcion').value,
+      direccion: document.getElementById('tp-direccion').value,
       zona: document.getElementById('tp-zona').value,
       dni_titular: document.getElementById('tp-dni').value,
       nombre_titular: document.getElementById('tp-nombre-titular').value,

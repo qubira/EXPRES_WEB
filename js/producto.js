@@ -203,6 +203,17 @@ async function cargarProducto() {
     document.getElementById('producto-tienda-nombre').textContent = p.tienda_nombre;
     document.getElementById('producto-tienda-zona').textContent = p.tienda_zona || '';
 
+    const direccionEl = document.getElementById('producto-tienda-direccion');
+    if (p.tienda_direccion) {
+      const esRestaurante = p.tienda_categoria === 'restaurante';
+      direccionEl.textContent = esRestaurante
+        ? `🍽️ Tiene local: ${p.tienda_direccion} — puedes ir a comer ahí`
+        : `📍 Local: ${p.tienda_direccion}`;
+      direccionEl.style.display = 'block';
+    } else {
+      direccionEl.style.display = 'none';
+    }
+
     const gridSimilares = document.getElementById('grid-similares');
     const similares = p.similares || [];
     if (similares.length === 0) {

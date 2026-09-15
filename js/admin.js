@@ -249,6 +249,7 @@ async function abrirModalEditarTienda(t) {
       </div>
     </div>
     <div class="form-grupo"><label>Nombre del titular</label><input id="e-nombre-titular" value="${t.nombre_titular || ''}" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
+    <div class="form-grupo"><label>Dirección del local (opcional)</label><input id="e-direccion" value="${t.direccion || ''}" placeholder="Ej. Malecón 123, frente a la playa"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="e-comision" type="number" step="0.5" value="${t.comision_pactada}"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="e-whatsapp" value="${t.contacto_whatsapp || ''}"></div>
     <div class="form-grupo flex justify-between items-center">
@@ -296,6 +297,7 @@ async function abrirModalEditarTienda(t) {
         descripcion: t.descripcion,
         dni_titular: document.getElementById('e-dni').value,
         nombre_titular: document.getElementById('e-nombre-titular').value,
+        direccion: document.getElementById('e-direccion').value,
         contacto_telefono: t.contacto_telefono,
         contacto_whatsapp: document.getElementById('e-whatsapp').value,
         zona: document.getElementById('e-zona').value,
@@ -406,6 +408,7 @@ async function initVistaRegistro() {
         zona: document.getElementById('rt-zona').value,
         dni_titular: document.getElementById('rt-dni').value,
         nombre_titular: document.getElementById('rt-nombre-titular').value,
+        direccion: document.getElementById('rt-direccion').value,
         comision_pactada: Number(document.getElementById('rt-comision').value),
         contacto_whatsapp: document.getElementById('rt-whatsapp').value,
         email: document.getElementById('rt-email').value,
