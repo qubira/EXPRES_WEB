@@ -1053,7 +1053,8 @@ th { color: var(--tinta-300); font-size: 12px; text-transform: uppercase; letter
   gap: 4px 24px;
 }
 @media (min-width: 680px) {
-  .modal-form-cols { grid-template-columns: 220px 1fr; align-items: start; }
+  .modal-form-cols { grid-template-columns: 240px 1fr; align-items: start; }
+  .modal-form-col-der { padding-left: 24px; border-left: 1px solid rgba(0,0,0,0.08); }
 }
 @media (min-width: 620px) {
   .modal-overlay { align-items: center; }

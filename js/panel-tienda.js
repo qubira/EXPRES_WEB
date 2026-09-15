@@ -130,7 +130,7 @@ function abrirModalProducto(p) {
   abrirModal(`
     <h3>${editando ? 'Editar producto' : 'Nuevo producto'}</h3>
     <div class="modal-form-cols mt-16">
-      <div>
+      <div class="modal-form-col-izq">
         <div class="form-grupo">
           <label>Foto del producto</label>
           <label class="file-drop ${p && p.foto_url ? 'con-imagen' : ''}" id="p-foto-drop">
@@ -144,6 +144,7 @@ function abrirModalProducto(p) {
           </label>
         </div>
         <div class="form-grupo"><label>URL de foto (opcional)</label><input id="p-foto" value="${p ? (p.foto_url||'') : ''}" placeholder="https://..."></div>
+        <div class="form-grupo"><label>Detalle (opcional)</label><textarea id="p-descripcion" rows="4">${p ? (p.descripcion||'') : ''}</textarea></div>
         ${editando ? `
           <div class="form-grupo flex justify-between items-center">
             <label class="mb-0">Producto activo</label>
@@ -154,7 +155,7 @@ function abrirModalProducto(p) {
           </div>
         ` : ''}
       </div>
-      <div>
+      <div class="modal-form-col-der">
         <div class="form-grupo"><label>Nombre</label><input id="p-nombre" value="${p ? p.nombre : ''}" required></div>
         <div class="form-grupo"><label>Marca (opcional)</label><input id="p-marca" value="${p ? (p.marca||'') : ''}" placeholder="Ej. Inca Kola, San Luis..."></div>
         <div class="grid-cols grid-cols-2">
@@ -170,7 +171,6 @@ function abrirModalProducto(p) {
           </div>
         </div>
         <div class="form-grupo"><label>Stock</label><input id="p-stock" type="number" value="${p ? p.stock : 10}" required></div>
-        <div class="form-grupo"><label>Detalle (opcional)</label><textarea id="p-descripcion">${p ? (p.descripcion||'') : ''}</textarea></div>
       </div>
     </div>
     <button class="btn btn-primary btn-block mt-8" id="btn-guardar-producto">${editando ? 'Guardar cambios' : 'Crear producto'}</button>
