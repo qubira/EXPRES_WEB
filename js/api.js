@@ -37,7 +37,10 @@ async function apiRequest(path, { method = 'GET', body, role, isForm = false } =
 
 const Api = {
   // Publico
-  getCategorias: () => apiRequest('/categorias'),
+  getCategorias: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return apiRequest(`/categorias${qs ? `?${qs}` : ''}`);
+  },
   getTiposNegocio: () => apiRequest('/tipos-negocio'),
   agregarTipoNegocio: (etiqueta, role) => apiRequest('/tipos-negocio', { method: 'POST', body: { etiqueta }, role }),
   getZonas: () => apiRequest('/zonas'),

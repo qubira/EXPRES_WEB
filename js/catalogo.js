@@ -42,7 +42,18 @@ function skeletonGrid(n) {
 }
 
 async function cargarFiltros() {
-  const categorias = await Api.getCategorias();
+  // Solo se muestran las categorias que de verdad tienen productos
+  // disponibles ahi (en esa tienda, o si no en esa zona): si no hay nada
+  // de "Artesanias", por ejemplo, ese chip ni aparece.
+  const params = tiendaIdActiva ? { tienda_id: tiendaIdActiva } : (getZonaGuardada() ? { zona: getZonaGuardada() } : {});
+  const categorias = await Api.getCategorias(params);
+
+  // Si el filtro activo ya no esta disponible (ej. cambio de zona), se
+  // vuelve a "Todo" en vez de quedar en un filtro invisible/vacio.
+  if (categoriaActiva && !categorias.includes(categoriaActiva)) {
+    categoriaActiva = '';
+  }
+
   const cont = document.getElementById('filtros');
   const todas = [{ valor: '', label: 'Todo' }, ...categorias.map((c) => ({ valor: c, label: `${CATEGORIAS_ICONOS[c] || ''} ${c[0].toUpperCase()}${c.slice(1)}` }))];
 
@@ -224,4 +235,4 @@ cargarProductos();
 mostrarFiltroTienda();
 actualizarCartBar();
 iniciarAutoRefresco(() => cargarProductos(false));
-document.addEventListener('zona-actualizada', () => cargarProductos());
+document.addEventListener('zona-actualizada', () => { cargarFiltros(); cargarProductos(); });
