@@ -1222,6 +1222,7 @@ body.con-tabbar { padding-bottom: var(--tabbar-h); }
 .cat-icon[data-cat="ropa"] .cat-icon-circle { --cat-bg-1: #ffd6e5; --cat-bg-2: #fff0f6; }
 .cat-icon[data-cat="servicios"] .cat-icon-circle { --cat-bg-1: #d7f2e3; --cat-bg-2: #edf9f1; }
 .cat-icon[data-cat="artesanias"] .cat-icon-circle { --cat-bg-1: #ffe9b3; --cat-bg-2: #fff6e0; }
+.cat-icon[data-cat="otros"] .cat-icon-circle { --cat-bg-1: #dceeff; --cat-bg-2: #eef7ff; }
 .cat-icon[data-cat="todo"] .cat-icon-circle { --cat-bg-1: #e0d6ff; --cat-bg-2: #f2eeff; }
 
 /* ---------- Stepper de cantidad (tarjeta de producto) ---------- */

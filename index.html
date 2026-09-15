@@ -74,14 +74,7 @@
   </div>
 </header>
 
-<div class="cat-strip" id="cat-strip">
-  <a href="catalogo.html?categoria=comida" class="cat-icon" data-cat="comida"><span class="cat-icon-circle">🍢</span><span class="cat-label">Comida</span></a>
-  <a href="catalogo.html?categoria=bebidas" class="cat-icon" data-cat="bebidas"><span class="cat-icon-circle">🥤</span><span class="cat-label">Bebidas</span></a>
-  <a href="catalogo.html?categoria=ropa" class="cat-icon" data-cat="ropa"><span class="cat-icon-circle">👙</span><span class="cat-label">Ropa</span></a>
-  <a href="catalogo.html?categoria=servicios" class="cat-icon" data-cat="servicios"><span class="cat-icon-circle">⛱️</span><span class="cat-label">Servicios</span></a>
-  <a href="catalogo.html?categoria=artesanias" class="cat-icon" data-cat="artesanias"><span class="cat-icon-circle">🎨</span><span class="cat-label">Artesanías</span></a>
-  <a href="catalogo.html" class="cat-icon" data-cat="todo"><span class="cat-icon-circle">🛍️</span><span class="cat-label">Todo</span></a>
-</div>
+<div class="cat-strip" id="cat-strip"></div>
 
 <div class="container mt-16">
   <div class="promo-banner">
@@ -197,6 +190,35 @@
 <script src="js/auth-cliente.js"></script>
 <script src="js/ubicacion.js"></script>
 <script>
+const CATEGORIAS_ICONOS_STRIP = {
+  comida: '🍢', bebidas: '🥤', ropa: '👙', servicios: '⛱️', artesanias: '🎨', otros: '🛍️',
+};
+const CATEGORIAS_LABELS_STRIP = {
+  comida: 'Comida', bebidas: 'Bebidas', ropa: 'Ropa', servicios: 'Servicios', artesanias: 'Artesanías', otros: 'Otros',
+};
+
+let ultimasCategoriasStrip = null;
+async function cargarCategoriasStrip() {
+  const cont = document.getElementById('cat-strip');
+  try {
+    const zona = getZonaGuardada();
+    const categorias = await Api.getCategorias(zona ? { zona } : {});
+    const firma = JSON.stringify(categorias);
+    if (firma === ultimasCategoriasStrip) return; // nada cambio, no repintar
+    ultimasCategoriasStrip = firma;
+
+    const items = [
+      ...categorias.map((c) => ({ cat: c, icono: CATEGORIAS_ICONOS_STRIP[c] || '🛍️', label: CATEGORIAS_LABELS_STRIP[c] || c, href: `catalogo.html?categoria=${c}` })),
+      { cat: 'todo', icono: '🛍️', label: 'Todo', href: 'catalogo.html' },
+    ];
+    cont.innerHTML = items.map((it) => `
+      <a href="${it.href}" class="cat-icon" data-cat="${it.cat}"><span class="cat-icon-circle">${it.icono}</span><span class="cat-label">${it.label}</span></a>
+    `).join('');
+  } catch (err) {
+    // fallo silencioso: no rompe el resto de la portada
+  }
+}
+
 let ultimasTiendasDestacadas = null;
 async function cargarTiendasDestacadas() {
   const cont = document.getElementById('store-scroll');
@@ -243,8 +265,11 @@ async function cargarTiendasDestacadas() {
     cont.innerHTML = '<div class="text-muted text-sm" style="padding:16px 18px;">No se pudo cargar el catálogo en este momento.</div>';
   }
 }
+cargarCategoriasStrip();
 cargarTiendasDestacadas();
+iniciarAutoRefresco(cargarCategoriasStrip);
 iniciarAutoRefresco(cargarTiendasDestacadas);
+document.addEventListener('zona-actualizada', cargarCategoriasStrip);
 document.addEventListener('zona-actualizada', cargarTiendasDestacadas);
 
 // Busqueda automatica: al dejar de escribir, lleva al catalogo filtrado sin necesidad de Enter
