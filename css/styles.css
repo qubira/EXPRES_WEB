@@ -44,7 +44,11 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden;
+  /* "clip" evita el scroll horizontal igual que "hidden", pero sin su
+     efecto secundario: "hidden" en html/body promueve un contenedor de
+     scroll interno que rompe "position: sticky" en toda la pagina (el
+     navbar, la tabbar, etc. dejaban de quedarse fijos al bajar). */
+  overflow-x: clip;
 }
 
 body {
@@ -980,7 +984,16 @@ textarea { resize: vertical; min-height: 80px; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  /* Sticky respecto al scroll de .panel-main: se ancla arriba en vez de
+     desaparecer al bajar en listas largas. El margen negativo cancela el
+     padding del contenedor para que quede al ras del borde superior y
+     cubra el contenido que pasa por debajo. */
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--arena-100);
+  margin: -18px -18px 20px -18px;
+  padding: 18px 18px 14px;
 }
 .panel-mobile-nav {
   position: fixed;
@@ -1008,6 +1021,7 @@ textarea { resize: vertical; min-height: 80px; }
   .panel-sidebar { display: flex; }
   .panel-mobile-nav { display: none; }
   .panel-main { padding: 32px; padding-bottom: 32px; }
+  .panel-topbar { margin: -32px -32px 20px -32px; padding: 32px 32px 20px; }
 }
 
 .stat-card {
