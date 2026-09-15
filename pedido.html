@@ -52,6 +52,8 @@
 <div class="container mt-24" style="max-width:560px;">
   <h1 class="section-title">Rastrear pedido</h1>
 
+  <a href="pedido.html" id="volver-mis-pedidos" class="hidden text-sm" style="display:inline-block;">← Volver a mis pedidos</a>
+
   <div id="bloque-mis-pedidos" class="hidden">
     <div class="filtros" id="filtro-fecha-pedidos">
       <button class="chip activo" data-rango="hoy">Hoy</button>
@@ -59,11 +61,12 @@
       <button class="chip" data-rango="todos">Todos</button>
     </div>
     <div id="lista-mis-pedidos" class="mt-16"></div>
-    <details class="mt-16" id="detalle-buscar-codigo">
-      <summary class="text-sm text-muted" style="cursor:pointer;">¿Tienes el código de otro pedido?</summary>
-      <div id="slot-form-buscar" class="mt-8"></div>
-    </details>
   </div>
+
+  <details class="mt-16" id="detalle-buscar-codigo">
+    <summary class="text-sm text-muted" style="cursor:pointer;">¿Tienes el código de otro pedido?</summary>
+    <div id="slot-form-buscar" class="mt-8"></div>
+  </details>
 
   <form id="form-buscar" class="card card-pad flex gap-8" style="align-items:flex-end;">
     <div class="form-grupo mb-0" style="flex:1;">

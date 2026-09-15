@@ -12,8 +12,14 @@ let marcadorCliente = null;
 let ultimoEstadoConocido = null;
 let pedidoIdRenderizado = null;
 
-function idInicial() {
-  return new URLSearchParams(location.search).get('id') || localStorage.getItem('express_last_pedido') || '';
+function idInicial(logueado) {
+  const idUrl = new URLSearchParams(location.search).get('id');
+  if (idUrl) return idUrl;
+  // El fallback a localStorage es solo para invitados sin sesion (para que no
+  // pierdan de vista su unico pedido reciente). Un cliente con sesion tiene la
+  // lista completa de sus pedidos, asi que "pedido.html" sin id siempre debe
+  // llevarlo ahi, nunca reabrir el ultimo pedido visto por accidente.
+  return logueado ? '' : localStorage.getItem('express_last_pedido') || '';
 }
 
 function renderTimeline(estado) {
@@ -301,6 +307,10 @@ document.getElementById('form-buscar').addEventListener('submit', (e) => {
   const id = document.getElementById('input-id').value.trim();
   if (id) {
     history.replaceState(null, '', `pedido.html?id=${id}`);
+    document.getElementById('bloque-mis-pedidos').classList.add('hidden');
+    if (typeof clienteEstaLogueado === 'function' && clienteEstaLogueado()) {
+      document.getElementById('volver-mis-pedidos').classList.remove('hidden');
+    }
     cargarPedido(id);
   }
 });
@@ -392,22 +402,27 @@ function programarSiguienteRefresco() {
   }, intervalo);
 }
 
-const idInit = idInicial();
 const logueadoInicio = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
+const idInit = idInicial(logueadoInicio);
+
+if (logueadoInicio) {
+  // Con sesion iniciada, el codigo (largo y tedioso de pegar) nunca es el
+  // metodo principal: queda siempre colapsado, para cuando busca un pedido
+  // que no es suyo o le compartieron el link.
+  document.getElementById('slot-form-buscar').appendChild(document.getElementById('form-buscar'));
+}
 
 if (idInit) {
   document.getElementById('input-id').value = idInit;
+  if (logueadoInicio) document.getElementById('volver-mis-pedidos').classList.remove('hidden');
   // Se encadena para que, si el pedido ya esta "recogido" desde la primera
   // carga, el refresco rapido de 5s arranque de inmediato (y no recien
   // despues de un primer ciclo lento de 15s con el estado aun en null).
   cargarPedido(idInit).finally(programarSiguienteRefresco);
 } else if (logueadoInicio) {
-  // En vez de pedirle el codigo (largo y tedioso de pegar), a un cliente con
-  // sesion iniciada se le muestran directamente sus pedidos filtrables por
-  // fecha; el buscador por codigo queda disponible pero colapsado, para
-  // cuando busca un pedido que no es suyo o le compartieron el link.
+  // En vez de pedirle el codigo, a un cliente con sesion iniciada se le
+  // muestran directamente sus pedidos filtrables por fecha.
   document.getElementById('bloque-mis-pedidos').classList.remove('hidden');
-  document.getElementById('slot-form-buscar').appendChild(document.getElementById('form-buscar'));
   cargarMisPedidosBrowser();
   programarSiguienteRefresco();
 } else {
