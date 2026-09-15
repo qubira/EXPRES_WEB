@@ -71,7 +71,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     if (data.zona) localStorage.setItem('express_zona_entrega', data.zona);
 
     const irSiguiente = () => {
-      const next = new URLSearchParams(location.search).get('next') || 'mis-pedidos.html';
+      const next = new URLSearchParams(location.search).get('next') || 'index.html';
       location.href = next;
     };
 
