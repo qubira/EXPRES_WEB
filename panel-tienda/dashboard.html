@@ -37,7 +37,12 @@
     </div>
 
     <section id="view-pedidos" class="view">
-      <div id="lista-pedidos-tienda"></div>
+      <div class="filtros" id="filtro-fecha-pedidos-tienda">
+        <button class="chip activo" data-rango="hoy">Hoy</button>
+        <button class="chip" data-rango="manana">Mañana</button>
+        <button class="chip" data-rango="todos">Todos</button>
+      </div>
+      <div class="mt-16" id="lista-pedidos-tienda" style="display:grid; gap:10px; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));"></div>
     </section>
 
     <section id="view-productos" class="view hidden">
