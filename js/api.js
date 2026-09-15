@@ -131,6 +131,19 @@ function mostrarToast(mensaje, tipo = '') {
   setTimeout(() => el.remove(), 3200);
 }
 
+// Refresca datos automaticamente sin que el usuario tenga que recargar la
+// pagina (ej. si una tienda cambia un precio o nombre mientras alguien esta
+// viendo el catalogo). Se pausa cuando la pestaña esta en segundo plano para
+// no gastar peticiones de mas, y refresca de inmediato al volver a ella.
+function iniciarAutoRefresco(fn, intervaloMs = 20000) {
+  setInterval(() => {
+    if (!document.hidden) fn();
+  }, intervaloMs);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) fn();
+  });
+}
+
 function formatoSoles(monto) {
   return `S/ ${Number(monto || 0).toFixed(2)}`;
 }

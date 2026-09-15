@@ -197,6 +197,7 @@
 <script src="js/auth-cliente.js"></script>
 <script src="js/ubicacion.js"></script>
 <script>
+let ultimasTiendasDestacadas = null;
 async function cargarTiendasDestacadas() {
   const cont = document.getElementById('store-scroll');
   const ICONOS = {
@@ -205,6 +206,10 @@ async function cargarTiendasDestacadas() {
   };
   try {
     const tiendas = await Api.getTiendas();
+    const firmaTiendas = JSON.stringify(tiendas);
+    if (firmaTiendas === ultimasTiendasDestacadas) return; // nada cambio, no repintar
+    ultimasTiendasDestacadas = firmaTiendas;
+
     if (tiendas.length === 0) {
       cont.innerHTML = '<div class="text-muted text-sm" style="padding:16px 18px;">Muy pronto tendremos tiendas aquí.</div>';
       return;
@@ -233,10 +238,12 @@ async function cargarTiendasDestacadas() {
       });
     });
   } catch (err) {
+    if (ultimasTiendasDestacadas) return; // ya habia contenido cargado: no lo borres por un fallo en segundo plano
     cont.innerHTML = '<div class="text-muted text-sm" style="padding:16px 18px;">No se pudo cargar el catálogo en este momento.</div>';
   }
 }
 cargarTiendasDestacadas();
+iniciarAutoRefresco(cargarTiendasDestacadas);
 
 // Busqueda automatica: al dejar de escribir, lleva al catalogo filtrado sin necesidad de Enter
 const heroSearchForm = document.querySelector('.search-bar-wrap');

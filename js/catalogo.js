@@ -121,19 +121,26 @@ function enlazarControl(productoId) {
   }
 }
 
-async function cargarProductos() {
+async function cargarProductos(mostrarCarga = true) {
   const grid = document.getElementById('grid-productos');
   const estadoCarga = document.getElementById('estado-carga');
   const vacio = document.getElementById('vacio');
-  estadoCarga.classList.add('hidden');
-  vacio.classList.add('hidden');
-  grid.innerHTML = skeletonGrid(6);
+
+  if (mostrarCarga) {
+    estadoCarga.classList.add('hidden');
+    vacio.classList.add('hidden');
+    grid.innerHTML = skeletonGrid(6);
+  }
 
   try {
     const params = {};
     if (categoriaActiva) params.categoria = categoriaActiva;
     if (terminoBusqueda) params.q = terminoBusqueda;
     const productos = await Api.getProductos(params);
+
+    // Evita volver a pintar la grilla si no cambio nada (sin parpadeos innecesarios).
+    const cambio = JSON.stringify(productos) !== JSON.stringify(ultimosProductos);
+    if (!cambio && !mostrarCarga) return;
     ultimosProductos = productos;
 
     if (productos.length === 0) {
@@ -141,6 +148,8 @@ async function cargarProductos() {
       vacio.classList.remove('hidden');
       return;
     }
+    vacio.classList.add('hidden');
+    estadoCarga.classList.add('hidden');
 
     grid.innerHTML = productos.map(tarjetaProducto).join('');
     productos.forEach((p) => enlazarControl(p.id));
@@ -151,6 +160,7 @@ async function cargarProductos() {
       });
     });
   } catch (err) {
+    if (!mostrarCarga) return; // fallo silencioso en segundo plano: no rompe la vista actual
     grid.innerHTML = '';
     estadoCarga.textContent = 'No se pudo conectar con el servidor. Intenta de nuevo.';
     estadoCarga.classList.remove('hidden');
@@ -174,3 +184,4 @@ document.getElementById('buscador').addEventListener('input', (e) => {
 cargarFiltros();
 cargarProductos();
 actualizarCartBar();
+iniciarAutoRefresco(() => cargarProductos(false));

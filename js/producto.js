@@ -210,3 +210,4 @@ async function cargarProducto() {
 }
 
 cargarProducto();
+iniciarAutoRefresco(cargarProducto);
