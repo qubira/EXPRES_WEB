@@ -69,7 +69,10 @@ async function cargarPagos() {
       cont.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>No hay pagos pendientes por confirmar.</p></div>';
       return;
     }
-    cont.innerHTML = pagos.map((pg) => `
+    cont.innerHTML = pagos.map((pg) => {
+      const items = pg.items || [];
+      const tiendas = [...new Set(items.map((i) => i.tienda_nombre))];
+      return `
       <div class="card card-pad mt-16">
         <div class="flex justify-between items-center">
           <div>
@@ -78,8 +81,20 @@ async function cargarPagos() {
           </div>
           <span class="tag">${pg.tipo}</span>
         </div>
-        <div class="flex justify-between items-center mt-8">
-          <span class="text-sm text-muted">Ref: ${pg.referencia || '—'}</span>
+        <div class="text-sm text-muted mt-8">Pedido #${pg.pedido_id.slice(0,8).toUpperCase()} · Ref. de pago: ${pg.referencia || '—'}</div>
+        ${tiendas.length > 0 ? `<div class="text-sm mt-8"><strong>Tienda${tiendas.length > 1 ? 's' : ''}:</strong> ${tiendas.join(', ')}</div>` : ''}
+        ${items.length > 0 ? `
+          <div class="mt-8" style="border-top:1px solid var(--arena-300); padding-top:8px;">
+            ${items.map((i) => `
+              <div class="flex justify-between text-sm">
+                <span>${i.cantidad}x ${i.nombre_producto}</span>
+                <span class="text-muted">${formatoSoles(i.subtotal)}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+        <div class="flex justify-between items-center mt-8" style="border-top:1px solid var(--arena-300); padding-top:8px;">
+          <span class="text-sm text-muted">Productos ${formatoSoles(pg.monto_productos)} + delivery ${formatoSoles(pg.delivery_fee)}</span>
           <strong>${formatoSoles(pg.monto_total)}</strong>
         </div>
         ${pg.comprobante_url ? `<a href="${uploadsUrl(pg.comprobante_url)}" target="_blank"><img src="${uploadsUrl(pg.comprobante_url)}" style="max-height:220px;border-radius:10px;margin-top:10px;"></a>` : ''}
@@ -88,7 +103,8 @@ async function cargarPagos() {
           <button class="btn btn-danger btn-sm w-full" data-rechazar="${pg.id}">✕ Rechazar</button>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     cont.querySelectorAll('[data-confirmar]').forEach((btn) => btn.addEventListener('click', async () => {
       btn.disabled = true;
