@@ -52,6 +52,12 @@
   <h1 class="section-title" style="margin-bottom:4px;">Mis pedidos</h1>
   <p class="text-muted" id="saludo-cliente"></p>
 
+  <div class="filtros mt-16" id="filtro-fecha-pedidos">
+    <button class="chip activo" data-rango="hoy">Hoy</button>
+    <button class="chip" data-rango="ayer">Ayer</button>
+    <button class="chip" data-rango="todos">Todos</button>
+  </div>
+
   <div id="contenido" class="mt-16"></div>
 </div>
 
@@ -95,22 +101,21 @@ function tarjetaPedido(p) {
   `;
 }
 
+function esMismoDia(fechaA, fechaB) {
+  return fechaA.getFullYear() === fechaB.getFullYear()
+    && fechaA.getMonth() === fechaB.getMonth()
+    && fechaA.getDate() === fechaB.getDate();
+}
+
+let rangoFechaActivo = 'hoy';
+let todosPedidosCache = null;
+
 async function cargarPedidos() {
   const cont = document.getElementById('contenido');
   cont.innerHTML = '<p class="text-center text-muted">Cargando...</p>';
   try {
-    const pedidos = await Api.clientePedidos();
-    if (pedidos.length === 0) {
-      cont.innerHTML = `
-        <div class="empty-state">
-          <div class="icon">🛍️</div>
-          <p>Aún no tienes pedidos.</p>
-          <a href="catalogo.html" class="btn btn-primary">Ver catálogo</a>
-        </div>
-      `;
-      return;
-    }
-    cont.innerHTML = pedidos.map(tarjetaPedido).join('');
+    todosPedidosCache = await Api.clientePedidos();
+    renderPedidosFiltrados();
   } catch (err) {
     if (err.status === 401) {
       cerrarSesionCliente();
@@ -120,6 +125,59 @@ async function cargarPedidos() {
     cont.innerHTML = `<p class="text-center form-error">${err.message}</p>`;
   }
 }
+
+function renderPedidosFiltrados() {
+  const cont = document.getElementById('contenido');
+  const ahora = new Date();
+  const ayer = new Date(ahora);
+  ayer.setDate(ayer.getDate() - 1);
+
+  const filtrados = todosPedidosCache.filter((p) => {
+    if (rangoFechaActivo === 'todos') return true;
+    const fecha = new Date(p.created_at);
+    if (rangoFechaActivo === 'hoy') return esMismoDia(fecha, ahora);
+    if (rangoFechaActivo === 'ayer') return esMismoDia(fecha, ayer);
+    return true;
+  });
+
+  if (todosPedidosCache.length === 0) {
+    cont.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🛍️</div>
+        <p>Aún no tienes pedidos.</p>
+        <a href="catalogo.html" class="btn btn-primary">Ver catálogo</a>
+      </div>
+    `;
+    return;
+  }
+
+  if (filtrados.length === 0) {
+    cont.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📦</div>
+        <p>No tienes pedidos en ese rango.</p>
+        <button type="button" class="btn btn-outline btn-sm mt-8" data-ver-todos>Ver todos mis pedidos</button>
+      </div>
+    `;
+    document.getElementById('contenido').querySelector('[data-ver-todos]').addEventListener('click', () => {
+      rangoFechaActivo = 'todos';
+      document.querySelectorAll('#filtro-fecha-pedidos .chip').forEach((c) => c.classList.toggle('activo', c.dataset.rango === 'todos'));
+      renderPedidosFiltrados();
+    });
+    return;
+  }
+
+  cont.innerHTML = filtrados.map(tarjetaPedido).join('');
+}
+
+document.querySelectorAll('#filtro-fecha-pedidos .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    rangoFechaActivo = chip.dataset.rango;
+    document.querySelectorAll('#filtro-fecha-pedidos .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    renderPedidosFiltrados();
+  });
+});
 
 cargarPedidos();
 </script>
