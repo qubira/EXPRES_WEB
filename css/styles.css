@@ -1046,6 +1046,15 @@ th { color: var(--tinta-300); font-size: 12px; text-transform: uppercase; letter
   max-height: 88vh;
   overflow-y: auto;
 }
+.modal-box.modal-box-ancho { max-width: 760px; }
+.modal-form-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px 24px;
+}
+@media (min-width: 680px) {
+  .modal-form-cols { grid-template-columns: 220px 1fr; align-items: start; }
+}
 @media (min-width: 620px) {
   .modal-overlay { align-items: center; }
   .modal-box { border-radius: var(--radio-l); }

@@ -32,9 +32,9 @@ function irAVista(vista) {
 }
 document.querySelectorAll('.panel-link[data-view]').forEach((link) => link.addEventListener('click', () => irAVista(link.dataset.view)));
 
-function abrirModal(html) {
+function abrirModal(html, ancho = false) {
   const root = document.getElementById('modal-root');
-  root.innerHTML = `<div class="modal-overlay" id="modal-overlay"><div class="modal-box">${html}</div></div>`;
+  root.innerHTML = `<div class="modal-overlay" id="modal-overlay"><div class="modal-box${ancho ? ' modal-box-ancho' : ''}">${html}</div></div>`;
   document.getElementById('modal-overlay').addEventListener('click', (e) => { if (e.target.id === 'modal-overlay') cerrarModal(); });
 }
 function cerrarModal() { document.getElementById('modal-root').innerHTML = ''; }
@@ -129,47 +129,52 @@ function abrirModalProducto(p) {
   const editando = !!p;
   abrirModal(`
     <h3>${editando ? 'Editar producto' : 'Nuevo producto'}</h3>
-    <div class="form-grupo"><label>Nombre</label><input id="p-nombre" value="${p ? p.nombre : ''}" required></div>
-    <div class="form-grupo"><label>Marca (opcional)</label><input id="p-marca" value="${p ? (p.marca||'') : ''}" placeholder="Ej. Inca Kola, San Luis..."></div>
-    <div class="grid-cols grid-cols-2">
-      <div class="form-grupo"><label>Categoría</label>
-        <select id="p-categoria">${CATEGORIAS.map((c) => `<option value="${c}" ${p && p.categoria===c?'selected':''}>${c}</option>`).join('')}</select>
-      </div>
-      <div class="form-grupo"><label>Subcategoría</label><input id="p-subcategoria" value="${p ? (p.subcategoria||'') : ''}" placeholder="Ej. jugos, sombreros..." required></div>
-    </div>
-    <div class="form-grupo"><label>Detalle (opcional)</label><textarea id="p-descripcion">${p ? (p.descripcion||'') : ''}</textarea></div>
-    <div class="grid-cols grid-cols-2">
-      <div class="form-grupo"><label>Precio de venta (S/)</label><input id="p-precio" type="number" step="0.10" value="${p ? p.precio : ''}" required></div>
-      <div class="form-grupo"><label>Unidad</label>
-        <select id="p-unidad">${UNIDADES.map((u) => `<option value="${u}" ${p && p.unidad===u?'selected':''}>${labelUnidad(u)}</option>`).join('')}</select>
-      </div>
-    </div>
-    <div class="form-grupo"><label>Stock</label><input id="p-stock" type="number" value="${p ? p.stock : 10}" required></div>
-    <div class="form-grupo">
-      <label>Foto del producto</label>
-      <label class="file-drop ${p && p.foto_url ? 'con-imagen' : ''}" id="p-foto-drop">
-        <input type="file" id="p-foto-file" accept="image/*" capture="environment" class="file-drop-input">
-        <img id="p-foto-preview" class="file-drop-preview" src="${p && p.foto_url ? p.foto_url : ''}" style="${p && p.foto_url ? '' : 'display:none;'}">
-        <div id="p-foto-placeholder" style="${p && p.foto_url ? 'display:none;' : 'display:flex;flex-direction:column;align-items:center;gap:6px;'}">
-          <span class="file-drop-icon">📷</span>
-          <span class="file-drop-text">Toca para subir una foto</span>
-          <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+    <div class="modal-form-cols mt-16">
+      <div>
+        <div class="form-grupo">
+          <label>Foto del producto</label>
+          <label class="file-drop ${p && p.foto_url ? 'con-imagen' : ''}" id="p-foto-drop">
+            <input type="file" id="p-foto-file" accept="image/*" capture="environment" class="file-drop-input">
+            <img id="p-foto-preview" class="file-drop-preview" src="${p && p.foto_url ? p.foto_url : ''}" style="${p && p.foto_url ? '' : 'display:none;'}">
+            <div id="p-foto-placeholder" style="${p && p.foto_url ? 'display:none;' : 'display:flex;flex-direction:column;align-items:center;gap:6px;'}">
+              <span class="file-drop-icon">📷</span>
+              <span class="file-drop-text">Toca para subir una foto</span>
+              <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+            </div>
+          </label>
         </div>
-      </label>
-      <div class="form-hint">También puedes pegar una URL abajo.</div>
-    </div>
-    <div class="form-grupo"><label>URL de foto</label><input id="p-foto" value="${p ? (p.foto_url||'') : ''}" placeholder="https://..."></div>
-    ${editando ? `
-      <div class="form-grupo flex justify-between items-center">
-        <label class="mb-0">Producto activo</label>
-        <span class="toggle-switch">
-          <input type="checkbox" id="p-activo" ${p.activo?'checked':''}>
-          <span class="toggle-slider"></span>
-        </span>
+        <div class="form-grupo"><label>URL de foto (opcional)</label><input id="p-foto" value="${p ? (p.foto_url||'') : ''}" placeholder="https://..."></div>
+        ${editando ? `
+          <div class="form-grupo flex justify-between items-center">
+            <label class="mb-0">Producto activo</label>
+            <span class="toggle-switch">
+              <input type="checkbox" id="p-activo" ${p.activo?'checked':''}>
+              <span class="toggle-slider"></span>
+            </span>
+          </div>
+        ` : ''}
       </div>
-    ` : ''}
-    <button class="btn btn-primary btn-block" id="btn-guardar-producto">${editando ? 'Guardar cambios' : 'Crear producto'}</button>
-  `);
+      <div>
+        <div class="form-grupo"><label>Nombre</label><input id="p-nombre" value="${p ? p.nombre : ''}" required></div>
+        <div class="form-grupo"><label>Marca (opcional)</label><input id="p-marca" value="${p ? (p.marca||'') : ''}" placeholder="Ej. Inca Kola, San Luis..."></div>
+        <div class="grid-cols grid-cols-2">
+          <div class="form-grupo"><label>Categoría</label>
+            <select id="p-categoria">${CATEGORIAS.map((c) => `<option value="${c}" ${p && p.categoria===c?'selected':''}>${c}</option>`).join('')}</select>
+          </div>
+          <div class="form-grupo"><label>Subcategoría</label><input id="p-subcategoria" value="${p ? (p.subcategoria||'') : ''}" placeholder="Ej. jugos, sombreros..." required></div>
+        </div>
+        <div class="grid-cols grid-cols-2">
+          <div class="form-grupo"><label>Precio de venta (S/)</label><input id="p-precio" type="number" step="0.10" value="${p ? p.precio : ''}" required></div>
+          <div class="form-grupo"><label>Unidad</label>
+            <select id="p-unidad">${UNIDADES.map((u) => `<option value="${u}" ${p && p.unidad===u?'selected':''}>${labelUnidad(u)}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="form-grupo"><label>Stock</label><input id="p-stock" type="number" value="${p ? p.stock : 10}" required></div>
+        <div class="form-grupo"><label>Detalle (opcional)</label><textarea id="p-descripcion">${p ? (p.descripcion||'') : ''}</textarea></div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block mt-8" id="btn-guardar-producto">${editando ? 'Guardar cambios' : 'Crear producto'}</button>
+  `, true);
 
   document.getElementById('p-foto-file').addEventListener('change', async (e) => {
     const file = e.target.files[0];
