@@ -175,6 +175,70 @@ function mostrarToast(mensaje, tipo = '') {
   setTimeout(() => el.remove(), 3200);
 }
 
+// Reemplazan confirm()/prompt() nativos (que el navegador muestra sin el
+// diseño del sitio) por un modal propio. Usan su propio contenedor
+// (#dialogo-modal-root, con z-index por encima de .modal-overlay) en vez de
+// #modal-root, porque a veces se llaman con otro modal ya abierto detras
+// (ej. suspender una cuenta desde dentro del modal "Editar usuario").
+function _abrirDialogoModal(html) {
+  let root = document.getElementById('dialogo-modal-root');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'dialogo-modal-root';
+    document.body.appendChild(root);
+  }
+  root.innerHTML = `<div class="modal-overlay" id="dialogo-modal-overlay" style="z-index:400;">${html}</div>`;
+  return root;
+}
+function _cerrarDialogoModal() {
+  const root = document.getElementById('dialogo-modal-root');
+  if (root) root.innerHTML = '';
+}
+
+function confirmModal(mensaje, opciones = {}) {
+  const { titulo = '¿Estás seguro?', textoAceptar = 'Aceptar', textoCancelar = 'Cancelar', peligro = false } = opciones;
+  return new Promise((resolve) => {
+    _abrirDialogoModal(`
+      <div class="modal-box" style="max-width:380px;">
+        <h3 style="margin-top:0;">${titulo}</h3>
+        <p class="text-sm" style="color:var(--tinta-600);">${mensaje}</p>
+        <div class="flex gap-8 mt-16">
+          <button type="button" class="btn btn-outline btn-block" id="dialogo-cancelar">${textoCancelar}</button>
+          <button type="button" class="btn ${peligro ? 'btn-danger' : 'btn-primary'} btn-block" id="dialogo-aceptar">${textoAceptar}</button>
+        </div>
+      </div>
+    `);
+    const cerrar = (resultado) => { _cerrarDialogoModal(); resolve(resultado); };
+    document.getElementById('dialogo-aceptar').addEventListener('click', () => cerrar(true));
+    document.getElementById('dialogo-cancelar').addEventListener('click', () => cerrar(false));
+    document.getElementById('dialogo-modal-overlay').addEventListener('click', (e) => { if (e.target.id === 'dialogo-modal-overlay') cerrar(false); });
+  });
+}
+
+function promptModal(mensaje, opciones = {}) {
+  const { titulo = '', textoAceptar = 'Aceptar', textoCancelar = 'Cancelar', placeholder = '', valorInicial = '' } = opciones;
+  return new Promise((resolve) => {
+    _abrirDialogoModal(`
+      <div class="modal-box" style="max-width:380px;">
+        ${titulo ? `<h3 style="margin-top:0;">${titulo}</h3>` : ''}
+        <p class="text-sm" style="color:var(--tinta-600);">${mensaje}</p>
+        <div class="form-grupo"><input id="dialogo-input" value="${valorInicial}" placeholder="${placeholder}"></div>
+        <div class="flex gap-8">
+          <button type="button" class="btn btn-outline btn-block" id="dialogo-cancelar">${textoCancelar}</button>
+          <button type="button" class="btn btn-primary btn-block" id="dialogo-aceptar">${textoAceptar}</button>
+        </div>
+      </div>
+    `);
+    const input = document.getElementById('dialogo-input');
+    input.focus();
+    const cerrar = (resultado) => { _cerrarDialogoModal(); resolve(resultado); };
+    document.getElementById('dialogo-aceptar').addEventListener('click', () => cerrar(input.value));
+    document.getElementById('dialogo-cancelar').addEventListener('click', () => cerrar(null));
+    document.getElementById('dialogo-modal-overlay').addEventListener('click', (e) => { if (e.target.id === 'dialogo-modal-overlay') cerrar(null); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') cerrar(input.value); });
+  });
+}
+
 // Refresca datos automaticamente sin que el usuario tenga que recargar la
 // pagina (ej. si una tienda cambia un precio o nombre mientras alguien esta
 // viendo el catalogo). Se pausa cuando la pestaña esta en segundo plano para
@@ -280,7 +344,7 @@ function habilitarAgregarTipoNegocio(selectId, btnId, role) {
   const select = document.getElementById(selectId);
   if (!btn || !select) return;
   btn.addEventListener('click', async () => {
-    const etiqueta = (prompt('Nombre del nuevo tipo de negocio (ej. Chichería):') || '').trim();
+    const etiqueta = ((await promptModal('Nombre del nuevo tipo de negocio', { titulo: 'Agregar tipo de negocio', placeholder: 'Ej. Chichería' })) || '').trim();
     if (!etiqueta) return;
     try {
       const nuevo = await Api.agregarTipoNegocio(etiqueta, role);
@@ -344,7 +408,7 @@ async function cargarConectividad(role, listaId, btnOtrasId) {
     `).join('');
 
     cont.querySelectorAll('[data-cerrar-sesion]').forEach((btn) => btn.addEventListener('click', async () => {
-      if (!confirm('¿Cerrar esta sesión? Ese dispositivo tendrá que iniciar sesión de nuevo.')) return;
+      if (!(await confirmModal('¿Cerrar esta sesión? Ese dispositivo tendrá que iniciar sesión de nuevo.'))) return;
       try {
         await Api.cerrarSesionRemota(btn.dataset.cerrarSesion, role);
         mostrarToast('Sesión cerrada', 'success');
@@ -358,7 +422,7 @@ async function cargarConectividad(role, listaId, btnOtrasId) {
   const btnOtras = document.getElementById(btnOtrasId);
   if (btnOtras) {
     btnOtras.onclick = async () => {
-      if (!confirm('¿Cerrar todas las demás sesiones? Solo quedará activa esta.')) return;
+      if (!(await confirmModal('¿Cerrar todas las demás sesiones? Solo quedará activa esta.'))) return;
       try {
         const r = await Api.cerrarOtrasSesiones(role);
         mostrarToast(r.mensaje, 'success');

@@ -115,7 +115,7 @@ async function cargarPagos() {
       } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
     }));
     cont.querySelectorAll('[data-rechazar]').forEach((btn) => btn.addEventListener('click', async () => {
-      if (!confirm('¿Rechazar este pago?')) return;
+      if (!(await confirmModal('¿Rechazar este pago?', { peligro: true, textoAceptar: 'Rechazar' }))) return;
       btn.disabled = true;
       try {
         await Api.adminRechazarPago(btn.dataset.rechazar);
@@ -413,7 +413,7 @@ async function cargarRepartidores() {
 
     tbody.querySelectorAll('[data-liquidar]').forEach((btn) => btn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      if (!confirm('¿Marcar este pago como liquidado?')) return;
+      if (!(await confirmModal('¿Marcar este pago como liquidado?'))) return;
       try {
         await Api.adminLiquidarRepartidor(btn.dataset.liquidar);
         mostrarToast('Pago liquidado', 'success');
@@ -831,8 +831,8 @@ async function abrirModalEditarUsuario(u) {
 
   const btnSuspender = document.getElementById('btn-suspender-usuario');
   if (btnSuspender) btnSuspender.addEventListener('click', async () => {
-    if (!confirm('¿Suspender esta cuenta por 5 días hábiles?')) return;
-    const motivo = prompt('¿Motivo de la suspensión? (opcional)') || '';
+    if (!(await confirmModal('¿Suspender esta cuenta por 5 días hábiles?', { peligro: true, textoAceptar: 'Suspender' }))) return;
+    const motivo = (await promptModal('Motivo de la suspensión (opcional)', { titulo: 'Suspender cuenta' })) || '';
     try {
       const r = await Api.adminSuspenderUsuario(u.id, motivo);
       mostrarToast(`Cuenta suspendida hasta el ${new Date(r.suspendido_hasta).toLocaleDateString('es-PE')}`, 'success');
@@ -843,8 +843,8 @@ async function abrirModalEditarUsuario(u) {
 
   const btnBloquear = document.getElementById('btn-bloquear-usuario');
   if (btnBloquear) btnBloquear.addEventListener('click', async () => {
-    if (!confirm('¿Bloquear esta cuenta? Ya no podrá iniciar sesión, pero su historial se conserva.')) return;
-    const motivo = prompt('¿Motivo del bloqueo? (opcional)') || '';
+    if (!(await confirmModal('¿Bloquear esta cuenta? Ya no podrá iniciar sesión, pero su historial se conserva.', { peligro: true, textoAceptar: 'Bloquear' }))) return;
+    const motivo = (await promptModal('Motivo del bloqueo (opcional)', { titulo: 'Bloquear cuenta' })) || '';
     try {
       await Api.adminBloquearUsuario(u.id, motivo);
       mostrarToast('Cuenta bloqueada', 'success');
@@ -1195,7 +1195,7 @@ async function cargarPagosRetenidos() {
       </tr>
     `).join('');
     tbody.querySelectorAll('[data-liberar]').forEach((btn) => btn.addEventListener('click', async () => {
-      if (!confirm('¿Confirmas que la entrega fue correcta y se debe pagar al repartidor?')) return;
+      if (!(await confirmModal('¿Confirmas que la entrega fue correcta y se debe pagar al repartidor?'))) return;
       btn.disabled = true;
       try {
         await Api.adminLiberarPago(btn.dataset.liberar);

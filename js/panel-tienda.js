@@ -162,7 +162,7 @@ async function cargarProductos() {
       abrirModalProducto(producto);
     }));
     grid.querySelectorAll('[data-eliminar]').forEach((btn) => btn.addEventListener('click', async () => {
-      if (!confirm('¿Eliminar este producto?')) return;
+      if (!(await confirmModal('¿Eliminar este producto?', { peligro: true, textoAceptar: 'Eliminar' }))) return;
       try {
         await Api.tiendaEliminarProducto(btn.dataset.eliminar);
         mostrarToast('Producto eliminado', 'success');

@@ -264,7 +264,7 @@ async function cargarPedido(id) {
     const btnCancelar = document.getElementById('btn-cancelar-pedido');
     if (btnCancelar) {
       btnCancelar.addEventListener('click', async () => {
-        if (!confirm('¿Seguro que quieres cancelar este pedido?')) return;
+        if (!(await confirmModal('¿Seguro que quieres cancelar este pedido?', { peligro: true, textoAceptar: 'Sí, cancelar' }))) return;
         btnCancelar.disabled = true;
         try {
           const r = await Api.clienteCancelarPedido(pedido.id);
