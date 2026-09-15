@@ -34,12 +34,26 @@ function renderTimeline(estado) {
 }
 
 function renderMapa(pedido) {
-  const tieneRepartidor = pedido.estado === 'recogido' && pedido.lat_repartidor && pedido.lng_repartidor;
-  if (!tieneRepartidor) {
+  if (pedido.estado !== 'recogido') {
     mapaEntrega = null;
     marcadorRepartidor = null;
     marcadorCliente = null;
     return '';
+  }
+  const tieneUbicacion = pedido.lat_repartidor && pedido.lng_repartidor;
+  if (!tieneUbicacion) {
+    mapaEntrega = null;
+    marcadorRepartidor = null;
+    marcadorCliente = null;
+    return `
+      <div class="card card-pad mt-16">
+        <h3>🚴 Tu repartidor está en camino</h3>
+        <div class="flex items-center gap-8 mt-8" style="background:var(--arena-100); border-radius:10px; padding:12px;">
+          <span style="font-size:20px;">📡</span>
+          <span class="text-sm text-muted">Esperando la ubicación en vivo del repartidor. Se mostrará el mapa apenas la comparta.</span>
+        </div>
+      </div>
+    `;
   }
   return `
     <div class="card card-pad mt-16">
@@ -166,6 +180,12 @@ async function cargarPedido(id) {
         ` : ''}
         ${rechazadoEnEntrega ? `
           <p class="form-error mt-16">Este pedido fue rechazado en la entrega. Si crees que fue un error, contáctanos.</p>
+        ` : ''}
+        ${pedido.entrega_observada ? `
+          <div class="flex items-center gap-8 mt-16" style="background:#fff7e6; border-radius:10px; padding:12px;">
+            <span style="font-size:20px;">⚠️</span>
+            <span class="text-sm">Esta entrega quedó marcada para revisión porque no se validó el código en el momento. Si no recibiste tu pedido o hay algo raro, haz tu reclamo abajo.</span>
+          </div>
         ` : ''}
         ${esperandoEnPunto ? `
           <p class="text-sm text-muted mt-16">Si el producto llega dañado o incorrecto, no lo recibas: puedes generar un reclamo aquí mismo apenas termine la entrega.</p>
