@@ -182,7 +182,7 @@ function habilitarBuscarDni(dniInputId, nombreInputId, btnId) {
   });
 }
 
-async // Igual que habilitarBuscarDni, pero para Carne de Extranjeria (sin formato fijo de digitos).
+// Igual que habilitarBuscarDni, pero para Carne de Extranjeria (sin formato fijo de digitos).
 function habilitarBuscarCe(ceInputId, nombreInputId, btnId) {
   const btn = document.getElementById(btnId);
   const ceInput = document.getElementById(ceInputId);
