@@ -872,6 +872,7 @@ textarea { resize: vertical; min-height: 80px; }
 @media (min-width: 700px) { .footer-cols { grid-template-columns: 2fr 1fr 1fr; } }
 .footer-cols h4 { color: white; font-size: 14px; }
 .footer-cols a, .footer-cols p { color: var(--mar-300); font-size: 14px; display: block; margin-bottom: 8px; }
+.footer-bottom a { color: white; text-decoration: underline; text-underline-offset: 2px; }
 .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.12);
   padding-top: 18px;
