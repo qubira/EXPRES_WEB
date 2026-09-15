@@ -59,27 +59,62 @@ let ubicacionEntrega = null;
 
 const btnGps = document.getElementById('btn-gps-entrega');
 const gpsEstado = document.getElementById('gps-entrega-estado');
+
+function mensajeErrorGps(err) {
+  // GeolocationPositionError.code: 1 = PERMISSION_DENIED, 2 = POSITION_UNAVAILABLE, 3 = TIMEOUT
+  if (err && err.code === 1) {
+    return 'Bloqueaste el permiso de ubicación. Actívalo en la configuración de tu navegador (ícono de candado junto a la URL) e intenta de nuevo.';
+  }
+  if (err && err.code === 3) {
+    return 'Tu señal GPS está muy débil ahora. Puedes intentar de nuevo o continuar con la referencia escrita.';
+  }
+  return 'No se pudo obtener tu ubicación (revisa que el GPS de tu celular esté activado). Puedes continuar igual con la referencia escrita.';
+}
+
+function obtenerUbicacionGps() {
+  btnGps.disabled = true;
+  gpsEstado.textContent = 'Obteniendo tu ubicación...';
+
+  const onExito = (pos) => {
+    ubicacionEntrega = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    gpsEstado.textContent = '✓ Ubicación GPS lista. El repartidor podrá verla al llegar a tu zona.';
+    btnGps.textContent = '📍 Ubicación compartida';
+    btnGps.disabled = false;
+  };
+
+  navigator.geolocation.getCurrentPosition(
+    onExito,
+    (err) => {
+      // Si la alta precision (satelite) falla o tarda, reintentamos una vez con
+      // baja precision (red/celda): es mas lento en precision pero mucho mas
+      // confiable en interiores o con bateria baja, donde el GPS de precision
+      // suele fallar o no responder a tiempo.
+      if (err && (err.code === 2 || err.code === 3)) {
+        gpsEstado.textContent = 'Señal débil, intentando con ubicación aproximada...';
+        navigator.geolocation.getCurrentPosition(
+          onExito,
+          (err2) => {
+            gpsEstado.textContent = mensajeErrorGps(err2);
+            btnGps.disabled = false;
+          },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 }
+        );
+        return;
+      }
+      gpsEstado.textContent = mensajeErrorGps(err);
+      btnGps.disabled = false;
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
 if (btnGps) {
   btnGps.addEventListener('click', () => {
     if (!navigator.geolocation) {
       gpsEstado.textContent = 'Tu navegador no permite compartir ubicación GPS.';
       return;
     }
-    btnGps.disabled = true;
-    gpsEstado.textContent = 'Obteniendo tu ubicación...';
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        ubicacionEntrega = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        gpsEstado.textContent = '✓ Ubicación GPS lista. El repartidor podrá verla al llegar a tu zona.';
-        btnGps.textContent = '📍 Ubicación compartida';
-        btnGps.disabled = false;
-      },
-      () => {
-        gpsEstado.textContent = 'No se pudo obtener tu ubicación. Puedes continuar igual con la referencia escrita.';
-        btnGps.disabled = false;
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+    obtenerUbicacionGps();
   });
 }
 
