@@ -193,7 +193,7 @@ async function cargarTiendas() {
   try {
     const tiendas = await Api.adminGetTiendas();
     tbody.innerHTML = tiendas.map((t) => `
-      <tr>
+      <tr class="fila-tienda" data-fila-tienda="${t.id}" style="cursor:pointer;">
         <td>${t.nombre}</td>
         <td class="text-sm text-muted">${t.email || '—'}</td>
         <td>${labelTipoNegocio(t.categoria)}</td>
@@ -204,12 +204,73 @@ async function cargarTiendas() {
       </tr>
     `).join('') || '<tr><td colspan="7" class="text-muted">Aún no hay tiendas registradas</td></tr>';
 
-    tbody.querySelectorAll('[data-editar-tienda]').forEach((btn) => btn.addEventListener('click', () => {
+    tbody.querySelectorAll('[data-editar-tienda]').forEach((btn) => btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const tienda = tiendas.find((t) => t.id === btn.dataset.editarTienda);
       abrirModalEditarTienda(tienda);
     }));
+    tbody.querySelectorAll('[data-fila-tienda]').forEach((fila) => fila.addEventListener('click', () => {
+      toggleProductosTienda(fila, fila.dataset.filaTienda);
+    }));
   } catch (err) {
     if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="7" class="form-error">${err.message}</td></tr>`;
+  }
+}
+
+async function toggleProductosTienda(filaTienda, tiendaId) {
+  const filaExistente = filaTienda.nextElementSibling;
+  if (filaExistente && filaExistente.classList.contains('fila-productos-tienda')) {
+    filaExistente.remove();
+    return;
+  }
+  // Cierra cualquier otra tienda expandida (solo una a la vez)
+  document.querySelectorAll('.fila-productos-tienda').forEach((f) => f.remove());
+
+  const fila = document.createElement('tr');
+  fila.className = 'fila-productos-tienda';
+  fila.innerHTML = `<td colspan="7"><p class="text-muted">Cargando productos...</p></td>`;
+  filaTienda.after(fila);
+
+  try {
+    const productos = await Api.adminProductosTienda(tiendaId);
+    if (productos.length === 0) {
+      fila.innerHTML = `<td colspan="7"><p class="text-muted">Esta tienda aún no tiene productos.</p></td>`;
+      return;
+    }
+    fila.innerHTML = `
+      <td colspan="7" style="padding:0;">
+        <div class="table-wrap" style="box-shadow:none; border-radius:0; margin:4px 0 8px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th><th>Categoría</th><th>Subcategoría</th><th>Tamaño</th><th>Costo</th>
+                <th title="Veces que se abrió la ficha del producto">👁️ Vistas</th>
+                <th title="Veces que se agregó a un pedido">🛒 Pedidos</th>
+                <th title="Pedidos entregados con éxito">✅ Ventas</th>
+                <th title="Pedidos cancelados o rechazados">❌ Cancelados</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${productos.map((p) => `
+                <tr>
+                  <td>${p.nombre}${!p.activo ? ' <span class="text-sm text-muted">(inactivo)</span>' : ''}</td>
+                  <td>${p.categoria}</td>
+                  <td>${p.subcategoria || '—'}</td>
+                  <td>${formatoContenido(p.contenido, p.unidad)}</td>
+                  <td>${formatoSoles(p.precio)}</td>
+                  <td>${p.vistas}</td>
+                  <td>${p.total_pedidos}</td>
+                  <td>${p.ventas}</td>
+                  <td>${p.cancelados}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </td>
+    `;
+  } catch (err) {
+    fila.innerHTML = `<td colspan="7" class="form-error">${err.message}</td>`;
   }
 }
 

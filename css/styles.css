@@ -1037,6 +1037,8 @@ table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--arena-300); }
 th { color: var(--tinta-300); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
 .table-wrap { overflow-x: auto; background: white; border-radius: var(--radio-m); box-shadow: var(--sombra-suave); }
+.fila-tienda:hover { background: var(--cielo-100); }
+.fila-productos-tienda td { background: var(--arena-100); }
 
 .modal-overlay {
   position: fixed; inset: 0;

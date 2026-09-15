@@ -72,6 +72,7 @@ const Api = {
   adminRechazarPago: (pagoId) => apiRequest(`/admin/pagos/${pagoId}/rechazar`, { method: 'POST', role: 'admin' }),
   adminAsignarRepartidor: (pedidoId, repartidor_id) => apiRequest(`/admin/pedidos/${pedidoId}/asignar`, { method: 'POST', body: { repartidor_id }, role: 'admin' }),
   adminGetTiendas: () => apiRequest('/admin/tiendas', { role: 'admin' }),
+  adminProductosTienda: (id) => apiRequest(`/admin/tiendas/${id}/productos`, { role: 'admin' }),
   adminCrearTienda: (data) => apiRequest('/admin/tiendas', { method: 'POST', body: data, role: 'admin' }),
   adminActualizarTienda: (id, data) => apiRequest(`/admin/tiendas/${id}`, { method: 'PUT', body: data, role: 'admin' }),
   adminCambiarPasswordTienda: (id, password) => apiRequest(`/admin/tiendas/${id}/password`, { method: 'POST', body: { password }, role: 'admin' }),
