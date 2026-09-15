@@ -14,6 +14,11 @@
 <nav class="navbar">
   <div class="container navbar-inner">
     <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+    <div class="nav-links">
+      <a href="catalogo.html">Catálogo</a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="pedido.html"><strong>Rastrear pedido</strong></a>
+    </div>
     <div class="nav-cta-group">
       <div class="account-menu">
         <button class="account-trigger" type="button">
@@ -27,7 +32,19 @@
           <button type="button" class="btn-logout-cuenta salir">🚪 Cerrar sesión</button>
         </div>
       </div>
-      <a href="catalogo.html" class="btn btn-ghost btn-sm">Catálogo</a>
+      <div class="cart-menu">
+        <button class="cart-trigger icon-btn" type="button">
+          🛒 <span class="badge-count hidden" data-cart-count>0</span>
+        </button>
+        <div class="cart-dropdown hidden">
+          <div class="cart-dropdown-header">Tu carrito</div>
+          <div class="cart-dropdown-items"></div>
+          <div class="cart-dropdown-footer">
+            <div class="flex justify-between items-center mb-0"><span class="text-sm">Total</span><strong data-cart-total>S/ 0.00</strong></div>
+            <a href="carrito.html" class="btn btn-primary btn-block mt-8">Ir a pagar</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </nav>

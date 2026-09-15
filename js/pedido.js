@@ -284,7 +284,15 @@ async function cargarPedido(id) {
     mapaEntrega = null;
     marcadorRepartidor = null;
     marcadorCliente = null;
-    cont.innerHTML = `<p class="text-center form-error mt-16">${err.message || 'Pedido no encontrado'}</p>`;
+    const logueado = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
+    cont.innerHTML = `
+      <div class="empty-state card card-pad">
+        <div class="icon">🧭</div>
+        <p><strong>${err.message || 'No encontramos ese pedido'}</strong></p>
+        <p class="text-sm">Revisa que el ID esté completo y bien copiado.</p>
+        ${logueado ? '<a href="mis-pedidos.html" class="btn btn-secondary btn-sm mt-8">Ver mis pedidos</a>' : ''}
+      </div>
+    `;
   }
 }
 
@@ -317,6 +325,14 @@ if (idInit) {
   // despues de un primer ciclo lento de 15s con el estado aun en null).
   cargarPedido(idInit).finally(programarSiguienteRefresco);
 } else {
-  document.getElementById('contenido').innerHTML = '<p class="text-center text-muted mt-16">Ingresa el ID de tu pedido para ver su estado.</p>';
+  const logueado = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
+  document.getElementById('contenido').innerHTML = `
+    <div class="empty-state card card-pad">
+      <div class="icon">📦</div>
+      <p><strong>Sigue tu pedido en tiempo real</strong></p>
+      <p class="text-sm">Pega el ID que te dimos al hacer tu compra para ver en qué va: preparación, camino y entrega.</p>
+      ${logueado ? '<a href="mis-pedidos.html" class="btn btn-secondary btn-sm mt-8">Ver mis pedidos</a>' : ''}
+    </div>
+  `;
   programarSiguienteRefresco();
 }
