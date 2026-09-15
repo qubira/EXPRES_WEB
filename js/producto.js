@@ -129,6 +129,7 @@ function tarjetaSimilar(p, index) {
     <div class="pcard fade-in-up" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
         ${media}
+        ${p.es_combo ? '<span class="combo-badge">🎁 Combo</span>' : ''}
         <button class="heart-btn ${esFavorito(p.id) ? 'activo' : ''}" data-fav="${p.id}" aria-label="Favorito">${esFavorito(p.id) ? '❤️' : '🤍'}</button>
         <div class="pcard-control" data-control="${p.id}">${controlTarjetaHtml(p)}</div>
       </div>
@@ -184,6 +185,7 @@ async function cargarProducto() {
     btnFav.classList.toggle('activo', esFavorito(p.id));
 
     document.getElementById('producto-tags').innerHTML = `
+      ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
       <span class="tag">${p.categoria}</span>
       ${p.subcategoria ? `<span class="tag" style="background:var(--arena-200);color:var(--tinta-600);">${p.subcategoria}</span>` : ''}
     `;

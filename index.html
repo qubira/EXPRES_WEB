@@ -86,6 +86,14 @@
   </div>
 </div>
 
+<section class="mt-24" id="seccion-combos" hidden>
+  <div class="container flex justify-between items-center mb-0">
+    <h2 style="margin:0;font-size:19px;">Combos 🎁</h2>
+    <a href="catalogo.html" class="text-sm" style="color:var(--coral-600);font-weight:700;">Ver todo →</a>
+  </div>
+  <div class="combo-scroll" id="combo-scroll"></div>
+</section>
+
 <section class="mt-24">
   <div class="container flex justify-between items-center mb-0">
     <h2 style="margin:0;font-size:19px;">Tiendas destacadas</h2>
@@ -208,6 +216,44 @@ async function cargarCategoriasStrip() {
   }
 }
 
+let ultimosCombos = null;
+async function cargarCombos() {
+  const seccion = document.getElementById('seccion-combos');
+  const cont = document.getElementById('combo-scroll');
+  try {
+    const zona = getZonaGuardada();
+    const combos = await Api.getProductos({ es_combo: 'true', ...(zona ? { zona } : {}) });
+    const firma = JSON.stringify(combos);
+    if (firma === ultimosCombos) return; // nada cambio, no repintar
+    ultimosCombos = firma;
+
+    if (combos.length === 0) {
+      seccion.hidden = true;
+      return;
+    }
+    seccion.hidden = false;
+    const lista = combos.slice(0, 8);
+    cont.innerHTML = lista.map((p, i) => `
+      <div class="pcard fade-in-up" style="animation-delay:${i * 60}ms;">
+        <a href="producto.html?id=${p.id}" style="display:block;">
+          <div style="position:relative;">
+            ${p.foto_url ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>` : '<div class="pcard-media">🎁</div>'}
+            <span class="combo-badge">🎁 Combo</span>
+          </div>
+          <div class="pcard-body">
+            <span class="pcard-name">${p.nombre}</span>
+            <span class="pcard-store">${p.tienda_nombre}</span>
+            <span class="pcard-price">${formatoSoles(p.precio)}</span>
+          </div>
+        </a>
+      </div>
+    `).join('');
+  } catch (err) {
+    if (ultimosCombos) return; // ya habia contenido cargado: no lo borres por un fallo en segundo plano
+    seccion.hidden = true;
+  }
+}
+
 let ultimasTiendasDestacadas = null;
 async function cargarTiendasDestacadas() {
   const cont = document.getElementById('store-scroll');
@@ -255,10 +301,13 @@ async function cargarTiendasDestacadas() {
   }
 }
 cargarCategoriasStrip();
+cargarCombos();
 cargarTiendasDestacadas();
 iniciarAutoRefresco(cargarCategoriasStrip);
+iniciarAutoRefresco(cargarCombos);
 iniciarAutoRefresco(cargarTiendasDestacadas);
 document.addEventListener('zona-actualizada', cargarCategoriasStrip);
+document.addEventListener('zona-actualizada', cargarCombos);
 document.addEventListener('zona-actualizada', cargarTiendasDestacadas);
 
 // Busqueda automatica: al dejar de escribir, lleva al catalogo filtrado sin necesidad de Enter

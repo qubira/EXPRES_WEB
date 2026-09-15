@@ -513,6 +513,22 @@ p { margin: 0 0 1rem; }
   margin-top: 6px;
 }
 
+/* ---------- Tarjetas de combo (scroll horizontal, reusa .pcard) ---------- */
+.combo-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px max(18px, calc((100% - 1100px) / 2 + 18px)) 14px;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+.combo-scroll::-webkit-scrollbar { display: none; }
+.combo-scroll .pcard {
+  flex: 0 0 auto;
+  width: 160px;
+  scroll-snap-align: start;
+}
+
 /* ---------- Grid de productos (estilo denso, 2 col en movil) ---------- */
 .product-grid {
   display: grid;
@@ -563,6 +579,18 @@ p { margin: 0 0 1rem; }
   padding-bottom: 2px;
 }
 .pcard-add:active { transform: scale(0.9); }
+.combo-badge {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  background: var(--sol-400, #ffb703);
+  color: var(--tinta-900);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 9px;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
 .pcard-body { padding: 18px 12px 12px; }
 .pcard-name {
   display: block;

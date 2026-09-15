@@ -141,6 +141,7 @@ async function cargarProductos() {
     grid.innerHTML = productos.map((p) => `
       <div class="card card-pad">
         <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
+        ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
         <strong>${p.nombre}</strong>
         ${p.marca ? `<div class="text-sm text-muted">${p.marca}</div>` : ''}
         <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
@@ -188,7 +189,14 @@ function abrirModalProducto(p) {
           </label>
         </div>
         <div class="form-grupo"><label>URL de foto (opcional)</label><input id="p-foto" value="${p ? (p.foto_url||'') : ''}" placeholder="https://..."></div>
-        <div class="form-grupo"><label>Detalle (opcional)</label><textarea id="p-descripcion" rows="4">${p ? (p.descripcion||'') : ''}</textarea></div>
+        <div class="form-grupo"><label>Detalle (opcional)</label><textarea id="p-descripcion" rows="4" placeholder="Si es un combo, cuenta que incluye. Ej: 3 anticuchos + 1 gaseosa 500ml">${p ? (p.descripcion||'') : ''}</textarea></div>
+        <div class="form-grupo flex justify-between items-center">
+          <label class="mb-0">🎁 Es un combo</label>
+          <span class="toggle-switch">
+            <input type="checkbox" id="p-es-combo" ${p && p.es_combo ? 'checked' : ''}>
+            <span class="toggle-slider"></span>
+          </span>
+        </div>
         ${editando ? `
           <div class="form-grupo flex justify-between items-center">
             <label class="mb-0">Producto activo</label>
@@ -256,6 +264,7 @@ function abrirModalProducto(p) {
       contenido: document.getElementById('p-contenido').value ? Number(document.getElementById('p-contenido').value) : null,
       stock: Number(document.getElementById('p-stock').value),
       foto_url: document.getElementById('p-foto').value,
+      es_combo: document.getElementById('p-es-combo').checked,
     };
     if (!datos.nombre || !datos.precio) { mostrarToast('Completa nombre y precio', 'error'); return; }
     if (!datos.subcategoria) { mostrarToast('Completa la subcategoría', 'error'); return; }
