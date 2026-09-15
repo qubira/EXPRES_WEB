@@ -78,6 +78,17 @@ async function cargarPedidos() {
           </div>
           <span class="badge badge-${i.pedido_estado}">${labelEstado(i.pedido_estado)}</span>
         </div>
+        <div class="mt-8">
+          <div class="entrega-info-row">👤 <span>${i.cliente_nombre}</span></div>
+          ${i.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${i.referencia_entrega}</span></div>` : ''}
+        </div>
+        <div class="flex gap-8 mt-8">
+          <a href="tel:${i.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
+          <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
+        </div>
+        ${i.lat_entrega && i.lng_entrega ? `
+          <a href="https://www.google.com/maps?q=${i.lat_entrega},${i.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-block mt-8">🗺️ Ver ubicación del cliente</a>
+        ` : ''}
         <div class="flex justify-between items-center mt-8">
           <span>${formatoSoles(i.subtotal)}</span>
           ${i.estado_tienda === 'listo'

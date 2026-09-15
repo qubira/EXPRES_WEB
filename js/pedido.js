@@ -9,6 +9,7 @@ const MOTIVOS_RECLAMO = {
 let mapaEntrega = null;
 let marcadorRepartidor = null;
 let marcadorCliente = null;
+let ultimoEstadoConocido = null;
 
 function idInicial() {
   return new URLSearchParams(location.search).get('id') || localStorage.getItem('express_last_pedido') || '';
@@ -149,6 +150,7 @@ async function cargarPedido(id) {
   try {
     const pedido = await Api.getPedido(id);
     localStorage.setItem('express_last_pedido', pedido.id);
+    ultimoEstadoConocido = pedido.estado;
 
     const necesitaPago = pedido.estado === 'pendiente_pago';
     const rechazado = pedido.estado === 'pago_rechazado';
@@ -266,7 +268,15 @@ if (idInit) {
   document.getElementById('contenido').innerHTML = '<p class="text-center text-muted mt-16">Ingresa el ID de tu pedido para ver su estado.</p>';
 }
 
-setInterval(() => {
-  const id = new URLSearchParams(location.search).get('id');
-  if (id) cargarPedido(id);
-}, 15000);
+// Mientras el repartidor esta en camino refrescamos mas seguido para que el
+// mapa en vivo se sienta realmente "en tiempo real"; en el resto de estados
+// alcanza con un refresco mas espaciado.
+function programarSiguienteRefresco() {
+  const intervalo = ultimoEstadoConocido === 'recogido' ? 5000 : 15000;
+  setTimeout(() => {
+    const id = new URLSearchParams(location.search).get('id');
+    if (id && !document.hidden) cargarPedido(id).finally(programarSiguienteRefresco);
+    else programarSiguienteRefresco();
+  }, intervalo);
+}
+programarSiguienteRefresco();

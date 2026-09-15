@@ -194,7 +194,7 @@ function actualizarSeguimientoGPS(pedidos) {
   gpsWatchId = navigator.geolocation.watchPosition(
     (pos) => {
       const ahora = Date.now();
-      if (ahora - ultimoEnvioGPS < 8000) return; // no saturar la API
+      if (ahora - ultimoEnvioGPS < 5000) return; // no saturar la API
       ultimoEnvioGPS = ahora;
       const { latitude, longitude } = pos.coords;
       pedidosRecogidoActuales.forEach((pedidoId) => {
