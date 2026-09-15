@@ -312,6 +312,11 @@ function resumenDispositivo(ua) {
   else if (/Linux/.test(ua)) so = 'Linux';
   return so ? `${nav} · ${so}` : nav;
 }
+function iconoDispositivo(ua) {
+  if (!ua) return '🖥️';
+  if (/Android|iPhone|iPad/.test(ua)) return '📱';
+  return '🖥️';
+}
 
 // role: 'tienda' | 'repartidor' | 'admin' | 'cliente'. Reutilizable en cualquier panel.
 async function cargarConectividad(role, listaId, btnOtrasId) {
@@ -325,11 +330,14 @@ async function cargarConectividad(role, listaId, btnOtrasId) {
       return;
     }
     cont.innerHTML = sesiones.map((s) => `
-      <div class="card card-pad mt-16 flex justify-between items-center" style="flex-wrap:wrap; gap:8px;">
-        <div>
-          <strong>${resumenDispositivo(s.user_agent)}</strong>
-          ${s.actual ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);margin-left:6px;">Esta sesión</span>' : ''}
-          <div class="text-sm text-muted">IP: ${s.ip || '—'} · Conectado: ${new Date(s.creado_en).toLocaleString('es-PE')}</div>
+      <div class="card card-pad mt-16 flex justify-between items-center sesion-card ${s.actual ? 'sesion-actual' : ''}" style="flex-wrap:wrap; gap:8px;">
+        <div class="flex items-center gap-8">
+          <span class="sesion-icon">${iconoDispositivo(s.user_agent)}</span>
+          <div>
+            <strong>${resumenDispositivo(s.user_agent)}</strong>
+            ${s.actual ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);margin-left:6px;">Esta sesión</span>' : ''}
+            <div class="text-sm text-muted">IP: ${s.ip || '—'} · Conectado: ${new Date(s.creado_en).toLocaleString('es-PE')}</div>
+          </div>
         </div>
         ${s.actual ? '' : `<button class="btn btn-outline btn-sm" data-cerrar-sesion="${s.id}">Cerrar sesión</button>`}
       </div>

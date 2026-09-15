@@ -70,7 +70,7 @@ async function cargarPedidos() {
       return;
     }
     cont.innerHTML = items.map((i) => `
-      <div class="card card-pad mt-16">
+      <div class="card card-pad mt-16 pedido-card" data-estado="${i.pedido_estado}">
         <div class="flex justify-between items-center">
           <div>
             <strong>${i.cantidad}x ${i.nombre_producto}</strong>
@@ -84,13 +84,13 @@ async function cargarPedidos() {
         </div>
         <div class="flex gap-8 mt-8">
           <a href="tel:${i.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
-          <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
+          <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-sm w-full">💬 WhatsApp</a>
         </div>
         ${i.lat_entrega && i.lng_entrega ? `
           <a href="https://www.google.com/maps?q=${i.lat_entrega},${i.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-block mt-8">🗺️ Ver ubicación del cliente</a>
         ` : ''}
-        <div class="flex justify-between items-center mt-8">
-          <span>${formatoSoles(i.subtotal)}</span>
+        <div class="flex justify-between items-center mt-8 pedido-card-footer">
+          <span class="pedido-precio">${formatoSoles(i.subtotal)}</span>
           ${i.pedido_estado === 'cancelado'
             ? '<span class="tag" style="background:#f0f0f0;color:var(--tinta-300);">✕ Cancelado por el cliente</span>'
             : i.estado_tienda === 'listo'
@@ -139,16 +139,21 @@ async function cargarProductos() {
       return;
     }
     grid.innerHTML = productos.map((p) => `
-      <div class="card card-pad">
-        <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
-        ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
-        <strong>${p.nombre}</strong>
-        ${p.marca ? `<div class="text-sm text-muted">${p.marca}</div>` : ''}
-        <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
-        <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
-        <div class="flex gap-8 mt-8">
-          <button class="btn btn-outline btn-sm w-full" data-editar="${p.id}">Editar</button>
-          <button class="btn btn-danger btn-sm" data-eliminar="${p.id}">🗑️</button>
+      <div class="card producto-admin-card">
+        <div class="pcard-media" style="${p.foto_url ? `background-image:url('${p.foto_url}')` : ''}">${p.foto_url ? '' : (p.es_combo ? '🎁' : '🛍️')}</div>
+        <div class="card-pad">
+          <div class="flex gap-6" style="flex-wrap:wrap;">
+            <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
+            ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
+          </div>
+          <strong class="producto-admin-nombre">${p.nombre}</strong>
+          ${p.marca ? `<div class="text-sm text-muted">${p.marca}</div>` : ''}
+          <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
+          <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
+          <div class="flex gap-8 mt-8">
+            <button class="btn btn-outline btn-sm w-full" data-editar="${p.id}">Editar</button>
+            <button class="btn btn-danger btn-sm" data-eliminar="${p.id}">🗑️</button>
+          </div>
         </div>
       </div>
     `).join('');
