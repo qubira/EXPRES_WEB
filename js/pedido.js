@@ -206,7 +206,7 @@ async function cargarPedido(id) {
         ` : ''}
         ${rechazado ? `
           <p class="form-error mt-16">Tu comprobante fue rechazado. Escríbenos por WhatsApp para resolverlo.</p>
-          <a href="https://wa.me/51987000000" target="_blank" class="btn btn-outline btn-block">Contactar soporte</a>
+          <a href="https://wa.me/51924687363" target="_blank" class="btn btn-outline btn-block">Contactar soporte</a>
         ` : ''}
         ${rechazadoEnEntrega ? `
           <p class="form-error mt-16">Este pedido fue rechazado en la entrega. Si crees que fue un error, contáctanos.</p>
