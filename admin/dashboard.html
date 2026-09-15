@@ -19,6 +19,7 @@
     <div class="panel-link" data-view="pedidos">📦 Pedidos</div>
     <div class="panel-link" data-view="tiendas">🏪 Tiendas</div>
     <div class="panel-link" data-view="repartidores">🚴 Repartidores</div>
+    <div class="panel-link" data-view="usuarios">👥 Cuentas de usuario</div>
     <div class="panel-link" data-view="reclamos">📣 Reclamos</div>
     <div class="panel-link" data-view="auditoria">🛡️ Auditoría</div>
     <div style="flex:1"></div>
@@ -219,6 +220,16 @@
       </div>
     </section>
 
+    <section id="view-usuarios" class="view hidden">
+      <p class="text-muted mb-16">Cuentas de clientes registradas en la plataforma.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Zona</th><th>Pedidos</th><th>Total comprado</th><th>Se unió</th><th></th></tr></thead>
+          <tbody id="tabla-usuarios"></tbody>
+        </table>
+      </div>
+    </section>
+
     <section id="view-reclamos" class="view hidden">
       <div class="card card-pad mb-16" id="card-pagos-retenidos">
         <h3>Pagos retenidos</h3>
@@ -273,6 +284,7 @@
   <div class="panel-link" data-view="pedidos"><span class="icon">📦</span>Pedidos</div>
   <div class="panel-link" data-view="tiendas"><span class="icon">🏪</span>Tiendas</div>
   <div class="panel-link" data-view="repartidores"><span class="icon">🚴</span>Bici</div>
+  <div class="panel-link" data-view="usuarios"><span class="icon">👥</span>Clientes</div>
   <div class="panel-link" data-view="reclamos"><span class="icon">📣</span>Reclamos</div>
 </nav>
 

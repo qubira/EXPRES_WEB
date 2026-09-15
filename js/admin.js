@@ -19,7 +19,7 @@ function manejarError401(err) {
 }
 
 // ---------- Navegacion entre vistas ----------
-const TITULOS = { resumen: 'Resumen', registro: 'Registrar cuenta', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores', reclamos: 'Reclamos', auditoria: 'Auditoría' };
+const TITULOS = { resumen: 'Resumen', registro: 'Registrar cuenta', pagos: 'Pagos pendientes', pedidos: 'Pedidos', tiendas: 'Tiendas', repartidores: 'Repartidores', usuarios: 'Cuentas de usuario', reclamos: 'Reclamos', auditoria: 'Auditoría' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
@@ -33,6 +33,7 @@ function irAVista(vista) {
   if (vista === 'pedidos') cargarPedidos();
   if (vista === 'tiendas') cargarTiendas();
   if (vista === 'repartidores') cargarRepartidores();
+  if (vista === 'usuarios') cargarUsuarios();
   if (vista === 'reclamos') { cargarReclamos(); cargarPagosRetenidos(); }
   if (vista === 'auditoria') cargarAuditoria();
 }
@@ -506,6 +507,76 @@ async function initVistaRegistro() {
       document.getElementById('rr-foto-drop').classList.remove('con-imagen');
       cargarRepartidores();
     } catch (err) { mostrarToast(err.message, 'error'); }
+  });
+}
+
+// ---------- Cuentas de usuario (clientes) ----------
+let usuariosCache = [];
+
+async function cargarUsuarios() {
+  const tbody = document.getElementById('tabla-usuarios');
+  tbody.innerHTML = '<tr><td colspan="8" class="text-muted">Cargando...</td></tr>';
+  try {
+    const usuarios = await Api.adminUsuarios();
+    usuariosCache = usuarios;
+    if (usuarios.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-muted">Aún no hay cuentas de clientes</td></tr>';
+      return;
+    }
+    tbody.innerHTML = usuarios.map((u) => `
+      <tr>
+        <td>${u.nombre}</td>
+        <td>${u.email || '—'}</td>
+        <td>${u.telefono}</td>
+        <td>${u.zona || '—'}</td>
+        <td>${u.total_pedidos}</td>
+        <td>${formatoSoles(u.total_gastado)}</td>
+        <td>${new Date(u.created_at).toLocaleDateString('es-PE')}</td>
+        <td><button class="btn btn-outline btn-sm" data-editar-usuario="${u.id}">Editar</button></td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('[data-editar-usuario]').forEach((btn) => btn.addEventListener('click', () => {
+      const u = usuariosCache.find((x) => x.id === btn.dataset.editarUsuario);
+      if (u) abrirModalEditarUsuario(u);
+    }));
+  } catch (err) {
+    if (!manejarError401(err)) tbody.innerHTML = `<tr><td colspan="8" class="form-error">${err.message}</td></tr>`;
+  }
+}
+
+async function abrirModalEditarUsuario(u) {
+  const zonaHtml = await zonaOptionsHtml(u.zona || '');
+  abrirModal(`
+    <h3>${u.nombre}</h3>
+    <p class="text-sm text-muted">${u.total_pedidos} pedido(s) · ${formatoSoles(u.total_gastado)} comprado</p>
+    <div class="form-grupo"><label>Nombre</label><input id="eu-nombre" value="${u.nombre}"></div>
+    <div class="form-grupo"><label>Correo</label><input id="eu-email" type="email" value="${u.email || ''}"></div>
+    <div class="form-grupo"><label>Teléfono</label><input id="eu-telefono" value="${u.telefono}"></div>
+    <div class="form-grupo"><label>Zona</label><select id="eu-zona">${zonaHtml}</select></div>
+    <hr class="divider">
+    <div class="form-grupo"><label>Nueva contraseña (opcional)</label><input id="eu-password" type="text" placeholder="Dejar vacío para no cambiar"></div>
+    <div id="eu-error" class="form-error hidden"></div>
+    <button class="btn btn-primary btn-block" id="btn-guardar-usuario">Guardar cambios</button>
+  `);
+  document.getElementById('btn-guardar-usuario').addEventListener('click', async () => {
+    const errBox = document.getElementById('eu-error');
+    errBox.classList.add('hidden');
+    try {
+      await Api.adminActualizarUsuario(u.id, {
+        nombre: document.getElementById('eu-nombre').value,
+        email: document.getElementById('eu-email').value,
+        telefono: document.getElementById('eu-telefono').value,
+        zona: document.getElementById('eu-zona').value,
+      });
+      const pass = document.getElementById('eu-password').value;
+      if (pass) await Api.adminCambiarPasswordUsuario(u.id, pass);
+      mostrarToast('Cuenta actualizada', 'success');
+      cerrarModal();
+      cargarUsuarios();
+    } catch (err) {
+      errBox.textContent = err.message;
+      errBox.classList.remove('hidden');
+    }
   });
 }
 
