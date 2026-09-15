@@ -13,9 +13,37 @@
 <nav class="navbar">
   <div class="container navbar-inner">
     <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+    <div class="nav-links">
+      <a href="catalogo.html">Catálogo</a>
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="pedido.html">Rastrear pedido</a>
+    </div>
     <div class="nav-cta-group">
-      <a href="mi-cuenta.html" class="btn btn-ghost btn-sm">✏️ Editar datos</a>
-      <button class="btn btn-outline btn-sm" id="btn-salir">Salir</button>
+      <div class="account-menu">
+        <button class="account-trigger" type="button">
+          <span class="icon-btn account-btn">👤</span>
+          <span class="account-name hidden"></span>
+        </button>
+        <div class="account-dropdown hidden">
+          <div class="account-dropdown-header">Mi cuenta</div>
+          <a href="mis-pedidos.html"><strong>📦 Mis pedidos</strong></a>
+          <a href="mi-cuenta.html">✏️ Editar datos</a>
+          <button type="button" class="btn-logout-cuenta salir">🚪 Cerrar sesión</button>
+        </div>
+      </div>
+      <div class="cart-menu">
+        <button class="cart-trigger icon-btn" type="button">
+          🛒 <span class="badge-count hidden" data-cart-count>0</span>
+        </button>
+        <div class="cart-dropdown hidden">
+          <div class="cart-dropdown-header">Tu carrito</div>
+          <div class="cart-dropdown-items"></div>
+          <div class="cart-dropdown-footer">
+            <div class="flex justify-between items-center mb-0"><span class="text-sm">Total</span><strong data-cart-total>S/ 0.00</strong></div>
+            <a href="carrito.html" class="btn btn-primary btn-block mt-8">Ir a pagar</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -49,14 +77,9 @@ if (!clienteEstaLogueado()) {
 }
 document.getElementById('saludo-cliente').textContent = `Hola, ${getClienteNombre()} 👋`;
 
-document.getElementById('btn-salir').addEventListener('click', () => {
-  cerrarSesionCliente();
-  location.href = 'index.html';
-});
-
 function tarjetaPedido(p) {
   return `
-    <a href="pedido.html?id=${p.id}" class="card card-pad mt-16" style="display:block;">
+    <div class="card card-pad mt-16">
       <div class="flex justify-between items-center">
         <div>
           <div class="text-sm text-muted">Pedido #${p.id.slice(0,8).toUpperCase()}</div>
@@ -67,7 +90,8 @@ function tarjetaPedido(p) {
       <div class="text-sm text-muted mt-8">📍 ${p.zona_entrega}</div>
       <div class="text-sm text-muted">${new Date(p.created_at).toLocaleString('es-PE')}</div>
       ${p.pin_entrega ? `<div class="mt-8"><span class="tag" style="background:#fff3d6;color:#b7690a;">🔑 PIN: ${p.pin_entrega}</span></div>` : ''}
-    </a>
+      <a href="pedido.html?id=${p.id}" class="btn btn-secondary btn-sm btn-block mt-8">Ver detalle del pedido →</a>
+    </div>
   `;
 }
 
