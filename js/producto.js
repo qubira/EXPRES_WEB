@@ -151,7 +151,7 @@ async function cargarProducto() {
     return;
   }
   try {
-    const p = await Api.getProducto(productoIdActual);
+    const p = await Api.getProducto(productoIdActual, getZonaGuardada());
     mapaProductos[p.id] = p;
     (p.similares || []).forEach((s) => { mapaProductos[s.id] = s; });
 
@@ -236,3 +236,4 @@ async function cargarProducto() {
 
 cargarProducto();
 iniciarAutoRefresco(cargarProducto);
+document.addEventListener('zona-actualizada', cargarProducto);

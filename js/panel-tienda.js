@@ -10,6 +10,25 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 
 habilitarBuscarDni('tp-dni', 'tp-nombre-titular', 'tp-buscar-dni');
 
+// ---------- Disponibilidad (pausa temporal: oculta los productos a los clientes) ----------
+function actualizarEtiquetaDisponible(disponible) {
+  document.getElementById('disponible-label').textContent = disponible ? 'Disponible' : 'No disponible';
+}
+async function cargarDisponibilidad() {
+  try {
+    const perfil = await Api.tiendaPerfil();
+    document.getElementById('toggle-disponible').checked = perfil.disponible;
+    actualizarEtiquetaDisponible(perfil.disponible);
+  } catch (err) { manejarError401(err); }
+}
+document.getElementById('toggle-disponible').addEventListener('change', async (e) => {
+  try {
+    await Api.tiendaDisponibilidad(e.target.checked);
+    actualizarEtiquetaDisponible(e.target.checked);
+    mostrarToast(e.target.checked ? 'Ahora estás disponible' : 'Ya no estás disponible', 'success');
+  } catch (err) { mostrarToast(err.message, 'error'); }
+});
+
 function manejarError401(err) {
   if (err.status === 401 || err.status === 403) {
     localStorage.removeItem('express_token_tienda');
@@ -342,3 +361,4 @@ document.getElementById('form-password-tienda').addEventListener('submit', async
 });
 
 cargarPedidos();
+cargarDisponibilidad();

@@ -41,13 +41,16 @@ const Api = {
   getTiposNegocio: () => apiRequest('/tipos-negocio'),
   agregarTipoNegocio: (etiqueta, role) => apiRequest('/tipos-negocio', { method: 'POST', body: { etiqueta }, role }),
   getZonas: () => apiRequest('/zonas'),
-  getTiendas: (categoria) => apiRequest(`/tiendas${categoria ? `?categoria=${categoria}` : ''}`),
+  getTiendas: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return apiRequest(`/tiendas${qs ? `?${qs}` : ''}`);
+  },
   getTienda: (id) => apiRequest(`/tiendas/${id}`),
   getProductos: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     return apiRequest(`/productos${qs ? `?${qs}` : ''}`);
   },
-  getProducto: (id) => apiRequest(`/productos/${id}`),
+  getProducto: (id, zona) => apiRequest(`/productos/${id}${zona ? `?zona=${encodeURIComponent(zona)}` : ''}`),
   crearPedido: (data) => apiRequest('/pedidos', { method: 'POST', body: data, role: 'cliente' }),
   subirComprobante: (pedidoId, formData) => apiRequest(`/pedidos/${pedidoId}/pago`, { method: 'POST', body: formData, isForm: true }),
   getPedido: (id) => apiRequest(`/pedidos/${id}`),
@@ -85,6 +88,7 @@ const Api = {
   tiendaPerfil: () => apiRequest('/tienda/perfil', { role: 'tienda' }),
   tiendaActualizarPerfil: (data) => apiRequest('/tienda/perfil', { method: 'PUT', body: data, role: 'tienda' }),
   tiendaCambiarPassword: (data) => apiRequest('/tienda/perfil/password', { method: 'POST', body: data, role: 'tienda' }),
+  tiendaDisponibilidad: (disponible) => apiRequest('/tienda/disponibilidad', { method: 'POST', body: { disponible }, role: 'tienda' }),
   tiendaProductos: () => apiRequest('/tienda/productos', { role: 'tienda' }),
   tiendaCrearProducto: (data) => apiRequest('/tienda/productos', { method: 'POST', body: data, role: 'tienda' }),
   tiendaSubirImagen: (formData) => apiRequest('/tienda/upload', { method: 'POST', body: formData, isForm: true, role: 'tienda' }),

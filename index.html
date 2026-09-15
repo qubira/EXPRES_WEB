@@ -205,7 +205,8 @@ async function cargarTiendasDestacadas() {
     ambulante:'🛒', boutique:'👙', artesanias:'🎨', servicios_playa:'⛱️', otro:'🛍️',
   };
   try {
-    const tiendas = await Api.getTiendas();
+    const zona = getZonaGuardada();
+    const tiendas = await Api.getTiendas(zona ? { zona } : {});
     const firmaTiendas = JSON.stringify(tiendas);
     if (firmaTiendas === ultimasTiendasDestacadas) return; // nada cambio, no repintar
     ultimasTiendasDestacadas = firmaTiendas;
@@ -244,6 +245,7 @@ async function cargarTiendasDestacadas() {
 }
 cargarTiendasDestacadas();
 iniciarAutoRefresco(cargarTiendasDestacadas);
+document.addEventListener('zona-actualizada', cargarTiendasDestacadas);
 
 // Busqueda automatica: al dejar de escribir, lleva al catalogo filtrado sin necesidad de Enter
 const heroSearchForm = document.querySelector('.search-bar-wrap');

@@ -137,6 +137,8 @@ async function cargarProductos(mostrarCarga = true) {
     const params = {};
     if (categoriaActiva) params.categoria = categoriaActiva;
     if (terminoBusqueda) params.q = terminoBusqueda;
+    const zona = getZonaGuardada();
+    if (zona) params.zona = zona;
     const productos = await Api.getProductos(params);
 
     // Evita volver a pintar la grilla si no cambio nada (sin parpadeos innecesarios).
@@ -195,3 +197,4 @@ cargarFiltros();
 cargarProductos();
 actualizarCartBar();
 iniciarAutoRefresco(() => cargarProductos(false));
+document.addEventListener('zona-actualizada', () => cargarProductos());
