@@ -362,6 +362,7 @@ async function initVistaRegistro() {
 
   // ---------- Repartidor: nacionalidad (DNI peruano vs CE extranjero) ----------
   habilitarBuscarDni('rr-dni', 'rr-nombre-peru', 'rr-buscar-dni');
+  habilitarBuscarCe('rr-ce', 'rr-nombre-extranjero', 'rr-buscar-ce');
   const btnPeruano = document.getElementById('rr-btn-peruano');
   const btnExtranjero = document.getElementById('rr-btn-extranjero');
   const bloquePeru = document.getElementById('rr-bloque-peru');

@@ -116,8 +116,13 @@
             </div>
             <div id="rr-bloque-extranjero" class="hidden">
               <div class="form-grupo"><label>Nacionalidad</label><input id="rr-nacionalidad" placeholder="Ej. Venezuela"></div>
-              <div class="form-grupo"><label>Carné de Extranjería (CE)</label><input id="rr-ce" placeholder="Ej. 001234567"></div>
-              <div class="form-grupo"><label>Nombre completo</label><input id="rr-nombre-extranjero" placeholder="Nombre y apellidos"></div>
+              <div class="form-grupo"><label>Carné de Extranjería (CE)</label>
+                <div class="flex" style="gap:8px;">
+                  <input id="rr-ce" placeholder="Ej. 001234567" style="flex:1;">
+                  <button type="button" class="btn btn-outline btn-sm" id="rr-buscar-ce">Buscar</button>
+                </div>
+              </div>
+              <div class="form-grupo"><label>Nombre completo</label><input id="rr-nombre-extranjero" placeholder="Se completa al buscar, o escríbelo si no hay resultado"></div>
             </div>
             <div class="form-grupo"><label>Edad</label><input id="rr-edad" type="number" min="18" max="80"></div>
             <div class="form-grupo"><label>Correo electrónico</label><input id="rr-email" type="email" required></div>

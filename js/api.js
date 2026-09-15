@@ -57,6 +57,7 @@ const Api = {
   cerrarSesionRemota: (id, role) => apiRequest(`/mis-sesiones/${id}/cerrar`, { method: 'POST', role }),
   cerrarOtrasSesiones: (role) => apiRequest('/mis-sesiones/cerrar-otras', { method: 'POST', role }),
   consultarDni: (numero) => apiRequest(`/consulta-dni/${numero}`),
+  consultarCe: (numero) => apiRequest(`/consulta-ce/${numero}`),
 
   // Admin
   adminLogin: (data) => apiRequest('/admin/login', { method: 'POST', body: data }),
@@ -174,6 +175,34 @@ function habilitarBuscarDni(dniInputId, nombreInputId, btnId) {
       mostrarToast('Nombre encontrado', 'success');
     } catch (err) {
       mostrarToast(err.message || 'No se encontró el DNI, ingresa el nombre manualmente', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    }
+  });
+}
+
+async // Igual que habilitarBuscarDni, pero para Carne de Extranjeria (sin formato fijo de digitos).
+function habilitarBuscarCe(ceInputId, nombreInputId, btnId) {
+  const btn = document.getElementById(btnId);
+  const ceInput = document.getElementById(ceInputId);
+  const nombreInput = document.getElementById(nombreInputId);
+  if (!btn || !ceInput || !nombreInput) return;
+  btn.addEventListener('click', async () => {
+    const numero = ceInput.value.trim();
+    if (!numero) {
+      mostrarToast('Ingresa el número de CE', 'error');
+      return;
+    }
+    const textoOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Buscando...';
+    try {
+      const { nombre } = await Api.consultarCe(numero);
+      nombreInput.value = nombre || '';
+      mostrarToast('Nombre encontrado', 'success');
+    } catch (err) {
+      mostrarToast(err.message || 'No se encontró el CE, ingresa el nombre manualmente', 'error');
     } finally {
       btn.disabled = false;
       btn.textContent = textoOriginal;
