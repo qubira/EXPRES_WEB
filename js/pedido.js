@@ -106,7 +106,7 @@ function renderReclamoModal(pedidoId) {
       </select>
     </div>
     <div class="form-grupo">
-      <label>Cuéntanos más (opcional)</label>
+      <label id="reclamo-descripcion-label">Cuéntanos más (opcional)</label>
       <textarea id="reclamo-descripcion" placeholder="Describe lo que pasó..."></textarea>
     </div>
     <div class="form-grupo">
@@ -116,17 +116,36 @@ function renderReclamoModal(pedidoId) {
     <div id="reclamo-error" class="form-error hidden"></div>
     <button class="btn btn-primary btn-block mt-8" id="btn-enviar-reclamo">Enviar reclamo</button>
   `);
+
+  const selectMotivo = document.getElementById('reclamo-motivo');
+  const descripcionLabel = document.getElementById('reclamo-descripcion-label');
+  const descripcionInput = document.getElementById('reclamo-descripcion');
+  function actualizarDescripcionSegunMotivo() {
+    const esOtro = selectMotivo.value === 'otro';
+    descripcionLabel.textContent = esOtro ? 'Cuéntanos qué pasó' : 'Cuéntanos más (opcional)';
+    descripcionInput.required = esOtro;
+    if (esOtro) descripcionInput.focus();
+  }
+  selectMotivo.addEventListener('change', actualizarDescripcionSegunMotivo);
+  actualizarDescripcionSegunMotivo();
+
   document.getElementById('btn-enviar-reclamo').addEventListener('click', async (e) => {
-    const motivo = document.getElementById('reclamo-motivo').value;
-    const descripcion = document.getElementById('reclamo-descripcion').value.trim();
+    const motivo = selectMotivo.value;
+    const descripcion = descripcionInput.value.trim();
     const imagenes = Array.from(document.getElementById('reclamo-imagenes').files || []);
     const errBox = document.getElementById('reclamo-error');
+    if (motivo === 'otro' && !descripcion) {
+      errBox.textContent = 'Cuéntanos qué pasó para poder revisarlo';
+      errBox.classList.remove('hidden');
+      return;
+    }
     const btn = e.currentTarget;
     btn.disabled = true;
     try {
       await Api.clienteReclamo(pedidoId, motivo, descripcion, imagenes);
       cerrarModal();
       mostrarToast('Reclamo enviado. Un administrador lo revisará pronto.', 'success');
+      cargarPedido(pedidoId);
     } catch (err) {
       errBox.textContent = err.message;
       errBox.classList.remove('hidden');
@@ -190,8 +209,10 @@ async function cargarPedido(id) {
     const rechazado = pedido.estado === 'pago_rechazado';
     const rechazadoEnEntrega = pedido.estado === 'rechazado_en_entrega';
     const logueado = typeof clienteEstaLogueado === 'function' && clienteEstaLogueado();
+    const tieneReclamoActivo = !!pedido.reclamo_estado;
     const puedeCancelar = logueado && ['pendiente_pago', 'pagado', 'preparando'].includes(pedido.estado);
     const puedeReclamar = logueado && ['entregado', 'rechazado_en_entrega'].includes(pedido.estado);
+    const puedeObservar = logueado && ['listo_recoger', 'recogido'].includes(pedido.estado) && !tieneReclamoActivo;
     const esperandoEnPunto = ['listo_recoger', 'recogido'].includes(pedido.estado);
 
     cont.innerHTML = `
@@ -223,11 +244,18 @@ async function cargarPedido(id) {
             <span class="text-sm">Esta entrega quedó marcada para revisión porque no se validó el código en el momento. Si no recibiste tu pedido o hay algo raro, haz tu reclamo abajo.</span>
           </div>
         ` : ''}
-        ${esperandoEnPunto ? `
-          <p class="text-sm text-muted mt-16">Si el producto llega dañado o incorrecto, no lo recibas: puedes generar un reclamo aquí mismo apenas termine la entrega.</p>
+        ${tieneReclamoActivo ? `
+          <div class="flex items-center gap-8 mt-16" style="background:#fff7e6; border-radius:10px; padding:12px;">
+            <span style="font-size:20px;">🔍</span>
+            <span class="text-sm">Este pedido está en observación (reclamo ${pedido.reclamo_estado === 'en_revision' ? 'en revisión' : 'abierto'}). Un administrador se pondrá en contacto contigo.</span>
+          </div>
+        ` : ''}
+        ${esperandoEnPunto && !tieneReclamoActivo ? `
+          <p class="text-sm text-muted mt-16">Si no quieres o no puedes recibir este pedido, puedes observarlo antes de que llegue.</p>
         ` : ''}
 
         ${puedeCancelar ? `<button class="btn btn-outline btn-block mt-16" id="btn-cancelar-pedido">Cancelar pedido</button>` : ''}
+        ${puedeObservar ? `<button class="btn btn-outline btn-block mt-16" id="btn-observar-pedido">🔍 Observar pedido</button>` : ''}
         ${puedeReclamar ? `<button class="btn btn-outline btn-block mt-16" id="btn-reclamo-pedido">📣 Hacer un reclamo</button>` : ''}
       </div>
 
@@ -279,6 +307,10 @@ async function cargarPedido(id) {
     const btnReclamo = document.getElementById('btn-reclamo-pedido');
     if (btnReclamo) {
       btnReclamo.addEventListener('click', () => renderReclamoModal(pedido.id));
+    }
+    const btnObservar = document.getElementById('btn-observar-pedido');
+    if (btnObservar) {
+      btnObservar.addEventListener('click', () => renderReclamoModal(pedido.id));
     }
   } catch (err) {
     // Si veniamos mostrando el pedido con el mapa montado y esta carga
