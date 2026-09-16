@@ -59,68 +59,155 @@ document.getElementById('toggle-disponible').addEventListener('change', async (e
 });
 
 // ---------- Entregas activas ----------
+const ESTADOS_ENTREGA_ACTIVA = ['pagado', 'preparando', 'listo_recoger', 'recogido'];
+let vistaActivosRepartidor = 'tarjetas';
+let todosActivosRepartidorCache = null;
+
 async function cargarActivos() {
   const cont = document.getElementById('lista-activos');
   cont.innerHTML = '<p class="text-muted">Cargando...</p>';
   try {
-    const pedidos = await Api.repartidorPedidos();
-    actualizarSeguimientoGPS(pedidos);
-
-    if (pedidos.length === 0) {
-      cont.innerHTML = '<div class="empty-state"><div class="icon">🚴</div><p>No tienes entregas asignadas por ahora.</p></div>';
-      return;
-    }
-    cont.innerHTML = pedidos.map((p) => `
-      <div class="card card-pad mt-16 entrega-card estado-${p.estado}">
-        <div class="flex justify-between items-center">
-          <strong>#${p.id.slice(0,8).toUpperCase()}</strong>
-          <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
-        </div>
-        <div class="mt-8">
-          <div class="entrega-info-row">📍 <span>${p.zona_entrega}</span></div>
-          ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${p.referencia_entrega}</span></div>` : ''}
-          <div class="entrega-info-row">👤 <span>${p.cliente_nombre}</span></div>
-        </div>
-        <div class="flex gap-8 mt-8">
-          <a href="tel:${p.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
-          <a href="https://wa.me/51${p.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
-        </div>
-        ${p.lat_entrega && p.lng_entrega ? `
-          <a href="https://www.google.com/maps?q=${p.lat_entrega},${p.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-block mt-8">🗺️ Ver ubicación del cliente</a>
-        ` : ''}
-        <div class="entrega-tarifa">
-          <span class="text-sm">Tarifa de entrega</span>
-          <strong>${formatoSoles(p.delivery_fee)}</strong>
-        </div>
-        <div class="mt-16">
-          ${p.estado === 'listo_recoger' ? `<button class="btn btn-secondary btn-block" data-recoger="${p.id}">🚲 He recogido el pedido</button>` : ''}
-          ${p.estado === 'recogido' ? `
-            <button class="btn btn-success btn-block" data-entregar="${p.id}">🔑 Confirmar entrega (PIN)</button>
-            <button class="btn btn-outline btn-block mt-8" data-rechazado="${p.id}">❌ El cliente rechazó el pedido</button>
-            <button class="btn btn-ghost btn-block mt-8" data-sin-pin="${p.id}" style="color:var(--tinta-300);">Entregó pero no dio el código</button>
-          ` : ''}
-          ${!['listo_recoger','recogido'].includes(p.estado) ? `<div class="text-sm text-muted text-center">⏳ Esperando que la tienda prepare el pedido...</div>` : ''}
-          ${['listo_recoger','recogido'].includes(p.estado) ? `<button class="btn btn-ghost btn-block mt-8" data-observacion="${p.id}" style="color:var(--rojo-alerta);">⚠️ Reportar un problema</button>` : ''}
-        </div>
-      </div>
-    `).join('');
-
-    cont.querySelectorAll('[data-recoger]').forEach((btn) => btn.addEventListener('click', async () => {
-      btn.disabled = true;
-      try {
-        await Api.repartidorRecogido(btn.dataset.recoger);
-        mostrarToast('Pedido marcado como recogido', 'success');
-        cargarActivos();
-      } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
-    }));
-    cont.querySelectorAll('[data-entregar]').forEach((btn) => btn.addEventListener('click', () => abrirModalPin(btn.dataset.entregar)));
-    cont.querySelectorAll('[data-rechazado]').forEach((btn) => btn.addEventListener('click', () => abrirModalRechazado(btn.dataset.rechazado)));
-    cont.querySelectorAll('[data-sin-pin]').forEach((btn) => btn.addEventListener('click', () => abrirModalSinPin(btn.dataset.sinPin)));
-    cont.querySelectorAll('[data-observacion]').forEach((btn) => btn.addEventListener('click', () => abrirModalObservacion(btn.dataset.observacion)));
+    todosActivosRepartidorCache = await Api.repartidorPedidos();
+    actualizarSeguimientoGPS(todosActivosRepartidorCache);
+    renderActivosRepartidor();
   } catch (err) {
     if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
   }
 }
+
+function tarjetaEntregaHtml(p) {
+  return `
+    <div class="card card-pad entrega-card estado-${p.estado}">
+      <div class="flex justify-between items-center">
+        <strong>#${p.id.slice(0,8).toUpperCase()}</strong>
+        <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
+      </div>
+      <div class="mt-8">
+        <div class="entrega-info-row">📍 <span>${p.zona_entrega}</span></div>
+        ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${p.referencia_entrega}</span></div>` : ''}
+        <div class="entrega-info-row">👤 <span>${p.cliente_nombre}</span></div>
+      </div>
+      <div class="flex gap-8 mt-8">
+        <a href="tel:${p.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
+        <a href="https://wa.me/51${p.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
+      </div>
+      ${p.lat_entrega && p.lng_entrega ? `
+        <a href="https://www.google.com/maps?q=${p.lat_entrega},${p.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-block mt-8">🗺️ Ver ubicación del cliente</a>
+      ` : ''}
+      <div class="entrega-tarifa">
+        <span class="text-sm">Tarifa de entrega</span>
+        <strong>${formatoSoles(p.delivery_fee)}</strong>
+      </div>
+      <div class="mt-16">
+        ${p.estado === 'listo_recoger' ? `<button class="btn btn-secondary btn-block" data-recoger="${p.id}">🚲 He recogido el pedido</button>` : ''}
+        ${p.estado === 'recogido' ? `
+          <button class="btn btn-success btn-block" data-entregar="${p.id}">🔑 Confirmar entrega (PIN)</button>
+          <button class="btn btn-outline btn-block mt-8" data-rechazado="${p.id}">❌ El cliente rechazó el pedido</button>
+          <button class="btn btn-ghost btn-block mt-8" data-sin-pin="${p.id}" style="color:var(--tinta-300);">Entregó pero no dio el código</button>
+        ` : ''}
+        ${!['listo_recoger','recogido'].includes(p.estado) ? `<div class="text-sm text-muted text-center">⏳ Esperando que la tienda prepare el pedido...</div>` : ''}
+        ${['listo_recoger','recogido'].includes(p.estado) ? `<button class="btn btn-ghost btn-block mt-8" data-observacion="${p.id}" style="color:var(--rojo-alerta);">⚠️ Reportar un problema</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function accionPrincipalEntregaHtml(p) {
+  if (p.estado === 'listo_recoger') return `<button class="btn btn-secondary btn-xs" data-recoger="${p.id}">🚲 Recogido</button>`;
+  if (p.estado === 'recogido') return `<button class="btn btn-success btn-xs" data-entregar="${p.id}">🔑 Entregar</button>`;
+  return '<span class="text-sm text-muted">⏳ Esperando</span>';
+}
+
+function renderActivosComoTarjetas(cont, pedidos) {
+  cont.innerHTML = `<div class="grid-pedidos-tarjetas">${pedidos.map(tarjetaEntregaHtml).join('')}</div>`;
+}
+
+function renderActivosComoTabla(cont, pedidos) {
+  cont.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Pedido</th><th>Zona</th><th>Cliente</th><th>Estado</th><th>Tarifa</th><th>Contacto</th><th>Acción</th></tr></thead>
+        <tbody>
+          ${pedidos.map((p) => `
+            <tr>
+              <td>#${p.id.slice(0,8).toUpperCase()}</td>
+              <td>${p.zona_entrega}</td>
+              <td>${p.cliente_nombre}</td>
+              <td><span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span></td>
+              <td>${formatoSoles(p.delivery_fee)}</td>
+              <td>
+                <div class="flex gap-6">
+                  <a href="tel:${p.cliente_telefono}" class="btn btn-ghost btn-xs" title="Llamar">📞</a>
+                  <a href="https://wa.me/51${p.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-xs" title="WhatsApp">💬</a>
+                  ${p.lat_entrega && p.lng_entrega ? `<a href="https://www.google.com/maps?q=${p.lat_entrega},${p.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-xs" title="Ver ubicación">🗺️</a>` : ''}
+                </div>
+              </td>
+              <td>${accionPrincipalEntregaHtml(p)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderActivosComoEstados(cont, pedidos) {
+  const columnas = ESTADOS_ENTREGA_ACTIVA.map((estado) => ({ estado, items: pedidos.filter((p) => p.estado === estado) }))
+    .filter((col) => col.items.length > 0);
+  if (columnas.length === 0) {
+    cont.innerHTML = '<p class="text-muted">No hay entregas activas.</p>';
+    return;
+  }
+  cont.innerHTML = `
+    <div class="tablero-estados">
+      ${columnas.map((col) => `
+        <div class="tablero-columna">
+          <div class="tablero-columna-titulo">
+            <span class="badge badge-${col.estado}">${labelEstado(col.estado)}</span>
+            <span class="text-muted">${col.items.length}</span>
+          </div>
+          <div class="tablero-columna-lista">${col.items.map(tarjetaEntregaHtml).join('')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function enlazarAccionesActivos(cont) {
+  cont.querySelectorAll('[data-recoger]').forEach((btn) => btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      await Api.repartidorRecogido(btn.dataset.recoger);
+      mostrarToast('Pedido marcado como recogido', 'success');
+      cargarActivos();
+    } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
+  }));
+  cont.querySelectorAll('[data-entregar]').forEach((btn) => btn.addEventListener('click', () => abrirModalPin(btn.dataset.entregar)));
+  cont.querySelectorAll('[data-rechazado]').forEach((btn) => btn.addEventListener('click', () => abrirModalRechazado(btn.dataset.rechazado)));
+  cont.querySelectorAll('[data-sin-pin]').forEach((btn) => btn.addEventListener('click', () => abrirModalSinPin(btn.dataset.sinPin)));
+  cont.querySelectorAll('[data-observacion]').forEach((btn) => btn.addEventListener('click', () => abrirModalObservacion(btn.dataset.observacion)));
+}
+
+function renderActivosRepartidor() {
+  const cont = document.getElementById('lista-activos');
+  if (todosActivosRepartidorCache.length === 0) {
+    cont.innerHTML = '<div class="empty-state"><div class="icon">🚴</div><p>No tienes entregas asignadas por ahora.</p></div>';
+    return;
+  }
+  if (vistaActivosRepartidor === 'tabla') renderActivosComoTabla(cont, todosActivosRepartidorCache);
+  else if (vistaActivosRepartidor === 'estados') renderActivosComoEstados(cont, todosActivosRepartidorCache);
+  else renderActivosComoTarjetas(cont, todosActivosRepartidorCache);
+  enlazarAccionesActivos(cont);
+}
+
+document.querySelectorAll('#filtro-vista-activos .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    vistaActivosRepartidor = chip.dataset.vista;
+    document.querySelectorAll('#filtro-vista-activos .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    renderActivosRepartidor();
+  });
+});
 
 function abrirModalRechazado(pedidoId) {
   abrirModal(`

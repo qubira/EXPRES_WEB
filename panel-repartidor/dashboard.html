@@ -22,17 +22,19 @@
 
   <main class="panel-main">
     <div class="panel-topbar">
-      <div>
-        <h2 style="margin:0;" id="titulo-vista">Mis entregas</h2>
-        <span class="text-sm text-muted" id="rep-nombre"></span>
+      <div class="panel-topbar-main">
+        <div>
+          <h2 style="margin:0;" id="titulo-vista">Mis entregas</h2>
+          <span class="text-sm text-muted" id="rep-nombre"></span>
+        </div>
+        <label class="flex items-center gap-8 disponible-pill" style="cursor:pointer;">
+          <span class="text-sm" id="disponible-label" style="font-weight:700;">Disponible</span>
+          <span class="toggle-switch">
+            <input type="checkbox" id="toggle-disponible">
+            <span class="toggle-slider"></span>
+          </span>
+        </label>
       </div>
-      <label class="flex items-center gap-8" style="cursor:pointer;">
-        <span class="text-sm" id="disponible-label" style="font-weight:700;">Disponible</span>
-        <span class="toggle-switch">
-          <input type="checkbox" id="toggle-disponible">
-          <span class="toggle-slider"></span>
-        </span>
-      </label>
     </div>
 
     <div class="stat-card mt-16" style="display:inline-block;">
@@ -41,7 +43,14 @@
     </div>
 
     <section id="view-activos" class="view mt-24">
-      <div id="lista-activos"></div>
+      <div class="flex justify-end">
+        <div class="filtros" id="filtro-vista-activos" style="padding:0;">
+          <button class="chip chip-icon activo" data-vista="tarjetas" title="Tarjetas">🗂️</button>
+          <button class="chip chip-icon" data-vista="tabla" title="Tabla">📊</button>
+          <button class="chip chip-icon" data-vista="estados" title="Por estado">📌</button>
+        </div>
+      </div>
+      <div id="lista-activos" class="mt-16"></div>
     </section>
 
     <section id="view-historial" class="view hidden mt-24">
