@@ -123,8 +123,13 @@ const Api = {
   // Repartidor
   repartidorLogin: (data) => apiRequest('/repartidor/login', { method: 'POST', body: data }),
   repartidorPerfil: () => apiRequest('/repartidor/perfil', { role: 'repartidor' }),
+  repartidorSubirImagen: (formData) => apiRequest('/repartidor/upload', { method: 'POST', body: formData, isForm: true, role: 'repartidor' }),
+  repartidorActualizarPerfil: (data) => apiRequest('/repartidor/perfil', { method: 'PUT', body: data, role: 'repartidor' }),
+  repartidorCambiarPassword: (data) => apiRequest('/repartidor/perfil/password', { method: 'POST', body: data, role: 'repartidor' }),
   repartidorDisponibilidad: (disponible) => apiRequest('/repartidor/disponibilidad', { method: 'POST', body: { disponible }, role: 'repartidor' }),
   repartidorPedidos: () => apiRequest('/repartidor/pedidos', { role: 'repartidor' }),
+  repartidorPedidosDisponibles: () => apiRequest('/repartidor/pedidos/disponibles', { role: 'repartidor' }),
+  repartidorReclamarPedido: (id) => apiRequest(`/repartidor/pedidos/${id}/reclamar`, { method: 'POST', role: 'repartidor' }),
   repartidorHistorial: () => apiRequest('/repartidor/pedidos/historial', { role: 'repartidor' }),
   repartidorPedido: (id) => apiRequest(`/repartidor/pedidos/${id}`, { role: 'repartidor' }),
   repartidorRecogido: (id) => apiRequest(`/repartidor/pedidos/${id}/recogido`, { method: 'POST', role: 'repartidor' }),

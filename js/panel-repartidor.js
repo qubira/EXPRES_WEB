@@ -17,15 +17,17 @@ function manejarError401(err) {
   return false;
 }
 
-const TITULOS = { activos: 'Mis entregas', historial: 'Historial', conectividad: 'Conectividad' };
+const TITULOS = { disponibles: 'Pedidos disponibles', activos: 'Mis entregas', historial: 'Historial', perfil: 'Mi perfil', conectividad: 'Conectividad' };
 
 function irAVista(vista) {
   document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden'));
   document.getElementById(`view-${vista}`).classList.remove('hidden');
   document.querySelectorAll('.panel-link[data-view]').forEach((l) => l.classList.toggle('activo', l.dataset.view === vista));
   document.getElementById('titulo-vista').textContent = TITULOS[vista];
+  if (vista === 'disponibles') cargarDisponibles();
   if (vista === 'activos') cargarActivos();
   if (vista === 'historial') cargarHistorial();
+  if (vista === 'perfil') cargarPerfilFormRepartidor();
   if (vista === 'conectividad') cargarConectividad('repartidor', 'lista-sesiones', 'btn-cerrar-otras-sesiones');
 }
 document.querySelectorAll('.panel-link[data-view]').forEach((link) => link.addEventListener('click', () => irAVista(link.dataset.view)));
@@ -425,6 +427,53 @@ function abrirModalEncuesta(pedidoId) {
   });
 }
 
+// ---------- Pedidos disponibles (pool sin asignar, en mi zona) ----------
+async function cargarDisponibles() {
+  const cont = document.getElementById('lista-disponibles');
+  cont.innerHTML = '<p class="text-muted">Cargando...</p>';
+  try {
+    const pedidos = await Api.repartidorPedidosDisponibles();
+    if (pedidos.length === 0) {
+      cont.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📥</div>
+          <p>No hay pedidos disponibles en tu zona por ahora.</p>
+          <p class="text-sm text-muted">Si no configuraste tu zona, hazlo en "Mi perfil" para empezar a ver pedidos aquí.</p>
+        </div>
+      `;
+      return;
+    }
+    cont.innerHTML = `<div class="grid-pedidos-tarjetas">${pedidos.map((p) => `
+      <div class="card card-pad entrega-card estado-${p.estado}">
+        <div class="flex justify-between items-center">
+          <strong>#${p.id.slice(0,8).toUpperCase()}</strong>
+          <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
+        </div>
+        <div class="mt-8">
+          <div class="entrega-info-row">📍 <span>${p.zona_entrega}</span></div>
+          ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${p.referencia_entrega}</span></div>` : ''}
+        </div>
+        <div class="entrega-tarifa">
+          <span class="text-sm">Tarifa de entrega</span>
+          <strong>${formatoSoles(p.delivery_fee)}</strong>
+        </div>
+        <button class="btn btn-primary btn-block mt-16" data-reclamar="${p.id}">📥 Tomar este pedido</button>
+      </div>
+    `).join('')}</div>`;
+
+    cont.querySelectorAll('[data-reclamar]').forEach((btn) => btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      try {
+        await Api.repartidorReclamarPedido(btn.dataset.reclamar);
+        mostrarToast('Pedido tomado, ya está en Mis entregas', 'success');
+        cargarDisponibles();
+      } catch (err) { mostrarToast(err.message, 'error'); btn.disabled = false; }
+    }));
+  } catch (err) {
+    if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
+  }
+}
+
 // ---------- Historial ----------
 async function cargarHistorial() {
   const cont = document.getElementById('lista-historial');
@@ -457,6 +506,97 @@ async function cargarHistorial() {
     if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
   }
 }
+
+// ---------- Mi perfil ----------
+async function cargarPerfilFormRepartidor() {
+  try {
+    const p = await Api.repartidorPerfil();
+    document.getElementById('rp-nombre').value = p.nombre || '';
+    document.getElementById('rp-telefono').value = p.telefono || '';
+    document.getElementById('rp-zona').innerHTML = await zonaOptionsHtml(p.zona || '');
+    document.getElementById('rp-foto').value = p.foto_url || '';
+    const preview = document.getElementById('rp-foto-preview');
+    if (p.foto_url) {
+      preview.src = p.foto_url;
+      preview.style.display = 'block';
+      document.getElementById('rp-foto-placeholder').style.display = 'none';
+      document.getElementById('rp-foto-drop').classList.add('con-imagen');
+    }
+  } catch (err) {
+    if (!manejarError401(err)) mostrarToast(err.message, 'error');
+  }
+}
+
+document.getElementById('rp-foto-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const preview = document.getElementById('rp-foto-preview');
+  const placeholder = document.getElementById('rp-foto-placeholder');
+  const drop = document.getElementById('rp-foto-drop');
+  try {
+    const fd = new FormData();
+    fd.append('imagen', file);
+    mostrarToast('Subiendo imagen...', '');
+    const { url } = await Api.repartidorSubirImagen(fd);
+    document.getElementById('rp-foto').value = url;
+    preview.src = url;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    drop.classList.add('con-imagen');
+    mostrarToast('Imagen subida', 'success');
+  } catch (err) {
+    mostrarToast(err.message || 'No se pudo subir la imagen', 'error');
+  }
+});
+
+document.getElementById('form-perfil-repartidor').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-guardar-perfil-repartidor');
+  const errorBox = document.getElementById('error-perfil-repartidor');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+  try {
+    await Api.repartidorActualizarPerfil({
+      nombre: document.getElementById('rp-nombre').value,
+      telefono: document.getElementById('rp-telefono').value,
+      zona: document.getElementById('rp-zona').value,
+      foto_url: document.getElementById('rp-foto').value,
+    });
+    document.getElementById('rep-nombre').textContent = document.getElementById('rp-nombre').value;
+    localStorage.setItem('express_nombre_repartidor', document.getElementById('rp-nombre').value);
+    mostrarToast('Perfil actualizado', 'success');
+  } catch (err) {
+    errorBox.textContent = err.message || 'No se pudo actualizar el perfil';
+    errorBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar cambios';
+  }
+});
+
+document.getElementById('form-password-repartidor').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('btn-cambiar-password-repartidor');
+  const errorBox = document.getElementById('error-password-repartidor');
+  errorBox.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Actualizando...';
+  try {
+    await Api.repartidorCambiarPassword({
+      password_actual: document.getElementById('rp-pass-actual').value,
+      password_nueva: document.getElementById('rp-pass-nueva').value,
+    });
+    mostrarToast('Contraseña actualizada', 'success');
+    e.target.reset();
+  } catch (err) {
+    errorBox.textContent = err.message || 'No se pudo cambiar la contraseña';
+    errorBox.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Actualizar contraseña';
+  }
+});
 
 cargarPerfil();
 cargarActivos();

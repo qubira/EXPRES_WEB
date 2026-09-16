@@ -13,11 +13,13 @@
 <div class="panel-shell">
   <aside class="panel-sidebar">
     <div class="brand"><img src="../assets/logo-navbar.png" alt="Express" class="brand-logo-sm"> Repartidor</div>
-    <div class="panel-link activo" data-view="activos">📦 Mis entregas</div>
-    <div class="panel-link" data-view="historial">🗂️ Historial</div>
-    <div class="panel-link" data-view="conectividad">🔗 Conectividad</div>
+    <div class="panel-link" data-view="disponibles"><span class="icon">📥</span> Pedidos disponibles</div>
+    <div class="panel-link activo" data-view="activos"><span class="icon">📦</span> Mis entregas</div>
+    <div class="panel-link" data-view="historial"><span class="icon">🗂️</span> Historial</div>
+    <div class="panel-link" data-view="perfil"><span class="icon">✏️</span> Mi perfil</div>
+    <div class="panel-link" data-view="conectividad"><span class="icon">🔗</span> Conectividad</div>
     <div style="flex:1"></div>
-    <div class="panel-link" id="btn-logout">🚪 Salir</div>
+    <div class="panel-link" id="btn-logout"><span class="icon">🚪</span> Salir</div>
   </aside>
 
   <main class="panel-main">
@@ -42,6 +44,11 @@
       <div class="stat-label">Por cobrar (tarifas de entrega)</div>
     </div>
 
+    <section id="view-disponibles" class="view hidden mt-24">
+      <p class="text-muted" style="max-width:520px;">Pedidos sin repartidor asignado, en tu zona. Tómalos si estás disponible.</p>
+      <div id="lista-disponibles" class="mt-16"></div>
+    </section>
+
     <section id="view-activos" class="view mt-24">
       <div class="flex justify-end">
         <div class="filtros" id="filtro-vista-activos" style="padding:0;">
@@ -57,6 +64,44 @@
       <div id="lista-historial"></div>
     </section>
 
+    <section id="view-perfil" class="view hidden mt-24">
+      <div class="grid-cols grid-cols-2">
+        <form id="form-perfil-repartidor" class="card card-pad">
+          <h3>Mis datos</h3>
+          <div class="form-grupo">
+            <label>Foto de perfil</label>
+            <label class="file-drop" id="rp-foto-drop">
+              <input type="file" id="rp-foto-file" accept="image/*" class="file-drop-input">
+              <img id="rp-foto-preview" class="file-drop-preview" style="display:none;">
+              <div id="rp-foto-placeholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <span class="file-drop-icon">🚲</span>
+                <span class="file-drop-text">Toca para subir tu foto</span>
+                <span class="file-drop-hint">JPG o PNG, máx. 5MB</span>
+              </div>
+            </label>
+          </div>
+          <input type="hidden" id="rp-foto">
+          <div class="form-grupo"><label>Nombre</label><input id="rp-nombre" required></div>
+          <div class="form-grupo"><label>Teléfono</label><input id="rp-telefono" required></div>
+          <div class="form-grupo">
+            <label>Zona donde repartes</label>
+            <select id="rp-zona" required></select>
+            <div class="form-hint">Solo verás pedidos disponibles de esta zona en "Pedidos disponibles".</div>
+          </div>
+          <div id="error-perfil-repartidor" class="form-error hidden"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="btn-guardar-perfil-repartidor">Guardar cambios</button>
+        </form>
+
+        <form id="form-password-repartidor" class="card card-pad">
+          <h3>Cambiar contraseña</h3>
+          <div class="form-grupo"><label>Contraseña actual</label><input type="password" id="rp-pass-actual" required placeholder="••••••••"></div>
+          <div class="form-grupo"><label>Nueva contraseña</label><input type="password" id="rp-pass-nueva" required minlength="6" placeholder="Mínimo 6 caracteres"></div>
+          <div id="error-password-repartidor" class="form-error hidden"></div>
+          <button type="submit" class="btn btn-secondary btn-block" id="btn-cambiar-password-repartidor">Actualizar contraseña</button>
+        </form>
+      </div>
+    </section>
+
     <section id="view-conectividad" class="view hidden mt-24">
       <div class="flex justify-between items-center" style="flex-wrap:wrap;gap:12px;">
         <p class="text-muted" style="max-width:480px;">Dispositivos donde tu cuenta tiene la sesión iniciada. Si ves uno que no reconoces, ciérralo.</p>
@@ -68,8 +113,10 @@
 </div>
 
 <nav class="panel-mobile-nav">
+  <div class="panel-link" data-view="disponibles"><span class="icon">📥</span>Pool</div>
   <div class="panel-link activo" data-view="activos"><span class="icon">📦</span>Entregas</div>
   <div class="panel-link" data-view="historial"><span class="icon">🗂️</span>Historial</div>
+  <div class="panel-link" data-view="perfil"><span class="icon">✏️</span>Perfil</div>
   <div class="panel-link" data-view="conectividad"><span class="icon">🔗</span>Conexión</div>
 </nav>
 
