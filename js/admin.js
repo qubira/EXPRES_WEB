@@ -914,32 +914,66 @@ const ESTADO_RECLAMO_LABELS = { abierto: 'Abierto', en_revision: 'En revisión',
 const ESTADOS_RECLAMO = ['abierto', 'en_revision', 'resuelto'];
 let vistaReclamos = 'tarjetas';
 let filtroEstadoReclamos = '';
+let filtroOrigenReclamos = 'todos';
 let todosReclamosCache = null;
 
+// Los reclamos vienen de 3 canales distintos: el reclamo ligado a un pedido
+// (desde la app o registrado por telefono/whatsapp), y el Libro de
+// Reclamaciones Virtual publico, que a su vez distingue Reclamo de Queja
+// (exigencia del Codigo de Proteccion y Defensa del Consumidor).
+function origenReclamoInfo(r) {
+  if (r.origen === 'libro_reclamaciones') {
+    return r.tipo_libro === 'queja'
+      ? { clave: 'libro_queja', label: '📖 Libro: Queja' }
+      : { clave: 'libro_reclamo', label: '📖 Libro: Reclamo' };
+  }
+  if (r.origen === 'admin') return { clave: 'pedido', label: '☎️ Registrado por admin' };
+  return { clave: 'pedido', label: '📱 Desde la app' };
+}
+
 function plazoReclamoHtml(r) {
-  const dias = r.dias_habiles_restantes;
-  if (r.estado === 'resuelto' || dias === null || dias === undefined) return '';
-  const urgente = dias <= 1;
-  const texto = dias <= 0 ? 'Plazo vencido' : `${dias} ${dias === 1 ? 'día hábil' : 'días hábiles'} para responder`;
+  if (r.estado === 'resuelto') return '';
+  const esLibro = r.origen === 'libro_reclamaciones';
+  // El libro de reclamaciones tiene plazo legal en dias CALENDARIO (30, segun
+  // el Codigo de Proteccion y Defensa del Consumidor); el reclamo ligado a un
+  // pedido usa un SLA interno en dias HABILES (7) que ya calcula el backend.
+  let dias, unidad;
+  if (esLibro) {
+    if (!r.plazo_respuesta_hasta) return '';
+    dias = Math.ceil((new Date(r.plazo_respuesta_hasta) - new Date()) / (24 * 60 * 60 * 1000));
+    unidad = dias === 1 ? 'día calendario' : 'días calendario';
+  } else {
+    dias = r.dias_habiles_restantes;
+    if (dias === null || dias === undefined) return '';
+    unidad = dias === 1 ? 'día hábil' : 'días hábiles';
+  }
+  const urgente = dias <= (esLibro ? 3 : 1);
+  const texto = dias <= 0 ? 'Plazo vencido' : `${dias} ${unidad} para responder`;
   return `<span style="display:inline-block; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; background:${urgente ? '#fde3e1' : '#fff2e0'};color:${urgente ? 'var(--rojo-alerta)' : '#b7690a'};">⏳ ${texto}</span>`;
 }
 
 function tarjetaReclamoHtml(r) {
+  const origen = origenReclamoInfo(r);
+  const esLibro = origen.clave !== 'pedido';
   return `
     <div class="card card-pad-sm reclamo-card" data-estado="${r.estado}">
       <div class="flex justify-between items-center" style="flex-wrap:wrap; gap:6px;">
-        <div class="text-sm text-muted">${new Date(r.created_at).toLocaleString('es-PE')} · ${r.origen === 'admin' ? '☎️ Registrado por admin' : '📱 Desde la app'}</div>
+        <div class="text-sm text-muted">${new Date(r.created_at).toLocaleString('es-PE')}</div>
         <span class="badge badge-${r.estado}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span>
       </div>
+      <div class="mt-6"><span class="tag" style="${esLibro ? 'background:#eef0ff;color:#5b52d6;' : ''}">${origen.label}</span></div>
       <div class="mt-6"><strong>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</strong>${r.dni_ce ? ` · ${(r.tipo_documento || '').toUpperCase()} ${r.dni_ce}` : ''}</div>
+      ${r.direccion_reclamante ? `<div class="text-sm text-muted mt-6">📍 ${r.direccion_reclamante}</div>` : ''}
       <div class="text-sm text-muted mt-6">
         ${r.telefono_contacto ? `📞 ${r.telefono_contacto}${r.permite_whatsapp ? ' (acepta WhatsApp)' : ''}` : ''}
         ${r.email_contacto ? ` · ✉️ ${r.email_contacto}` : ''}
       </div>
       ${r.cuenta_nombre ? `<div class="text-sm text-muted mt-6">Cuenta registrada: ${r.cuenta_nombre} (${r.cuenta_email || 'sin correo'})</div>` : ''}
       ${r.pedido_id ? `<div class="text-sm text-muted mt-6">Pedido #${r.pedido_id.slice(0,8).toUpperCase()} · ${r.pedido_estado || ''}</div>` : ''}
-      <div class="mt-6"><span class="tag">${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</span></div>
+      ${esLibro ? '' : `<div class="mt-6"><span class="tag">${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</span></div>`}
+      ${r.bien_contratado ? `<div class="text-sm mt-6"><strong>Bien contratado:</strong> ${r.bien_contratado}</div>` : ''}
       ${r.descripcion ? `<div class="text-sm mt-6">${r.descripcion}</div>` : ''}
+      ${r.solicitud_consumidor ? `<div class="text-sm mt-6"><strong>Solicita:</strong> ${r.solicitud_consumidor}</div>` : ''}
       ${r.imagenes && r.imagenes.length > 0 ? `
         <div class="flex gap-6 mt-6" style="flex-wrap:wrap;">
           ${r.imagenes.map((url) => `<a href="${url}" target="_blank"><img src="${url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></a>`).join('')}
@@ -962,19 +996,23 @@ function renderReclamosComoTabla(cont, reclamos) {
   cont.innerHTML = `
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Fecha</th><th>Reclamante</th><th>Motivo</th><th>Pedido</th><th>Estado</th><th>Plazo</th><th>Acción</th></tr></thead>
+        <thead><tr><th>Fecha</th><th>Origen</th><th>Reclamante</th><th>Motivo</th><th>Pedido</th><th>Estado</th><th>Plazo</th><th>Acción</th></tr></thead>
         <tbody>
-          ${reclamos.map((r) => `
+          ${reclamos.map((r) => {
+            const origen = origenReclamoInfo(r);
+            return `
             <tr>
               <td>${new Date(r.created_at).toLocaleDateString('es-PE')}</td>
+              <td>${origen.label}</td>
               <td>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</td>
-              <td>${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</td>
+              <td>${origen.clave === 'pedido' ? (MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo) : (r.bien_contratado || '—')}</td>
               <td>${r.pedido_id ? `#${r.pedido_id.slice(0,8).toUpperCase()}` : '—'}</td>
               <td><span class="badge badge-${r.estado}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span></td>
               <td>${plazoReclamoHtml(r) || '—'}</td>
               <td>${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-xs" data-resolver="${r.id}">Resolver</button>` : ''}</td>
             </tr>
-          `).join('')}
+          `;
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -1017,13 +1055,21 @@ async function cargarReclamos(estado = filtroEstadoReclamos) {
 
 function renderReclamos() {
   const cont = document.getElementById('lista-reclamos');
+  const reclamos = filtroOrigenReclamos === 'todos'
+    ? todosReclamosCache
+    : todosReclamosCache.filter((r) => origenReclamoInfo(r).clave === filtroOrigenReclamos);
+
   if (todosReclamosCache.length === 0) {
     cont.innerHTML = '<p class="text-muted">Sin reclamos por ahora.</p>';
     return;
   }
-  if (vistaReclamos === 'tabla') renderReclamosComoTabla(cont, todosReclamosCache);
-  else if (vistaReclamos === 'estados') renderReclamosComoEstados(cont, todosReclamosCache);
-  else renderReclamosComoTarjetas(cont, todosReclamosCache);
+  if (reclamos.length === 0) {
+    cont.innerHTML = '<p class="text-muted">No hay reclamos de ese tipo.</p>';
+    return;
+  }
+  if (vistaReclamos === 'tabla') renderReclamosComoTabla(cont, reclamos);
+  else if (vistaReclamos === 'estados') renderReclamosComoEstados(cont, reclamos);
+  else renderReclamosComoTarjetas(cont, reclamos);
   cont.querySelectorAll('[data-resolver]').forEach((btn) => btn.addEventListener('click', () => abrirModalResolverReclamo(btn.dataset.resolver)));
 }
 
@@ -1031,6 +1077,15 @@ document.querySelectorAll('#filtro-vista-reclamos .chip').forEach((chip) => {
   chip.addEventListener('click', () => {
     vistaReclamos = chip.dataset.vista;
     document.querySelectorAll('#filtro-vista-reclamos .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    renderReclamos();
+  });
+});
+
+document.querySelectorAll('#filtro-origen-reclamos .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    filtroOrigenReclamos = chip.dataset.origen;
+    document.querySelectorAll('#filtro-origen-reclamos .chip').forEach((c) => c.classList.remove('activo'));
     chip.classList.add('activo');
     renderReclamos();
   });

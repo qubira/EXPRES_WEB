@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Libro de Reclamaciones | Express Ancon</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .tipo-libro-opcion {
+    display: block;
+    cursor: pointer;
+    border: 2px solid var(--arena-300);
+    border-radius: var(--radio-m);
+    padding: 16px;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .tipo-libro-opcion input { position: absolute; opacity: 0; pointer-events: none; }
+  .tipo-libro-opcion strong { display: block; margin-bottom: 4px; color: var(--mar-900); }
+  .tipo-libro-opcion.activo { border-color: var(--coral-500); background: #fff5f5; }
+  .libro-legal-box {
+    background: var(--cielo-100);
+    border-radius: var(--radio-m);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--mar-900);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body class="con-tabbar">
+
+<nav class="navbar">
+  <div class="container navbar-inner">
+    <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+      <a href="pedido.html">Rastrear pedido</a>
+    </div>
+    <div class="nav-cta-group">
+      <div class="account-menu">
+        <button class="account-trigger" type="button">
+          <span class="icon-btn account-btn">👤</span>
+          <span class="account-name hidden"></span>
+        </button>
+        <div class="account-dropdown hidden">
+          <div class="account-dropdown-header">Mi cuenta</div>
+          <a href="mis-pedidos.html">📦 Mis pedidos</a>
+          <a href="mi-cuenta.html">✏️ Editar datos</a>
+          <button type="button" class="btn-logout-cuenta salir">🚪 Cerrar sesión</button>
+        </div>
+      </div>
+      <div class="cart-menu">
+        <button class="cart-trigger icon-btn" type="button">
+          🛒 <span class="badge-count hidden" data-cart-count>0</span>
+        </button>
+        <div class="cart-dropdown hidden">
+          <div class="cart-dropdown-header">Tu carrito</div>
+          <div class="cart-dropdown-items"></div>
+          <div class="cart-dropdown-footer">
+            <div class="flex justify-between items-center mb-0"><span class="text-sm">Total</span><strong data-cart-total>S/ 0.00</strong></div>
+            <a href="carrito.html" class="btn btn-primary btn-block mt-8">Ir a pagar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-24" style="max-width:640px;">
+  <h1 class="section-title" style="margin-bottom:4px;">📖 Libro de Reclamaciones</h1>
+  <p class="text-muted text-sm">Conforme al Código de Protección y Defensa del Consumidor, este establecimiento cuenta con un Libro de Reclamaciones a tu disposición. Su presentación no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.</p>
+
+  <div class="libro-legal-box mt-16">
+    <strong>Reclamo:</strong> disconformidad relacionada a los productos o servicios contratados.<br>
+    <strong>Queja:</strong> disconformidad no relacionada a los productos o servicios, o malestar respecto a la atención al público.
+  </div>
+
+  <div id="formulario-libro">
+    <form id="form-libro-reclamaciones">
+      <div class="card card-pad mt-16">
+        <h3>1. ¿Qué deseas registrar?</h3>
+        <div class="grid-cols grid-cols-2">
+          <label class="tipo-libro-opcion" id="opcion-reclamo">
+            <input type="radio" name="tipo" value="reclamo" checked>
+            <strong>📦 Reclamo</strong>
+            <span class="text-sm text-muted">No estoy conforme con un producto o servicio.</span>
+          </label>
+          <label class="tipo-libro-opcion" id="opcion-queja">
+            <input type="radio" name="tipo" value="queja">
+            <strong>💬 Queja</strong>
+            <span class="text-sm text-muted">Malestar con la atención recibida.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card card-pad mt-16">
+        <h3>2. Tus datos</h3>
+        <div class="form-grupo"><label>Nombre completo</label><input id="lr-nombre" required></div>
+        <div class="grid-cols grid-cols-2">
+          <div class="form-grupo">
+            <label>Documento</label>
+            <select id="lr-tipo-documento"><option value="dni">DNI</option><option value="ce">Carné de Extranjería</option></select>
+          </div>
+          <div class="form-grupo"><label>Número</label><input id="lr-dni-ce" required></div>
+        </div>
+        <div class="form-grupo"><label>Dirección</label><input id="lr-direccion" placeholder="Ej. Av. Los Arquitectos 123, Ancón" required></div>
+        <div class="grid-cols grid-cols-2">
+          <div class="form-grupo"><label>Teléfono</label><input id="lr-telefono" inputmode="tel"></div>
+          <div class="form-grupo"><label>Correo electrónico</label><input id="lr-email" type="email"></div>
+        </div>
+        <div class="form-hint" style="margin-top:-8px;">Déjanos al menos un dato de contacto (teléfono o correo).</div>
+        <label class="flex items-center gap-8 mt-8" style="cursor:pointer;">
+          <input type="checkbox" id="lr-whatsapp" style="width:auto;">
+          <span class="text-sm">Acepto que me contacten por WhatsApp</span>
+        </label>
+      </div>
+
+      <div class="card card-pad mt-16">
+        <h3>3. Detalle</h3>
+        <div class="form-grupo">
+          <label>Código de tu pedido en Express (opcional)</label>
+          <input id="lr-pedido-id" placeholder="Ej. df870d3a-55b6-402b-ad8e-871990669b90">
+          <div class="form-hint">Lo encuentras en "Rastrear pedido" o en tu comprobante.</div>
+        </div>
+        <div class="form-grupo"><label>Bien contratado (producto o servicio)</label><textarea id="lr-bien" placeholder="Ej. Delivery de anticuchos, S/ 23.00, comprado el 15/09/2026" required></textarea></div>
+        <div class="form-grupo"><label>Detalle de tu reclamo/queja</label><textarea id="lr-descripcion" placeholder="Cuéntanos qué pasó..." required></textarea></div>
+        <div class="form-grupo"><label>¿Qué solicitas?</label><textarea id="lr-solicitud" placeholder="Ej. Devolución del dinero, cambio del producto, una disculpa..." required></textarea></div>
+        <div class="form-grupo">
+          <label>Fotos como evidencia (opcional, hasta 4)</label>
+          <input type="file" id="lr-imagenes" accept="image/*" multiple>
+        </div>
+      </div>
+
+      <div id="lr-error" class="form-error hidden mt-16"></div>
+      <button type="submit" class="btn btn-primary btn-block mt-16" id="btn-enviar-libro">Enviar</button>
+    </form>
+  </div>
+
+  <div id="confirmacion-libro" class="hidden mt-16"></div>
+</div>
+
+<div style="height:20px;"></div>
+
+<nav class="tabbar">
+  <a href="index.html" class="tabbar-item"><span class="tabbar-icon">🏠</span>Inicio</a>
+  <a href="catalogo.html" class="tabbar-item"><span class="tabbar-icon">🔍</span>Catálogo</a>
+  <a href="pedido.html" class="tabbar-item"><span class="tabbar-icon">📦</span>Pedidos</a>
+  <a href="carrito.html" class="tabbar-item">
+    <span class="tabbar-icon">🛒</span>Carrito
+    <span class="tabbar-badge hidden" data-cart-count>0</span>
+  </a>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth-cliente.js"></script>
+<script src="js/libro-reclamaciones.js"></script>
+</body>
+</html>

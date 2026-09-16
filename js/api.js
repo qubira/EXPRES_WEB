@@ -161,6 +161,14 @@ const Api = {
     return apiRequest(`/cliente/pedidos/${id}/reclamo`, { method: 'POST', body: fd, isForm: true, role: 'cliente' });
   },
   clienteReclamosPedido: (id) => apiRequest(`/cliente/pedidos/${id}/reclamos`, { role: 'cliente' }),
+
+  // Libro de Reclamaciones Virtual (publico, sin necesidad de cuenta)
+  libroReclamaciones: (datos, imagenes = []) => {
+    const fd = new FormData();
+    Object.entries(datos).forEach(([k, v]) => { if (v !== null && v !== undefined) fd.append(k, v); });
+    imagenes.forEach((f) => fd.append('imagenes', f));
+    return apiRequest('/libro-reclamaciones', { method: 'POST', body: fd, isForm: true });
+  },
 };
 
 function uploadsUrl(path) {
