@@ -37,18 +37,20 @@
         </label>
       </div>
       <div id="filtros-pedidos-tienda">
-        <div class="flex gap-8" style="flex-wrap:wrap; align-items:center;">
-          <div class="filtros" id="filtro-fecha-pedidos-tienda" style="padding:0;">
-            <button class="chip activo" data-rango="hoy">Hoy</button>
-            <button class="chip" data-rango="manana">Mañana</button>
-            <button class="chip" data-rango="todos">Todos</button>
+        <div class="flex justify-between items-center gap-8" style="flex-wrap:wrap;">
+          <div class="flex gap-8" style="flex-wrap:wrap; align-items:center;">
+            <div class="filtros" id="filtro-fecha-pedidos-tienda" style="padding:0;">
+              <button class="chip activo" data-rango="hoy">Hoy</button>
+              <button class="chip" data-rango="manana">Mañana</button>
+              <button class="chip" data-rango="todos">Todos</button>
+            </div>
+            <select id="filtro-estado-pedidos-tienda" style="width:auto;"></select>
           </div>
-          <select id="filtro-estado-pedidos-tienda" style="width:auto;"></select>
-        </div>
-        <div class="filtros mt-8" id="filtro-vista-pedidos-tienda" style="padding:0;">
-          <button class="chip activo" data-vista="tarjetas">🗂️ Tarjetas</button>
-          <button class="chip" data-vista="tabla">📊 Tabla</button>
-          <button class="chip" data-vista="estados">📌 Por estado</button>
+          <div class="filtros" id="filtro-vista-pedidos-tienda" style="padding:0;">
+            <button class="chip chip-icon activo" data-vista="tarjetas" title="Tarjetas">🗂️</button>
+            <button class="chip chip-icon" data-vista="tabla" title="Tabla">📊</button>
+            <button class="chip chip-icon" data-vista="estados" title="Por estado">📌</button>
+          </div>
         </div>
       </div>
     </div>
