@@ -905,6 +905,7 @@ textarea { resize: vertical; min-height: 80px; }
 .pedido-card .entrega-info-row { font-size: 12.5px; margin-bottom: 2px; }
 .pedido-precio { font-size: 15px; font-weight: 800; color: var(--mar-900); }
 .grid-pedidos-tarjetas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.grid-productos-tarjetas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 
 /* ---------- Tarjeta de producto (panel de tienda) ---------- */
 .producto-admin-card { display: flex; flex-direction: row; }

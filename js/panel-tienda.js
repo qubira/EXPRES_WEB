@@ -279,50 +279,107 @@ document.querySelectorAll('#filtro-vista-pedidos-tienda .chip').forEach((chip) =
 const CATEGORIAS = ['ropa','comida','bebidas','servicios','artesanias','otros'];
 const UNIDADES = ['unidad','kg','g','l','ml','cm','m','paquete','docena'];
 
+let vistaProductosTienda = 'tarjetas';
+let todosProductosTiendaCache = null;
+
 async function cargarProductos() {
   const grid = document.getElementById('grid-productos-tienda');
   grid.innerHTML = '<p class="text-muted">Cargando...</p>';
   try {
-    const productos = await Api.tiendaProductos();
-    if (productos.length === 0) {
-      grid.innerHTML = '<div class="empty-state"><div class="icon">🛍️</div><p>Aún no tienes productos. ¡Agrega el primero!</p></div>';
-      return;
-    }
-    grid.innerHTML = productos.map((p) => `
-      <div class="card producto-admin-card">
-        <div class="pcard-media" style="${p.foto_url ? `background-image:url('${p.foto_url}')` : ''}">${p.foto_url ? '' : (p.es_combo ? '🎁' : '🛍️')}</div>
-        <div class="card-pad-sm">
-          <div class="flex gap-6" style="flex-wrap:wrap;">
-            <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
-            ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
-          </div>
-          <strong class="producto-admin-nombre">${p.nombre}${p.marca ? ` · ${p.marca}` : ''}</strong>
-          <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
-          <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
-          <div class="flex gap-6 mt-6">
-            <button class="btn btn-outline btn-xs w-full" data-editar="${p.id}">Editar</button>
-            <button class="btn btn-danger btn-xs" data-eliminar="${p.id}">🗑️</button>
-          </div>
-        </div>
-      </div>
-    `).join('');
-
-    grid.querySelectorAll('[data-editar]').forEach((btn) => btn.addEventListener('click', () => {
-      const producto = productos.find((p) => p.id === btn.dataset.editar);
-      abrirModalProducto(producto);
-    }));
-    grid.querySelectorAll('[data-eliminar]').forEach((btn) => btn.addEventListener('click', async () => {
-      if (!(await confirmModal('¿Eliminar este producto?', { peligro: true, textoAceptar: 'Eliminar' }))) return;
-      try {
-        await Api.tiendaEliminarProducto(btn.dataset.eliminar);
-        mostrarToast('Producto eliminado', 'success');
-        cargarProductos();
-      } catch (err) { mostrarToast(err.message, 'error'); }
-    }));
+    todosProductosTiendaCache = await Api.tiendaProductos();
+    renderProductosTienda();
   } catch (err) {
     if (!manejarError401(err)) grid.innerHTML = `<p class="form-error">${err.message}</p>`;
   }
 }
+
+function tarjetaProductoTiendaHtml(p) {
+  return `
+    <div class="card producto-admin-card">
+      <div class="pcard-media" style="${p.foto_url ? `background-image:url('${p.foto_url}')` : ''}">${p.foto_url ? '' : (p.es_combo ? '🎁' : '🛍️')}</div>
+      <div class="card-pad-sm">
+        <div class="flex gap-6" style="flex-wrap:wrap;">
+          <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
+          ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
+        </div>
+        <strong class="producto-admin-nombre">${p.nombre}${p.marca ? ` · ${p.marca}` : ''}</strong>
+        <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
+        <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
+        <div class="flex gap-6 mt-6">
+          <button class="btn btn-outline btn-xs w-full" data-editar="${p.id}">Editar</button>
+          <button class="btn btn-danger btn-xs" data-eliminar="${p.id}">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderProductosComoTarjetas(cont, productos) {
+  cont.innerHTML = `<div class="grid-productos-tarjetas">${productos.map(tarjetaProductoTiendaHtml).join('')}</div>`;
+}
+
+function renderProductosComoTabla(cont, productos) {
+  cont.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          ${productos.map((p) => `
+            <tr>
+              <td>${p.foto_url ? `<img src="${p.foto_url}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;">` : `<span style="font-size:20px;">${p.es_combo ? '🎁' : '🛍️'}</span>`}</td>
+              <td>${p.nombre}${p.marca ? ` · ${p.marca}` : ''}${p.es_combo ? ' <span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}</td>
+              <td>${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</td>
+              <td>${formatoSoles(p.precio)} <span class="text-sm text-muted">/ ${formatoContenido(p.contenido, p.unidad)}</span></td>
+              <td>${p.stock}</td>
+              <td>${p.activo ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">Activo</span>' : '<span class="tag" style="background:#f0f0f0;color:var(--tinta-300);">Inactivo</span>'}</td>
+              <td>
+                <div class="flex gap-6">
+                  <button class="btn btn-outline btn-xs" data-editar="${p.id}">Editar</button>
+                  <button class="btn btn-danger btn-xs" data-eliminar="${p.id}">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function enlazarAccionesProductosTienda(cont) {
+  cont.querySelectorAll('[data-editar]').forEach((btn) => btn.addEventListener('click', () => {
+    const producto = todosProductosTiendaCache.find((p) => p.id === btn.dataset.editar);
+    abrirModalProducto(producto);
+  }));
+  cont.querySelectorAll('[data-eliminar]').forEach((btn) => btn.addEventListener('click', async () => {
+    if (!(await confirmModal('¿Eliminar este producto?', { peligro: true, textoAceptar: 'Eliminar' }))) return;
+    try {
+      await Api.tiendaEliminarProducto(btn.dataset.eliminar);
+      mostrarToast('Producto eliminado', 'success');
+      cargarProductos();
+    } catch (err) { mostrarToast(err.message, 'error'); }
+  }));
+}
+
+function renderProductosTienda() {
+  const grid = document.getElementById('grid-productos-tienda');
+  if (todosProductosTiendaCache.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="icon">🛍️</div><p>Aún no tienes productos. ¡Agrega el primero!</p></div>';
+    return;
+  }
+  if (vistaProductosTienda === 'tabla') renderProductosComoTabla(grid, todosProductosTiendaCache);
+  else renderProductosComoTarjetas(grid, todosProductosTiendaCache);
+  enlazarAccionesProductosTienda(grid);
+}
+
+document.querySelectorAll('#filtro-vista-productos-tienda .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    vistaProductosTienda = chip.dataset.vista;
+    document.querySelectorAll('#filtro-vista-productos-tienda .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    renderProductosTienda();
+  });
+});
 
 function abrirModalProducto(p) {
   const editando = !!p;
