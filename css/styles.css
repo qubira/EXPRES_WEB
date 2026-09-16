@@ -906,6 +906,12 @@ textarea { resize: vertical; min-height: 80px; }
 .pedido-precio { font-size: 15px; font-weight: 800; color: var(--mar-900); }
 .grid-pedidos-tarjetas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
 .grid-productos-tarjetas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.grid-reclamos-tarjetas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); align-items: start; }
+
+.reclamo-card { border-left: 3px solid var(--arena-300); font-size: 13.5px; }
+.reclamo-card[data-estado="abierto"] { border-left-color: #b7690a; }
+.reclamo-card[data-estado="en_revision"] { border-left-color: #5b52d6; }
+.reclamo-card[data-estado="resuelto"] { border-left-color: var(--verde-palma); }
 
 /* ---------- Tarjeta de producto (panel de tienda) ---------- */
 .producto-admin-card { display: flex; flex-direction: row; }
@@ -1019,6 +1025,9 @@ textarea { resize: vertical; min-height: 80px; }
 .badge-activo { background: #e9f9ee; color: var(--verde-palma); }
 .badge-suspendido { background: #fff2e0; color: #b7690a; }
 .badge-bloqueado { background: #fde3e1; color: var(--rojo-alerta); }
+.badge-abierto { background: #fff2e0; color: #b7690a; }
+.badge-en_revision { background: #eef0ff; color: #5b52d6; }
+.badge-resuelto { background: #e9f9ee; color: var(--verde-palma); }
 
 /* ---------- PIN de entrega ---------- */
 .pin-box {

@@ -911,56 +911,130 @@ const MOTIVO_RECLAMO_LABELS = {
 };
 const ESTADO_RECLAMO_LABELS = { abierto: 'Abierto', en_revision: 'En revisión', resuelto: 'Resuelto' };
 
-async function cargarReclamos(estado = '') {
+const ESTADOS_RECLAMO = ['abierto', 'en_revision', 'resuelto'];
+let vistaReclamos = 'tarjetas';
+let filtroEstadoReclamos = '';
+let todosReclamosCache = null;
+
+function plazoReclamoHtml(r) {
+  const dias = r.dias_habiles_restantes;
+  if (r.estado === 'resuelto' || dias === null || dias === undefined) return '';
+  const urgente = dias <= 1;
+  const texto = dias <= 0 ? 'Plazo vencido' : `${dias} ${dias === 1 ? 'día hábil' : 'días hábiles'} para responder`;
+  return `<span style="display:inline-block; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; background:${urgente ? '#fde3e1' : '#fff2e0'};color:${urgente ? 'var(--rojo-alerta)' : '#b7690a'};">⏳ ${texto}</span>`;
+}
+
+function tarjetaReclamoHtml(r) {
+  return `
+    <div class="card card-pad-sm reclamo-card" data-estado="${r.estado}">
+      <div class="flex justify-between items-center" style="flex-wrap:wrap; gap:6px;">
+        <div class="text-sm text-muted">${new Date(r.created_at).toLocaleString('es-PE')} · ${r.origen === 'admin' ? '☎️ Registrado por admin' : '📱 Desde la app'}</div>
+        <span class="badge badge-${r.estado}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span>
+      </div>
+      <div class="mt-6"><strong>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</strong>${r.dni_ce ? ` · ${(r.tipo_documento || '').toUpperCase()} ${r.dni_ce}` : ''}</div>
+      <div class="text-sm text-muted mt-6">
+        ${r.telefono_contacto ? `📞 ${r.telefono_contacto}${r.permite_whatsapp ? ' (acepta WhatsApp)' : ''}` : ''}
+        ${r.email_contacto ? ` · ✉️ ${r.email_contacto}` : ''}
+      </div>
+      ${r.cuenta_nombre ? `<div class="text-sm text-muted mt-6">Cuenta registrada: ${r.cuenta_nombre} (${r.cuenta_email || 'sin correo'})</div>` : ''}
+      ${r.pedido_id ? `<div class="text-sm text-muted mt-6">Pedido #${r.pedido_id.slice(0,8).toUpperCase()} · ${r.pedido_estado || ''}</div>` : ''}
+      <div class="mt-6"><span class="tag">${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</span></div>
+      ${r.descripcion ? `<div class="text-sm mt-6">${r.descripcion}</div>` : ''}
+      ${r.imagenes && r.imagenes.length > 0 ? `
+        <div class="flex gap-6 mt-6" style="flex-wrap:wrap;">
+          ${r.imagenes.map((url) => `<a href="${url}" target="_blank"><img src="${url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></a>`).join('')}
+        </div>
+      ` : ''}
+      ${r.resolucion ? `<div class="text-sm mt-6" style="color:var(--verde-palma);"><strong>Resolución:</strong> ${r.resolucion}</div>` : ''}
+      <div class="flex justify-between items-center mt-6">
+        <div>${plazoReclamoHtml(r)}</div>
+        ${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-xs" data-resolver="${r.id}">Resolver</button>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderReclamosComoTarjetas(cont, reclamos) {
+  cont.innerHTML = `<div class="grid-reclamos-tarjetas">${reclamos.map(tarjetaReclamoHtml).join('')}</div>`;
+}
+
+function renderReclamosComoTabla(cont, reclamos) {
+  cont.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Reclamante</th><th>Motivo</th><th>Pedido</th><th>Estado</th><th>Plazo</th><th>Acción</th></tr></thead>
+        <tbody>
+          ${reclamos.map((r) => `
+            <tr>
+              <td>${new Date(r.created_at).toLocaleDateString('es-PE')}</td>
+              <td>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</td>
+              <td>${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</td>
+              <td>${r.pedido_id ? `#${r.pedido_id.slice(0,8).toUpperCase()}` : '—'}</td>
+              <td><span class="badge badge-${r.estado}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span></td>
+              <td>${plazoReclamoHtml(r) || '—'}</td>
+              <td>${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-xs" data-resolver="${r.id}">Resolver</button>` : ''}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderReclamosComoEstados(cont, reclamos) {
+  const columnas = ESTADOS_RECLAMO.map((estado) => ({ estado, items: reclamos.filter((r) => r.estado === estado) }))
+    .filter((col) => col.items.length > 0);
+  if (columnas.length === 0) {
+    cont.innerHTML = '<p class="text-muted">Sin reclamos por ahora.</p>';
+    return;
+  }
+  cont.innerHTML = `
+    <div class="tablero-estados">
+      ${columnas.map((col) => `
+        <div class="tablero-columna">
+          <div class="tablero-columna-titulo">
+            <span class="badge badge-${col.estado}">${ESTADO_RECLAMO_LABELS[col.estado]}</span>
+            <span class="text-muted">${col.items.length}</span>
+          </div>
+          <div class="tablero-columna-lista">${col.items.map(tarjetaReclamoHtml).join('')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function cargarReclamos(estado = filtroEstadoReclamos) {
+  filtroEstadoReclamos = estado;
   const cont = document.getElementById('lista-reclamos');
   cont.innerHTML = '<p class="text-muted">Cargando...</p>';
   try {
-    const reclamos = await Api.adminReclamos(estado);
-    if (reclamos.length === 0) {
-      cont.innerHTML = '<p class="text-muted">Sin reclamos por ahora.</p>';
-      return;
-    }
-    cont.innerHTML = reclamos.map((r) => {
-      const dias = r.dias_habiles_restantes;
-      let plazoHtml = '';
-      if (r.estado !== 'resuelto' && dias !== null && dias !== undefined) {
-        const urgente = dias <= 1;
-        const texto = dias <= 0 ? 'Plazo vencido' : `${dias} ${dias === 1 ? 'día hábil' : 'días hábiles'} para responder`;
-        plazoHtml = `<span style="display:inline-block; font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; background:${urgente ? '#fde3e1' : '#fff2e0'};color:${urgente ? 'var(--rojo-alerta)' : '#b7690a'};">⏳ ${texto}</span>`;
-      }
-      return `
-      <div class="card card-pad mt-8" style="background:var(--arena-100);">
-        <div class="flex justify-between items-center" style="flex-wrap:wrap; gap:8px;">
-          <div class="text-sm text-muted">${new Date(r.created_at).toLocaleString('es-PE')} · ${r.origen === 'admin' ? '☎️ Registrado por admin' : '📱 Desde la app'}</div>
-          <span class="badge badge-${r.estado === 'resuelto' ? 'entregado' : 'pendiente_pago'}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span>
-        </div>
-        <div class="mt-8"><strong>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</strong>${r.dni_ce ? ` · ${(r.tipo_documento || '').toUpperCase()} ${r.dni_ce}` : ''}</div>
-        <div class="text-sm text-muted mt-8">
-          ${r.telefono_contacto ? `📞 ${r.telefono_contacto}${r.permite_whatsapp ? ' (acepta WhatsApp)' : ''}` : ''}
-          ${r.email_contacto ? ` · ✉️ ${r.email_contacto}` : ''}
-        </div>
-        ${r.cuenta_nombre ? `<div class="text-sm text-muted mt-8">Cuenta registrada: ${r.cuenta_nombre} (${r.cuenta_email || 'sin correo'})</div>` : ''}
-        ${r.pedido_id ? `<div class="text-sm text-muted mt-8">Pedido #${r.pedido_id.slice(0,8).toUpperCase()} · ${r.pedido_estado || ''}</div>` : ''}
-        <div class="mt-8"><strong>${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</strong></div>
-        ${r.descripcion ? `<div class="text-sm mt-8">${r.descripcion}</div>` : ''}
-        ${r.imagenes && r.imagenes.length > 0 ? `
-          <div class="flex gap-8 mt-8" style="flex-wrap:wrap;">
-            ${r.imagenes.map((url) => `<a href="${url}" target="_blank"><img src="${url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;"></a>`).join('')}
-          </div>
-        ` : ''}
-        ${r.resolucion ? `<div class="text-sm mt-8" style="color:var(--verde-palma);"><strong>Resolución:</strong> ${r.resolucion}</div>` : ''}
-        <div class="flex justify-between items-center mt-8">
-          <div>${plazoHtml}</div>
-          ${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-sm" data-resolver="${r.id}">Resolver</button>` : ''}
-        </div>
-      </div>
-    `;
-    }).join('');
-    cont.querySelectorAll('[data-resolver]').forEach((btn) => btn.addEventListener('click', () => abrirModalResolverReclamo(btn.dataset.resolver)));
+    todosReclamosCache = await Api.adminReclamos(estado);
+    renderReclamos();
   } catch (err) {
     if (!manejarError401(err)) cont.innerHTML = `<p class="form-error">${err.message}</p>`;
   }
 }
+
+function renderReclamos() {
+  const cont = document.getElementById('lista-reclamos');
+  if (todosReclamosCache.length === 0) {
+    cont.innerHTML = '<p class="text-muted">Sin reclamos por ahora.</p>';
+    return;
+  }
+  if (vistaReclamos === 'tabla') renderReclamosComoTabla(cont, todosReclamosCache);
+  else if (vistaReclamos === 'estados') renderReclamosComoEstados(cont, todosReclamosCache);
+  else renderReclamosComoTarjetas(cont, todosReclamosCache);
+  cont.querySelectorAll('[data-resolver]').forEach((btn) => btn.addEventListener('click', () => abrirModalResolverReclamo(btn.dataset.resolver)));
+}
+
+document.querySelectorAll('#filtro-vista-reclamos .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    vistaReclamos = chip.dataset.vista;
+    document.querySelectorAll('#filtro-vista-reclamos .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    renderReclamos();
+  });
+});
 
 // ---------- Registrar reclamo (intake manual: telefono/WhatsApp) ----------
 document.getElementById('btn-registrar-reclamo').addEventListener('click', () => abrirModalRegistrarReclamo());
@@ -1106,18 +1180,18 @@ async function cargarObservaciones() {
       return;
     }
     cont.innerHTML = obs.map((o) => `
-      <div class="card card-pad mt-8">
+      <div class="card card-pad-sm mt-6">
         <div class="flex justify-between items-center">
           <div class="text-sm text-muted">${new Date(o.created_at).toLocaleString('es-PE')} · Repartidor: ${o.repartidor_nombre}</div>
           <span class="tag" style="background:${o.dirigido_a === 'cliente' ? '#fde3e1' : '#fff2e0'};color:${o.dirigido_a === 'cliente' ? 'var(--rojo-alerta)' : '#b7690a'};">
             Sobre ${o.dirigido_a === 'cliente' ? 'el cliente' : 'la tienda'}
           </span>
         </div>
-        <div class="mt-8"><strong>${TIPO_OBSERVACION_LABELS[o.tipo] || o.tipo}</strong> · Pedido #${o.pedido_id.slice(0,8).toUpperCase()} · Cliente: ${o.cliente_nombre}</div>
-        ${o.descripcion ? `<div class="text-sm mt-8">${o.descripcion}</div>` : ''}
-        <div class="flex gap-8 mt-8">
-          <button class="btn btn-outline btn-sm w-full" data-descartar-obs="${o.id}">Descartar</button>
-          <button class="btn btn-primary btn-sm w-full" data-confirmar-obs="${o.id}">Confirmar</button>
+        <div class="mt-6"><strong>${TIPO_OBSERVACION_LABELS[o.tipo] || o.tipo}</strong> · Pedido #${o.pedido_id.slice(0,8).toUpperCase()} · Cliente: ${o.cliente_nombre}</div>
+        ${o.descripcion ? `<div class="text-sm mt-6">${o.descripcion}</div>` : ''}
+        <div class="flex gap-6 mt-6">
+          <button class="btn btn-outline btn-xs w-full" data-descartar-obs="${o.id}">Descartar</button>
+          <button class="btn btn-primary btn-xs w-full" data-confirmar-obs="${o.id}">Confirmar</button>
         </div>
       </div>
     `).join('');

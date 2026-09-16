@@ -254,11 +254,18 @@
           <h3 class="mb-0">Reclamos de clientes</h3>
           <button class="btn btn-primary btn-sm" id="btn-registrar-reclamo">+ Registrar reclamo</button>
         </div>
-        <div class="filtros mt-8" id="filtro-reclamos">
-          <button class="chip activo" data-estado="">Todos</button>
-          <button class="chip" data-estado="abierto">Abiertos</button>
-          <button class="chip" data-estado="en_revision">En revisión</button>
-          <button class="chip" data-estado="resuelto">Resueltos</button>
+        <div class="flex justify-between items-center mt-8" style="flex-wrap:wrap; gap:8px;">
+          <div class="filtros" id="filtro-reclamos" style="padding:0;">
+            <button class="chip activo" data-estado="">Todos</button>
+            <button class="chip" data-estado="abierto">Abiertos</button>
+            <button class="chip" data-estado="en_revision">En revisión</button>
+            <button class="chip" data-estado="resuelto">Resueltos</button>
+          </div>
+          <div class="filtros" id="filtro-vista-reclamos" style="padding:0;">
+            <button class="chip chip-icon activo" data-vista="tarjetas" title="Tarjetas">🗂️</button>
+            <button class="chip chip-icon" data-vista="tabla" title="Tabla">📊</button>
+            <button class="chip chip-icon" data-vista="estados" title="Por estado">📌</button>
+          </div>
         </div>
         <div id="lista-reclamos" class="mt-8"></div>
       </div>
