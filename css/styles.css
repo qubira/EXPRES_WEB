@@ -903,6 +903,7 @@ textarea { resize: vertical; min-height: 80px; }
 .pedido-card[data-estado="cancelado"], .pedido-card[data-estado="rechazado_en_entrega"], .pedido-card[data-estado="pago_rechazado"] { border-left-color: var(--rojo-alerta); }
 .pedido-card .entrega-info-row { font-size: 12.5px; margin-bottom: 2px; }
 .pedido-precio { font-size: 15px; font-weight: 800; color: var(--mar-900); }
+.grid-pedidos-tarjetas { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
 
 /* ---------- Tarjeta de producto (panel de tienda) ---------- */
 .producto-admin-card { display: flex; flex-direction: row; }
@@ -916,6 +917,35 @@ textarea { resize: vertical; min-height: 80px; }
 .sesion-card { border-left: 3px solid var(--arena-300); font-size: 13px; }
 .sesion-card.sesion-actual { border-left-color: var(--verde-palma); background: #f4fbf7; }
 .sesion-icon { font-size: 16px; flex-shrink: 0; }
+
+/* ---------- Vista "Por estado" (tablero tipo kanban) ---------- */
+.tablero-estados {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  align-items: flex-start;
+  -webkit-overflow-scrolling: touch;
+}
+.tablero-columna {
+  flex: 0 0 280px;
+  background: var(--arena-200);
+  border-radius: var(--radio-m);
+  padding: 10px;
+  max-height: calc(100vh - 260px);
+  display: flex;
+  flex-direction: column;
+}
+.tablero-columna-titulo {
+  font-weight: 800;
+  font-size: 13px;
+  padding: 4px 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tablero-columna-lista { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.tablero-columna .pedido-card { border-left-width: 3px; }
 
 /* ---------- Footer ---------- */
 .footer {
@@ -1067,19 +1097,26 @@ textarea { resize: vertical; min-height: 80px; }
 .panel-main { flex: 1; padding: 14px; padding-bottom: 84px; max-width: 100%; height: 100vh; overflow-y: auto; }
 .panel-topbar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
   /* Sticky respecto al scroll de .panel-main: se ancla arriba en vez de
-     desaparecer al bajar en listas largas. El margen negativo cancela el
-     padding del contenedor para que quede al ras del borde superior y
-     cubra el contenido que pasa por debajo. */
+     desaparecer al bajar en listas largas. El margen negativo es solo
+     horizontal (para que el fondo llegue de borde a borde); nunca vertical
+     -- combinar position:sticky con un margin-top negativo hace que el
+     navegador renderice el bloque mas abajo de su posicion "pegada" real,
+     dejando ver una tira del contenido que deberia quedar tapado detras. */
   position: sticky;
   top: 0;
   z-index: 40;
   background: var(--arena-100);
-  margin: -14px -14px 18px -14px;
+  margin: 0 -14px 14px -14px;
   padding: 14px 14px 10px;
   box-shadow: 0 4px 14px rgba(7,59,76,0.06);
+}
+.panel-topbar-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .disponible-pill {
   background: var(--blanco);
@@ -1118,7 +1155,7 @@ textarea { resize: vertical; min-height: 80px; }
   .panel-sidebar { display: flex; }
   .panel-mobile-nav { display: none; }
   .panel-main { padding: 22px; padding-bottom: 22px; }
-  .panel-topbar { margin: -22px -22px 26px -22px; padding: 22px 22px 14px; }
+  .panel-topbar { margin: 0 -22px 20px -22px; padding: 22px 22px 14px; }
 }
 
 .stat-card {

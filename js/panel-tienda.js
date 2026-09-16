@@ -45,6 +45,7 @@ function irAVista(vista) {
   document.getElementById(`view-${vista}`).classList.remove('hidden');
   document.querySelectorAll('.panel-link[data-view]').forEach((l) => l.classList.toggle('activo', l.dataset.view === vista));
   document.getElementById('titulo-vista').textContent = TITULOS[vista];
+  document.getElementById('filtros-pedidos-tienda').classList.toggle('hidden', vista !== 'pedidos');
   if (vista === 'pedidos') cargarPedidos();
   if (vista === 'productos') cargarProductos();
   if (vista === 'perfil') cargarPerfilTienda();
@@ -66,7 +67,18 @@ function esMismoDiaPedido(fechaA, fechaB) {
     && fechaA.getDate() === fechaB.getDate();
 }
 
+// Solo los estados que la tienda realmente puede ver (el backend ya excluye
+// pendiente_pago/pago_rechazado de /tienda/pedidos).
+const ESTADOS_PEDIDO_TIENDA = ['pagado', 'preparando', 'listo_recoger', 'recogido', 'entregado', 'cancelado', 'rechazado_en_entrega'];
+
+document.getElementById('filtro-estado-pedidos-tienda').innerHTML = [
+  '<option value="todos">Todos los estados</option>',
+  ...ESTADOS_PEDIDO_TIENDA.map((e) => `<option value="${e}">${labelEstado(e)}</option>`),
+].join('');
+
 let rangoFechaPedidosTienda = 'hoy';
+let filtroEstadoPedidosTienda = 'todos';
+let vistaPedidosTienda = 'tarjetas';
 let todosPedidosTiendaCache = null;
 
 async function cargarPedidos() {
@@ -80,44 +92,9 @@ async function cargarPedidos() {
   }
 }
 
-function renderPedidosTiendaFiltrados() {
-  const cont = document.getElementById('lista-pedidos-tienda');
-  const ahora = new Date();
-  const manana = new Date(ahora);
-  manana.setDate(manana.getDate() + 1);
-
-  const items = todosPedidosTiendaCache.filter((i) => {
-    if (rangoFechaPedidosTienda === 'todos') return true;
-    const fecha = new Date(i.created_at);
-    if (rangoFechaPedidosTienda === 'hoy') return esMismoDiaPedido(fecha, ahora);
-    if (rangoFechaPedidosTienda === 'manana') return esMismoDiaPedido(fecha, manana);
-    return true;
-  });
-
-  if (todosPedidosTiendaCache.length === 0) {
-    cont.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>Aún no tienes pedidos.</p></div>';
-    return;
-  }
-  if (items.length === 0) {
-    cont.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">📦</div>
-        <p>No tienes pedidos en ese rango.</p>
-        <button type="button" class="btn btn-outline btn-sm mt-8" id="btn-ver-todos-pedidos-tienda">Ver todos</button>
-      </div>
-    `;
-    const btnVerTodos = document.getElementById('btn-ver-todos-pedidos-tienda');
-    if (btnVerTodos) {
-      btnVerTodos.addEventListener('click', () => {
-        rangoFechaPedidosTienda = 'todos';
-        document.querySelectorAll('#filtro-fecha-pedidos-tienda .chip').forEach((c) => c.classList.toggle('activo', c.dataset.rango === 'todos'));
-        renderPedidosTiendaFiltrados();
-      });
-    }
-    return;
-  }
-  cont.innerHTML = items.map((i) => `
-    <div class="card card-pad-sm mt-10 pedido-card" data-estado="${i.pedido_estado}">
+function tarjetaPedidoTiendaHtml(i) {
+  return `
+    <div class="card card-pad-sm pedido-card" data-estado="${i.pedido_estado}">
       <div class="flex justify-between items-center">
         <div>
           <strong>${i.cantidad}x ${i.nombre_producto}</strong>
@@ -138,17 +115,76 @@ function renderPedidosTiendaFiltrados() {
       </div>
       <div class="flex justify-between items-center mt-6">
         <span class="pedido-precio">${formatoSoles(i.subtotal)}</span>
-        ${i.pedido_estado === 'cancelado'
-          ? '<span class="tag" style="background:#f0f0f0;color:var(--tinta-300);">✕ Cancelado por el cliente</span>'
-          : i.estado_tienda === 'listo'
-            ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">✓ Listo para recoger</span>'
-            : i.estado_tienda === 'confirmado'
-              ? `<button class="btn btn-success btn-xs" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`
-              : `<button class="btn btn-primary btn-xs" data-confirmar="${i.pedido_id}|${i.item_id}">Confirmar pedido</button>`}
+        ${accionPedidoTiendaHtml(i)}
       </div>
     </div>
-  `).join('');
+  `;
+}
 
+function accionPedidoTiendaHtml(i) {
+  if (i.pedido_estado === 'cancelado') return '<span class="tag" style="background:#f0f0f0;color:var(--tinta-300);">✕ Cancelado por el cliente</span>';
+  if (i.estado_tienda === 'listo') return '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">✓ Listo para recoger</span>';
+  if (i.estado_tienda === 'confirmado') return `<button class="btn btn-success btn-xs" data-listo="${i.pedido_id}|${i.item_id}">Marcar listo</button>`;
+  return `<button class="btn btn-primary btn-xs" data-confirmar="${i.pedido_id}|${i.item_id}">Confirmar pedido</button>`;
+}
+
+function renderPedidosComoTarjetas(cont, items) {
+  cont.innerHTML = `<div class="grid-pedidos-tarjetas">${items.map(tarjetaPedidoTiendaHtml).join('')}</div>`;
+}
+
+function renderPedidosComoTabla(cont, items) {
+  cont.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Producto</th><th>Pedido</th><th>Cliente</th><th>Zona</th><th>Estado</th><th>Precio</th><th>Contacto</th><th>Acción</th></tr></thead>
+        <tbody>
+          ${items.map((i) => `
+            <tr>
+              <td>${i.cantidad}x ${i.nombre_producto}</td>
+              <td>#${i.pedido_id.slice(0,8).toUpperCase()}</td>
+              <td>${i.cliente_nombre}</td>
+              <td>${i.zona_entrega}</td>
+              <td><span class="badge badge-${i.pedido_estado}">${labelEstado(i.pedido_estado)}</span></td>
+              <td>${formatoSoles(i.subtotal)}</td>
+              <td>
+                <div class="flex gap-6">
+                  <a href="tel:${i.cliente_telefono}" class="btn btn-ghost btn-xs" title="Llamar">📞</a>
+                  <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-xs" title="WhatsApp">💬</a>
+                  ${i.lat_entrega && i.lng_entrega ? `<a href="https://www.google.com/maps?q=${i.lat_entrega},${i.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-xs" title="Ver ubicación">🗺️</a>` : ''}
+                </div>
+              </td>
+              <td>${accionPedidoTiendaHtml(i)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderPedidosComoEstados(cont, items) {
+  const columnas = ESTADOS_PEDIDO_TIENDA.map((estado) => ({ estado, items: items.filter((i) => i.pedido_estado === estado) }))
+    .filter((col) => col.items.length > 0);
+  if (columnas.length === 0) {
+    cont.innerHTML = '<p class="text-muted">No hay pedidos en ese rango.</p>';
+    return;
+  }
+  cont.innerHTML = `
+    <div class="tablero-estados">
+      ${columnas.map((col) => `
+        <div class="tablero-columna">
+          <div class="tablero-columna-titulo">
+            <span class="badge badge-${col.estado}">${labelEstado(col.estado)}</span>
+            <span class="text-muted">${col.items.length}</span>
+          </div>
+          <div class="tablero-columna-lista">${col.items.map(tarjetaPedidoTiendaHtml).join('')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function enlazarAccionesPedidosTienda(cont) {
   cont.querySelectorAll('[data-confirmar]').forEach((btn) => btn.addEventListener('click', async () => {
     const [pedidoId, itemId] = btn.dataset.confirmar.split('|');
     btn.disabled = true;
@@ -169,10 +205,71 @@ function renderPedidosTiendaFiltrados() {
   }));
 }
 
+function renderPedidosTiendaFiltrados() {
+  const cont = document.getElementById('lista-pedidos-tienda');
+  const ahora = new Date();
+  const manana = new Date(ahora);
+  manana.setDate(manana.getDate() + 1);
+
+  const items = todosPedidosTiendaCache.filter((i) => {
+    if (filtroEstadoPedidosTienda !== 'todos' && i.pedido_estado !== filtroEstadoPedidosTienda) return false;
+    if (rangoFechaPedidosTienda === 'todos') return true;
+    const fecha = new Date(i.created_at);
+    if (rangoFechaPedidosTienda === 'hoy') return esMismoDiaPedido(fecha, ahora);
+    if (rangoFechaPedidosTienda === 'manana') return esMismoDiaPedido(fecha, manana);
+    return true;
+  });
+
+  if (todosPedidosTiendaCache.length === 0) {
+    cont.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>Aún no tienes pedidos.</p></div>';
+    return;
+  }
+  if (items.length === 0) {
+    cont.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📦</div>
+        <p>No tienes pedidos con ese filtro.</p>
+        <button type="button" class="btn btn-outline btn-sm mt-8" id="btn-ver-todos-pedidos-tienda">Ver todos</button>
+      </div>
+    `;
+    const btnVerTodos = document.getElementById('btn-ver-todos-pedidos-tienda');
+    if (btnVerTodos) {
+      btnVerTodos.addEventListener('click', () => {
+        rangoFechaPedidosTienda = 'todos';
+        filtroEstadoPedidosTienda = 'todos';
+        document.querySelectorAll('#filtro-fecha-pedidos-tienda .chip').forEach((c) => c.classList.toggle('activo', c.dataset.rango === 'todos'));
+        document.getElementById('filtro-estado-pedidos-tienda').value = 'todos';
+        renderPedidosTiendaFiltrados();
+      });
+    }
+    return;
+  }
+
+  if (vistaPedidosTienda === 'tabla') renderPedidosComoTabla(cont, items);
+  else if (vistaPedidosTienda === 'estados') renderPedidosComoEstados(cont, items);
+  else renderPedidosComoTarjetas(cont, items);
+
+  enlazarAccionesPedidosTienda(cont);
+}
+
 document.querySelectorAll('#filtro-fecha-pedidos-tienda .chip').forEach((chip) => {
   chip.addEventListener('click', () => {
     rangoFechaPedidosTienda = chip.dataset.rango;
     document.querySelectorAll('#filtro-fecha-pedidos-tienda .chip').forEach((c) => c.classList.remove('activo'));
+    chip.classList.add('activo');
+    renderPedidosTiendaFiltrados();
+  });
+});
+
+document.getElementById('filtro-estado-pedidos-tienda').addEventListener('change', (e) => {
+  filtroEstadoPedidosTienda = e.target.value;
+  renderPedidosTiendaFiltrados();
+});
+
+document.querySelectorAll('#filtro-vista-pedidos-tienda .chip').forEach((chip) => {
+  chip.addEventListener('click', () => {
+    vistaPedidosTienda = chip.dataset.vista;
+    document.querySelectorAll('#filtro-vista-pedidos-tienda .chip').forEach((c) => c.classList.remove('activo'));
     chip.classList.add('activo');
     renderPedidosTiendaFiltrados();
   });
