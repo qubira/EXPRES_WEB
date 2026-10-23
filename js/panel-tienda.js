@@ -296,7 +296,7 @@ async function cargarProductos() {
 function tarjetaProductoTiendaHtml(p) {
   return `
     <div class="card producto-admin-card">
-      <div class="pcard-media" style="${p.foto_url ? `background-image:url('${p.foto_url}')` : ''}">${p.foto_url ? '' : (p.es_combo ? '🎁' : '🛍️')}</div>
+      <div class="pcard-media${p.foto_url ? '' : ' pcard-media-vacia'}" style="${p.foto_url ? `background-image:url('${p.foto_url}')` : ''}">${p.foto_url ? '' : '<img src="../IMG/fondo1.png" alt="Sin imagen">'}</div>
       <div class="card-pad-sm">
         <div class="flex gap-6" style="flex-wrap:wrap;">
           <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
@@ -326,7 +326,7 @@ function renderProductosComoTabla(cont, productos) {
         <tbody>
           ${productos.map((p) => `
             <tr>
-              <td>${p.foto_url ? `<img src="${p.foto_url}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;">` : `<span style="font-size:20px;">${p.es_combo ? '🎁' : '🛍️'}</span>`}</td>
+              <td>${p.foto_url ? `<img src="${p.foto_url}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;">` : `<img src="../IMG/fondo1.png" alt="Sin imagen" style="width:36px;height:36px;object-fit:contain;">`}</td>
               <td>${p.nombre}${p.marca ? ` · ${p.marca}` : ''}${p.es_combo ? ' <span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}</td>
               <td>${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</td>
               <td>${formatoSoles(p.precio)} <span class="text-sm text-muted">/ ${formatoContenido(p.contenido, p.unidad)}</span></td>

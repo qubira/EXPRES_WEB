@@ -694,6 +694,8 @@ p { margin: 0 0 1rem; }
   font-size: 34px;
   color: white;
 }
+.pcard-media-vacia { background: var(--arena-100); padding: 10%; }
+.pcard-media-vacia img { width: 100%; height: 100%; object-fit: contain; }
 .pcard-add {
   position: absolute;
   right: 8px;

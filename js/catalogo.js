@@ -86,10 +86,9 @@ function controlHtml(p) {
 }
 
 function tarjetaProducto(p, index) {
-  const icon = CATEGORIAS_ICONOS[p.categoria] || '🛍️';
   const media = p.foto_url
     ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>`
-    : `<div class="pcard-media">${icon}</div>`;
+    : `<div class="pcard-media pcard-media-vacia"><img src="IMG/fondo1.png" alt="Sin imagen"></div>`;
   return `
     <div class="pcard fade-in-up" data-id="${p.id}" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">

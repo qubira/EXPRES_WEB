@@ -245,7 +245,7 @@ async function cargarCombos() {
       <div class="pcard fade-in-up" style="animation-delay:${i * 60}ms;">
         <a href="producto.html?id=${p.id}" style="display:block;">
           <div style="position:relative;">
-            ${p.foto_url ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>` : '<div class="pcard-media">🎁</div>'}
+            ${p.foto_url ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>` : '<div class="pcard-media pcard-media-vacia"><img src="IMG/fondo1.png" alt="Sin imagen"></div>'}
             <span class="combo-badge">🎁 Combo</span>
           </div>
           <div class="pcard-body">

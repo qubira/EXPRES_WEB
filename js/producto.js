@@ -121,10 +121,9 @@ function refrescarControlTarjeta(id) {
 }
 
 function tarjetaSimilar(p, index) {
-  const icon = CATEGORIAS_ICONOS[p.categoria] || '🛍️';
   const media = p.foto_url
     ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>`
-    : `<div class="pcard-media">${icon}</div>`;
+    : `<div class="pcard-media pcard-media-vacia"><img src="IMG/fondo1.png" alt="Sin imagen"></div>`;
   return `
     <div class="pcard fade-in-up" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
@@ -159,15 +158,17 @@ async function cargarProducto() {
     document.getElementById('estado-carga').classList.add('hidden');
     document.getElementById('contenido').classList.remove('hidden');
 
-    const icon = CATEGORIAS_ICONOS[p.categoria] || '🛍️';
     const media = document.getElementById('producto-media');
     if (p.foto_url) {
       media.style.backgroundImage = `url('${p.foto_url}')`;
       media.style.backgroundSize = 'cover';
       media.style.backgroundPosition = 'center';
-      media.textContent = '';
+      media.classList.remove('pcard-media-vacia');
+      media.innerHTML = '';
     } else {
-      media.textContent = icon;
+      media.style.backgroundImage = '';
+      media.classList.add('pcard-media-vacia');
+      media.innerHTML = '<img src="IMG/fondo1.png" alt="Sin imagen">';
     }
     // ojo: cargarProducto se re-ejecuta con el auto-refresco, asi que este boton
     // se reutiliza si ya existe en vez de duplicarse en cada ciclo.
