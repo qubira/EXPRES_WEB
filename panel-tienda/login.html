@@ -4,45 +4,75 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/png" href="../assets/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Tienda | Express Ancon</title>
+<title>Panel Tienda | Express Ancón</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/styles.css">
 </head>
-<body style="min-height:100vh; display:flex; align-items:center; background:linear-gradient(145deg, #087F8C, #032f35);">
+<body class="portal-page">
 
-<div class="container" style="max-width:400px;">
-  <div class="text-center mt-24" style="color:white;">
-    <img src="../assets/logo-hero.png" alt="Express" class="login-logo">
-    <h1 style="color:white;">Panel de Tienda</h1>
-    <p style="color:var(--cielo-100);">Express Ancón</p>
+<div class="portal-card">
+  <div class="text-center" style="margin-bottom:20px;">
+    <div class="auth-mascot-badge" style="width:84px;height:84px;margin-bottom:8px;">
+      <img src="../IMG/logo2.png" alt="Express" class="auth-mascot-img" style="width:78px;height:78px;">
+    </div>
+    <span class="portal-badge tienda">🏪 Comercio Asociado</span>
+    <h1 style="font-size:22px;margin:4px 0 2px;color:var(--mar-900);">Panel de Tienda</h1>
+    <p style="font-size:13px;color:var(--tinta-600);margin:0;">Administra tu catálogo de playa y pedidos</p>
   </div>
 
-  <form id="form-login" class="card card-pad mt-16">
+  <form id="form-login">
     <div class="form-grupo">
-      <label>Email</label>
-      <input type="email" name="email" required placeholder="tunegocio@correo.com">
+      <label for="tienda-email">Correo de la tienda</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉️</span>
+        <input type="email" id="tienda-email" name="email" required placeholder="tunegocio@correo.com" autocomplete="email">
+      </div>
     </div>
+
     <div class="form-grupo">
-      <label>Contraseña</label>
-      <input type="password" name="password" required placeholder="••••••••">
+      <label for="tienda-password">Contraseña</label>
+      <div class="input-wrap">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="tienda-password" name="password" required placeholder="••••••••" autocomplete="current-password">
+        <button type="button" class="btn-toggle-pass" id="btn-toggle-pass" aria-label="Mostrar contraseña">👁️</button>
+      </div>
     </div>
-    <div id="error-login" class="form-error hidden"></div>
-    <button type="submit" class="btn btn-primary btn-block" id="btn-login">Ingresar</button>
+
+    <div id="error-login" class="form-error hidden" style="margin-bottom:12px;"></div>
+
+    <button type="submit" class="btn-auth-submit" id="btn-login">
+      <span>Ingresar al panel</span>
+      <span>→</span>
+    </button>
   </form>
 
-  <p class="text-center mt-16"><a href="../index.html" style="color:var(--cielo-100);">← Volver al sitio</a></p>
+  <p class="text-center mt-16 mb-0" style="font-size:13px;">
+    <a href="../index.html" style="color:var(--turquesa-600);font-weight:600;">← Volver al sitio principal</a>
+  </p>
 </div>
 
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
 <script>
+const togglePassBtn = document.getElementById('btn-toggle-pass');
+const passInput = document.getElementById('tienda-password');
+if (togglePassBtn && passInput) {
+  togglePassBtn.addEventListener('click', () => {
+    const esPassword = passInput.type === 'password';
+    passInput.type = esPassword ? 'text' : 'password';
+    togglePassBtn.textContent = esPassword ? '🙈' : '👁️';
+  });
+}
+
 document.getElementById('form-login').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-login');
   const errorBox = document.getElementById('error-login');
   errorBox.classList.add('hidden');
   btn.disabled = true;
-  btn.textContent = 'Ingresando...';
+  btn.innerHTML = '<span>Ingresando...</span>';
   try {
     const fd = new FormData(e.target);
     const data = await Api.tiendaLogin({ email: fd.get('email'), password: fd.get('password') });
@@ -53,7 +83,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     errorBox.textContent = err.message || 'Error al iniciar sesión';
     errorBox.classList.remove('hidden');
     btn.disabled = false;
-    btn.textContent = 'Ingresar';
+    btn.innerHTML = '<span>Ingresar al panel</span> <span>→</span>';
   }
 });
 </script>

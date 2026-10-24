@@ -4,65 +4,127 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crear cuenta | Express Ancon</title>
+<title>Crear cuenta | Express Ancón</title>
+<meta name="description" content="Crea tu cuenta en Express Ancón para disfrutar de delivery directo a tu sombrilla en la playa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="auth-page">
 
-<nav class="navbar">
-  <div class="container navbar-inner">
-    <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+<nav class="auth-nav">
+  <div class="container auth-nav-inner">
+    <a href="index.html" class="brand">
+      <img src="assets/logo-navbar.png" alt="Express Ancón" class="brand-logo">
+    </a>
+    <a href="index.html" class="auth-back-link">
+      <span>←</span> Volver a la tienda
+    </a>
   </div>
 </nav>
 
-<div class="container mt-24" style="max-width:420px;">
-  <div class="text-center">
-    <div style="font-size:38px;">🏖️</div>
-    <h1 class="section-title" style="margin-bottom:4px;">Crea tu cuenta</h1>
-    <p class="text-muted">Guarda tu historial de pedidos y agiliza tu próxima compra.</p>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-mascot-badge">
+        <img src="IMG/logo2.png" alt="Mascota Express Ancón" class="auth-mascot-img">
+      </div>
+      <span class="auth-pill">🏖️ Verano 2026 en Ancón</span>
+      <h1 class="auth-title">Crea tu cuenta</h1>
+      <p class="auth-sub">Guarda tus pedidos, tus zonas favoritas y agiliza tus entregas en la arena.</p>
+    </div>
+
+    <form id="form-registro">
+      <div class="form-grupo">
+        <label for="reg-nombre">Nombre completo</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="reg-nombre" name="nombre" required placeholder="Ej. María Torres" autocomplete="name">
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label for="reg-email">Correo electrónico</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="reg-email" name="email" required placeholder="Ej. maria@correo.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label for="reg-telefono">Celular / WhatsApp</label>
+        <div class="input-wrap">
+          <span class="input-icon">📱</span>
+          <input type="tel" id="reg-telefono" name="telefono" required placeholder="Ej. 987654321" autocomplete="tel">
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label for="reg-password">Contraseña</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="reg-password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <button type="button" class="btn-toggle-pass" id="btn-toggle-pass" aria-label="Mostrar contraseña">👁️</button>
+        </div>
+      </div>
+
+      <div id="error-registro" class="form-error hidden" style="margin-bottom: 12px;"></div>
+
+      <button type="submit" class="btn-auth-submit" id="btn-registro">
+        <span>Crear mi cuenta</span>
+        <span>→</span>
+      </button>
+    </form>
+
+    <div class="auth-benefits">
+      <div class="auth-benefit-item">
+        <span class="emoji">⚡</span>
+        <span>Sin esperas</span>
+      </div>
+      <div class="auth-benefit-item">
+        <span class="emoji">🚲</span>
+        <span>Bici Express</span>
+      </div>
+      <div class="auth-benefit-item">
+        <span class="emoji">🔑</span>
+        <span>PIN de entrega</span>
+      </div>
+    </div>
+
+    <div class="auth-alt-wrap">
+      ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+    </div>
+
+    <a href="catalogo.html" class="auth-guest-link">O explora el catálogo sin cuenta →</a>
   </div>
-
-  <form id="form-registro" class="card card-pad mt-16">
-    <div class="form-grupo">
-      <label>Nombre completo</label>
-      <input type="text" name="nombre" required placeholder="Ej. María Torres">
-    </div>
-    <div class="form-grupo">
-      <label>Correo electrónico</label>
-      <input type="email" name="email" required placeholder="Ej. maria@correo.com">
-    </div>
-    <div class="form-grupo">
-      <label>Celular</label>
-      <input type="tel" name="telefono" required placeholder="Ej. 987654321">
-    </div>
-    <div class="form-grupo">
-      <label>Contraseña</label>
-      <input type="password" name="password" required minlength="6" placeholder="Mínimo 6 caracteres">
-    </div>
-    <div id="error-registro" class="form-error hidden"></div>
-    <button type="submit" class="btn btn-primary btn-block" id="btn-registro">Crear cuenta</button>
-  </form>
-
-  <p class="text-center mt-16">¿Ya tienes cuenta? <a href="login.html" style="color:var(--turquesa-500);font-weight:700;">Inicia sesión</a></p>
 </div>
 
 <div id="modal-root"></div>
-
-<div style="height:40px;"></div>
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth-cliente.js"></script>
 <script src="js/ubicacion.js"></script>
 <script>
+// Toggle contraseña visible
+const togglePassBtn = document.getElementById('btn-toggle-pass');
+const passInput = document.getElementById('reg-password');
+if (togglePassBtn && passInput) {
+  togglePassBtn.addEventListener('click', () => {
+    const esPassword = passInput.type === 'password';
+    passInput.type = esPassword ? 'text' : 'password';
+    togglePassBtn.textContent = esPassword ? '🙈' : '👁️';
+  });
+}
+
 document.getElementById('form-registro').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-registro');
   const errorBox = document.getElementById('error-registro');
   errorBox.classList.add('hidden');
   btn.disabled = true;
-  btn.textContent = 'Creando cuenta...';
+  btn.innerHTML = '<span>Creando cuenta...</span>';
   try {
     const fd = new FormData(e.target);
     const data = await Api.clienteRegistro({
@@ -81,7 +143,7 @@ document.getElementById('form-registro').addEventListener('submit', async (e) =>
     errorBox.textContent = err.message || 'Error al crear la cuenta';
     errorBox.classList.remove('hidden');
     btn.disabled = false;
-    btn.textContent = 'Crear cuenta';
+    btn.innerHTML = '<span>Crear mi cuenta</span> <span>→</span>';
   }
 });
 </script>

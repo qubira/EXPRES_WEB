@@ -4,57 +4,113 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Iniciar sesión | Express Ancon</title>
+<title>Iniciar sesión | Express Ancón</title>
+<meta name="description" content="Inicia sesión en Express Ancón para rastrear tus pedidos con PIN en tiempo real.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="auth-page">
 
-<nav class="navbar">
-  <div class="container navbar-inner">
-    <a href="index.html" class="brand"><img src="assets/logo-navbar.png" alt="Express" class="brand-logo"></a>
+<nav class="auth-nav">
+  <div class="container auth-nav-inner">
+    <a href="index.html" class="brand">
+      <img src="assets/logo-navbar.png" alt="Express Ancón" class="brand-logo">
+    </a>
+    <a href="index.html" class="auth-back-link">
+      <span>←</span> Volver a la tienda
+    </a>
   </div>
 </nav>
 
-<div class="container mt-24" style="max-width:420px;">
-  <div class="text-center">
-    <div style="font-size:38px;">👤</div>
-    <h1 class="section-title" style="margin-bottom:4px;">Inicia sesión</h1>
-    <p class="text-muted">Consulta tu historial de pedidos y su PIN de entrega.</p>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-mascot-badge">
+        <img src="IMG/logo2.png" alt="Mascota Express Ancón" class="auth-mascot-img">
+      </div>
+      <span class="auth-pill">🚴‍♂️ Delivery en Playa Ancón</span>
+      <h1 class="auth-title">Inicia sesión</h1>
+      <p class="auth-sub">Consulta tu historial de pedidos y tu PIN de entrega directo a tu sombrilla.</p>
+    </div>
+
+    <form id="form-login">
+      <div class="form-grupo">
+        <label for="login-email">Correo electrónico</label>
+        <div class="input-wrap">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="login-email" name="email" required placeholder="Ej. maria@correo.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <div class="flex justify-between items-center mb-0">
+          <label for="login-password" style="margin-bottom:0;">Contraseña</label>
+        </div>
+        <div class="input-wrap mt-8">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="login-password" name="password" required placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="btn-toggle-pass" id="btn-toggle-pass" aria-label="Mostrar contraseña">👁️</button>
+        </div>
+      </div>
+
+      <div id="error-login" class="form-error hidden" style="margin-bottom: 12px;"></div>
+
+      <button type="submit" class="btn-auth-submit" id="btn-login">
+        <span>Ingresar a mi cuenta</span>
+        <span>→</span>
+      </button>
+    </form>
+
+    <div class="auth-benefits">
+      <div class="auth-benefit-item">
+        <span class="emoji">🏖️</span>
+        <span>A tu sombrilla</span>
+      </div>
+      <div class="auth-benefit-item">
+        <span class="emoji">🚲</span>
+        <span>Eco delivery</span>
+      </div>
+      <div class="auth-benefit-item">
+        <span class="emoji">📱</span>
+        <span>Yape o Plin</span>
+      </div>
+    </div>
+
+    <div class="auth-alt-wrap">
+      ¿Aún no tienes cuenta? <a href="registro.html">Regístrate gratis</a>
+    </div>
+
+    <a href="catalogo.html" class="auth-guest-link">O explora el catálogo sin iniciar sesión →</a>
   </div>
-
-  <form id="form-login" class="card card-pad mt-16">
-    <div class="form-grupo">
-      <label>Correo electrónico</label>
-      <input type="email" name="email" required placeholder="Ej. maria@correo.com">
-    </div>
-    <div class="form-grupo">
-      <label>Contraseña</label>
-      <input type="password" name="password" required placeholder="••••••••">
-    </div>
-    <div id="error-login" class="form-error hidden"></div>
-    <button type="submit" class="btn btn-primary btn-block" id="btn-login">Ingresar</button>
-  </form>
-
-  <p class="text-center mt-16">¿Aún no tienes cuenta? <a href="registro.html" style="color:var(--turquesa-500);font-weight:700;">Regístrate</a></p>
 </div>
 
 <div id="modal-root"></div>
-
-<div style="height:40px;"></div>
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/auth-cliente.js"></script>
 <script src="js/ubicacion.js"></script>
 <script>
+// Toggle contraseña visible
+const togglePassBtn = document.getElementById('btn-toggle-pass');
+const passInput = document.getElementById('login-password');
+if (togglePassBtn && passInput) {
+  togglePassBtn.addEventListener('click', () => {
+    const esPassword = passInput.type === 'password';
+    passInput.type = esPassword ? 'text' : 'password';
+    togglePassBtn.textContent = esPassword ? '🙈' : '👁️';
+  });
+}
+
 document.getElementById('form-login').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = document.getElementById('btn-login');
   const errorBox = document.getElementById('error-login');
   errorBox.classList.add('hidden');
   btn.disabled = true;
-  btn.textContent = 'Ingresando...';
+  btn.innerHTML = '<span>Ingresando...</span>';
   try {
     const fd = new FormData(e.target);
     const data = await Api.loginUnificado({ email: fd.get('email'), password: fd.get('password') });
@@ -84,7 +140,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     errorBox.textContent = err.message || 'Error al iniciar sesión';
     errorBox.classList.remove('hidden');
     btn.disabled = false;
-    btn.textContent = 'Ingresar';
+    btn.innerHTML = '<span>Ingresar a mi cuenta</span> <span>→</span>';
   }
 });
 </script>
