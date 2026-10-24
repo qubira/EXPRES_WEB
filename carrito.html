@@ -46,45 +46,48 @@
     <a href="catalogo.html" class="btn btn-primary">Ver catálogo</a>
   </div>
 
-  <div id="resumen-carrito" class="card card-pad mt-16">
-    <div class="flex justify-between mb-0"><span>Subtotal productos</span><strong id="r-subtotal">S/ 0.00</strong></div>
-    <div class="flex justify-between mt-8"><span>Delivery (bicicleta)</span><strong id="r-delivery">S/ 5.00</strong></div>
-    <hr class="divider">
-    <div class="flex justify-between"><span style="font-weight:700;">Total a pagar</span><strong class="precio" id="r-total">S/ 0.00</strong></div>
+  <div id="resumen-carrito" class="card card-pad mt-16" style="border-radius:22px;border:1.5px solid rgba(8,127,140,0.14);box-shadow:0 8px 24px rgba(3,47,53,0.06);">
+    <div class="flex justify-between mb-0"><span style="color:var(--tinta-600);font-weight:600;">Subtotal productos</span><strong id="r-subtotal" style="color:var(--mar-900);font-size:15px;">S/ 0.00</strong></div>
+    <div class="flex justify-between mt-8"><span style="color:var(--tinta-600);font-weight:600;">Delivery en bicicleta 🚲</span><strong id="r-delivery" style="color:var(--turquesa-700);font-size:15px;">S/ 5.00</strong></div>
+    <hr class="divider" style="margin:14px 0;border:none;border-top:1px dashed rgba(8,127,140,0.15);">
+    <div class="flex justify-between items-center"><span style="font-weight:800;font-size:16px;color:var(--mar-900);">Total a pagar</span><strong class="precio" id="r-total" style="font-size:24px;color:var(--turquesa-700);">S/ 0.00</strong></div>
   </div>
 
-  <div id="login-gate" class="card card-pad mt-16 hidden text-center">
-    <div style="font-size:36px;">🔒</div>
-    <h3>Inicia sesión para completar tu compra</h3>
-    <p class="text-sm text-muted">Por seguridad, toda compra requiere una cuenta — así puedes ver tu PIN de entrega y el estado de tu pedido cuando quieras.</p>
-    <a href="login.html?next=carrito.html" class="btn btn-primary btn-block mt-8">Iniciar sesión</a>
-    <a href="registro.html?next=carrito.html" class="btn btn-outline btn-block mt-8">Crear cuenta nueva</a>
+  <div id="login-gate" class="card card-pad mt-16 hidden text-center" style="border-radius:24px;border:1.5px solid rgba(8,127,140,0.14);box-shadow:0 12px 32px rgba(3,47,53,0.06);padding:32px 24px;">
+    <div style="font-size:40px;margin-bottom:8px;">🔒</div>
+    <h3 style="font-size:20px;font-weight:800;color:var(--mar-900);margin-bottom:6px;">Inicia sesión para completar tu compra</h3>
+    <p class="text-sm text-muted" style="max-width:440px;margin:0 auto 16px;">Por seguridad, toda compra requiere una cuenta — así podrás ver tu PIN de entrega y rastrear a tu repartidor en tiempo real.</p>
+    <a href="login.html?next=carrito.html" class="btn btn-primary btn-block" style="height:48px;font-size:15px;border-radius:14px;box-shadow:0 8px 22px rgba(8,127,140,0.35);">Iniciar sesión</a>
+    <a href="registro.html?next=carrito.html" class="btn btn-outline btn-block mt-8" style="height:46px;font-size:14.5px;border-radius:14px;">Crear cuenta nueva</a>
   </div>
 
-  <form id="form-checkout" class="card card-pad mt-16 hidden">
-    <h3>Datos de entrega</h3>
+  <form id="form-checkout" class="card card-pad mt-16 hidden" style="border-radius:24px;border:1.5px solid rgba(8,127,140,0.14);box-shadow:0 12px 32px rgba(3,47,53,0.06);">
+    <h3 style="font-size:19px;font-weight:800;color:var(--mar-900);margin-bottom:14px;">📍 Datos de entrega en la playa</h3>
     <div class="form-grupo">
       <label>Nombre completo</label>
-      <input type="text" name="cliente_nombre" required placeholder="Ej. María Torres">
+      <input type="text" name="cliente_nombre" required placeholder="Ej. María Torres" style="border-radius:14px;">
     </div>
     <div class="form-grupo">
       <label>Celular (WhatsApp)</label>
-      <input type="tel" name="cliente_telefono" required placeholder="Ej. 987654321">
+      <input type="tel" name="cliente_telefono" required placeholder="Ej. 987654321" style="border-radius:14px;">
     </div>
     <div class="form-grupo">
       <label>¿Dónde estás en la playa?</label>
-      <input type="text" name="zona_entrega" required placeholder="Ej. Playa Ancón, sombrilla azul #12, frente al muelle">
+      <input type="text" name="zona_entrega" required placeholder="Ej. Playa Ancón, sombrilla azul #12, frente al muelle" style="border-radius:14px;">
     </div>
     <div class="form-grupo">
       <label>Referencia para encontrarte</label>
-      <textarea name="referencia_entrega" required placeholder="Ej. Sombrilla azul #12, polo rojo, cerca al puesto de salvavidas"></textarea>
-      <p class="text-sm text-muted mt-8">Obligatorio: ayuda al repartidor a ubicarte más rápido en la playa.</p>
+      <textarea name="referencia_entrega" required placeholder="Ej. Sombrilla azul #12, polo rojo, cerca al puesto de salvavidas" style="border-radius:14px;"></textarea>
+      <p class="text-sm text-muted mt-8">Obligatorio: ayuda al repartidor en bicicleta a ubicarte más rápido en la arena.</p>
     </div>
     <div class="form-grupo">
-      <button type="button" class="btn btn-outline btn-block" id="btn-gps-entrega">📍 Compartir mi ubicación GPS exacta</button>
+      <button type="button" class="btn btn-outline btn-block" id="btn-gps-entrega" style="border-radius:14px;height:46px;gap:8px;">📍 Compartir mi ubicación GPS exacta</button>
       <p class="text-sm text-muted mt-8" id="gps-entrega-estado">Ayuda a que el repartidor te encuentre más rápido (opcional, pero recomendado).</p>
     </div>
-    <button type="submit" class="btn btn-primary btn-block" id="btn-continuar">Continuar al pago →</button>
+    <button type="submit" class="btn btn-primary btn-block" id="btn-continuar" style="height:50px;font-size:15.5px;border-radius:14px;box-shadow:0 8px 24px rgba(8,127,140,0.35);">
+      <span>Continuar al pago</span>
+      <span>→</span>
+    </button>
   </form>
 </div>
 
