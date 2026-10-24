@@ -49,7 +49,17 @@
       </div>
     </div>
   </div>
-  <div class="location-bar">📍 <span class="zona-texto">Entregando en Playa Ancón</span> <span class="chevron">▾</span></div>
+  <div class="location-bar">
+    <div class="location-target">
+      <span>📍</span>
+      <span class="zona-texto">Entregando en Playa Ancón</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="beach-live-ticker">
+      <span class="radar-live-dot"></span>
+      <strong>En vivo:</strong> ☀️ 27°C Ancón · 🌊 Mar en calma · 🚴 8 bicis rodando
+    </div>
+  </div>
 </nav>
 
 <header class="hero">
@@ -202,6 +212,122 @@
   </div>
 </section>
 
+<section class="metrics-section">
+  <div class="container">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-num"><span class="metric-counter">+2,800</span></div>
+        <div class="metric-label">Pedidos a la arena</div>
+        <div class="metric-sub">Entregados directo a la toalla</div>
+      </div>
+      <div class="metric-card highlight">
+        <div class="metric-num"><span>~18</span> min</div>
+        <div class="metric-label">Tiempo promedio</div>
+        <div class="metric-sub">Sin filas ni caminatas al sol</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num"><span>100%</span> 🚲</div>
+        <div class="metric-label">Eco-Friendly</div>
+        <div class="metric-sub">Cero emisiones en la playa</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-num"><span>4.9</span> / 5 ★</div>
+        <div class="metric-label">Satisfacción veraneante</div>
+        <div class="metric-sub">Calificación verificada 2026</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-arena simulator-section" id="como-te-encontramos">
+  <div class="container">
+    <div class="text-center">
+      <div class="eyebrow" style="color:var(--turquesa-500);">Tecnología Sombrilla-GPS 📡</div>
+      <h2 class="section-title" style="margin: 0 auto 10px;">¿Cómo te encontramos exactamente en la arena?</h2>
+      <p class="section-sub" style="margin: 0 auto 32px;">Haz clic en una sombrilla de prueba para simular cómo el repartidor en bicicleta llega a tu posición exacta sin confusiones.</p>
+    </div>
+
+    <div class="simulator-layout">
+      <!-- Mapa interactivo de sombrillas en la playa -->
+      <div class="simulator-beach">
+        <div class="beach-water-strip">
+          <span>🌊 Orilla del Mar de Ancón (Zona de Bañistas)</span>
+        </div>
+        <div class="beach-sand-grid">
+          <button type="button" class="umbrella-btn activo" data-spot="conchitas" data-name="Sombrilla #14 (Amarilla)" data-zona="Las Conchitas · Cerca a las rocas" data-rep="Carlos M. (Bicicleta Eco 03)" data-pin="8391" data-tiempo="14 min">
+            <span class="umbrella-icon">⛱️</span>
+            <span class="umbrella-tag">#14 Amarilla</span>
+            <span class="ping-ring"></span>
+          </button>
+          <button type="button" class="umbrella-btn" data-spot="hermosa" data-name="Sombrilla #06 (Turquesa)" data-zona="Playa Hermosa · Frente a salvavidas 2" data-rep="Mateo S. (Bicicleta Eco 07)" data-pin="5204" data-tiempo="16 min">
+            <span class="umbrella-icon">⛱️</span>
+            <span class="umbrella-tag">#06 Turquesa</span>
+            <span class="ping-ring"></span>
+          </button>
+          <button type="button" class="umbrella-btn" data-spot="miramar" data-name="Toldo Familiar #22 (Rayas)" data-zona="Playa Miramar · Malecón central" data-rep="Jorge L. (Bicicleta Eco 01)" data-pin="7742" data-tiempo="12 min">
+            <span class="umbrella-icon">⛺</span>
+            <span class="umbrella-tag">#22 Toldo</span>
+            <span class="ping-ring"></span>
+          </button>
+          <button type="button" class="umbrella-btn" data-spot="toalla" data-name="Toalla Libre #09 (Arena)" data-zona="Arena libre · Frente a módulo de serenos" data-rep="Diego R. (Bicicleta Eco 05)" data-pin="1938" data-tiempo="18 min">
+            <span class="umbrella-icon">🏖️</span>
+            <span class="umbrella-tag">#09 Toalla</span>
+            <span class="ping-ring"></span>
+          </button>
+        </div>
+        <div class="beach-promenade">
+          <span>🚶‍♂️ Malecón de Ancón (Acceso directo de ciclovía y restaurantes)</span>
+        </div>
+      </div>
+
+      <!-- Tarjeta HUD en vivo del repartidor simulado -->
+      <div class="simulator-card">
+        <div class="sim-header">
+          <div class="sim-status-dot"></div>
+          <div>
+            <strong id="sim-spot-title">Sombrilla #14 (Amarilla)</strong>
+            <span id="sim-spot-sub" class="text-sm text-muted">Las Conchitas · Cerca a las rocas</span>
+          </div>
+        </div>
+
+        <div class="sim-radar">
+          <div class="sim-bike-icon">🚴‍♂️</div>
+          <div class="sim-radar-track">
+            <div class="sim-radar-progress"></div>
+          </div>
+          <div class="sim-umbrella-icon">📍</div>
+        </div>
+
+        <div class="sim-details-grid">
+          <div class="sim-item">
+            <span class="sim-label">Repartidor asignado</span>
+            <strong id="sim-repartidor">Carlos M. (Bicicleta Eco 03)</strong>
+          </div>
+          <div class="sim-item">
+            <span class="sim-label">Tiempo estimado</span>
+            <strong id="sim-tiempo" style="color:var(--turquesa-600);">14 min a tu toalla</strong>
+          </div>
+          <div class="sim-item highlight-pin">
+            <span class="sim-label">Tu PIN de entrega exclusivo</span>
+            <strong id="sim-pin">PIN: 8391</strong>
+          </div>
+          <div class="sim-item">
+            <span class="sim-label">Método de localización</span>
+            <strong style="color:var(--verde-palma);">GPS + Color de Sombrilla ✓</strong>
+          </div>
+        </div>
+
+        <div class="sim-footer">
+          <p class="text-xs text-muted" style="margin:0;line-height:1.4;">
+            🛡️ <strong>Garantía Express:</strong> El repartidor sólo confirma la entrega cuando le dictas tu PIN secreto de 4 dígitos. ¡Cero confusiones en la arena!
+          </p>
+          <a href="catalogo.html" class="btn btn-primary btn-block">Ver productos y pedir →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="section section-mar" id="tiendas-socias">
   <div class="container">
     <div class="grid-cols grid-cols-2" style="align-items:center;gap:32px;">
@@ -284,6 +410,58 @@
             <span class="review-name">Renzo Gonzales</span>
             <span class="review-location">📍 Playa Miramar</span>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-white" id="faq-ancon">
+  <div class="container" style="max-width: 860px;">
+    <div class="text-center">
+      <div class="eyebrow">Resolvemos tus dudas</div>
+      <h2 class="section-title" style="margin: 0 auto 8px;">Preguntas Frecuentes de la Playa ☀️</h2>
+      <p class="section-sub" style="margin: 0 auto 32px;">Todo lo que necesitas saber para pedir tu delivery a la arena sin complicaciones.</p>
+    </div>
+
+    <div class="faq-accordion">
+      <div class="faq-item abierto">
+        <button class="faq-trigger" type="button">
+          <span>¿Cómo sabe el repartidor cuál es mi sombrilla en medio de tanta gente?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-content">
+          <p>Al hacer tu pedido, seleccionas tu zona de playa (Las Conchitas, Miramar, Playa Hermosa, etc.) y agregas una breve referencia visual: por ejemplo <em>"Sombrilla amarilla con rayas rojas frente a la caseta de salvavidas"</em> o activas tu ubicación GPS. Los repartidores patrullan en bicicleta por los senderos de arena y te localizan con total precisión.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger" type="button">
+          <span>¿Cómo funciona el PIN de seguridad y por qué evita confusiones?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-content">
+          <p>En la playa muchas personas pueden estar cerca, pero tu pedido es exclusivamente tuyo. Cuando la tienda despacha tu orden, la app te genera un <strong>PIN único de 4 dígitos</strong>. El repartidor tiene prohibido entregarlo hasta que tú le confirmes ese código en persona.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger" type="button">
+          <span>¿Puedo pagar con Yape o Plin desde mi toalla?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-content">
+          <p>¡Sí! Es la forma preferida de pago. Pagas al instante con el código QR oficial de Express Ancón, subes la captura del voucher y tu orden entra automáticamente a preparación en la cocina o tienda asociada.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-trigger" type="button">
+          <span>¿Por qué las entregas se hacen 100% en bicicleta?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-content">
+          <p>Ancón es un balneario histórico y tradicional. Las bicicletas de carga son <strong>100% ecológicas, silenciosas y seguras</strong> para los bañistas y niños que juegan en la orilla, protegiendo el ecosistema y la tranquilidad del balneario.</p>
         </div>
       </div>
     </div>
@@ -462,15 +640,66 @@ document.addEventListener('zona-actualizada', cargarCombos);
 document.addEventListener('zona-actualizada', cargarTiendasDestacadas);
 
 // Busqueda automatica: al dejar de escribir, lleva al catalogo filtrado sin necesidad de Enter
-const heroSearchForm = document.querySelector('.search-bar-wrap');
-const heroSearchInput = heroSearchForm.querySelector('input[name="q"]');
-let heroSearchTimer = null;
-heroSearchInput.addEventListener('input', () => {
-  clearTimeout(heroSearchTimer);
-  const valor = heroSearchInput.value.trim();
-  if (!valor) return;
-  heroSearchTimer = setTimeout(() => heroSearchForm.submit(), 600);
+const heroSearchForm = document.querySelector('.hero-search-form') || document.querySelector('.search-bar-wrap');
+if (heroSearchForm) {
+  const heroSearchInput = heroSearchForm.querySelector('input[name="q"]');
+  if (heroSearchInput) {
+    let heroSearchTimer = null;
+    heroSearchInput.addEventListener('input', () => {
+      clearTimeout(heroSearchTimer);
+      const valor = heroSearchInput.value.trim();
+      if (!valor) return;
+      heroSearchTimer = setTimeout(() => heroSearchForm.submit(), 600);
+    });
+  }
+}
+
+// Interaccion del Simulador de Sombrilla GPS
+document.querySelectorAll('.umbrella-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.umbrella-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    
+    const name = btn.getAttribute('data-name');
+    const zona = btn.getAttribute('data-zona');
+    const rep = btn.getAttribute('data-rep');
+    const pin = btn.getAttribute('data-pin');
+    const tiempo = btn.getAttribute('data-tiempo');
+
+    const spotTitle = document.getElementById('sim-spot-title');
+    const spotSub = document.getElementById('sim-spot-sub');
+    const repEl = document.getElementById('sim-repartidor');
+    const pinEl = document.getElementById('sim-pin');
+    const tiempoEl = document.getElementById('sim-tiempo');
+
+    if (spotTitle) spotTitle.textContent = name;
+    if (spotSub) spotSub.textContent = zona;
+    if (repEl) repEl.textContent = rep;
+    if (pinEl) pinEl.textContent = 'PIN: ' + pin;
+    if (tiempoEl) tiempoEl.textContent = tiempo + ' a tu toalla';
+  });
+});
+
+// Interaccion del Acordeon FAQ
+document.querySelectorAll('.faq-trigger').forEach(trigger => {
+  trigger.addEventListener('click', () => {
+    const item = trigger.closest('.faq-item');
+    if (!item) return;
+    const estabaAbierto = item.classList.contains('abierto');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('abierto'));
+    if (!estabaAbierto) {
+      item.classList.add('abierto');
+    }
+  });
 });
 </script>
+
+<!-- Concierge flotante de asistencia en la playa -->
+<a href="https://wa.me/51924687363?text=Hola%20Express%20Anc%C3%B3n,%20estoy%20en%20la%20playa%20y%20necesito%20ayuda%20con%20un%20pedido" target="_blank" rel="noopener" class="beach-floating-help" title="¿Ayuda en la playa? Escríbenos por WhatsApp" aria-label="Ayuda por WhatsApp">
+  <span class="help-pulse"></span>
+  <span class="help-icon">💬</span>
+  <span class="help-text">¿Ayuda en la playa?</span>
+</a>
+
 </body>
 </html>
