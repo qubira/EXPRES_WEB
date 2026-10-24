@@ -53,6 +53,7 @@
 </nav>
 
 <header class="hero">
+  <canvas id="hero-particles" class="hero-particles-canvas"></canvas>
   <div class="hero-aurora a1"></div>
   <div class="hero-aurora a2"></div>
   <span class="hero-deco d1">☀️</span>
@@ -94,8 +95,11 @@
     </div>
   </div>
   <div class="hero-wave">
-    <svg viewBox="0 0 500 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,20 C100,45 150,0 250,15 C350,30 400,0 500,18 L500,40 L0,40 Z" fill="var(--arena-100)"></path>
+    <svg viewBox="0 0 1200 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" class="hero-wave-svg wave-back">
+      <path d="M0,24 C200,44 400,8 600,24 C800,44 1000,8 1200,24 L1200,48 L0,48 Z" fill="rgba(255, 251, 245, 0.48)"></path>
+    </svg>
+    <svg viewBox="0 0 1200 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" class="hero-wave-svg wave-front">
+      <path d="M0,20 C180,42 420,0 600,20 C820,40 1020,4 1200,20 L1200,48 L0,48 Z" fill="var(--arena-100)"></path>
     </svg>
   </div>
 </header>
@@ -205,23 +209,23 @@
 <section class="metrics-section">
   <div class="container">
     <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-num"><span class="metric-counter">+2,800</span></div>
+      <div class="metric-card reveal-card">
+        <div class="metric-num"><span class="metric-counter" data-target="2800" data-prefix="+">+2,800</span></div>
         <div class="metric-label">Pedidos a la arena</div>
         <div class="metric-sub">Entregados directo a la toalla</div>
       </div>
-      <div class="metric-card highlight">
-        <div class="metric-num"><span>~18</span> min</div>
+      <div class="metric-card highlight reveal-card">
+        <div class="metric-num"><span class="metric-counter" data-target="18" data-prefix="~">~18</span> min</div>
         <div class="metric-label">Tiempo promedio</div>
         <div class="metric-sub">Sin filas ni caminatas al sol</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-num"><span>100%</span> 🚲</div>
+      <div class="metric-card reveal-card">
+        <div class="metric-num"><span class="metric-counter" data-target="100" data-suffix="%">100%</span> 🚲</div>
         <div class="metric-label">Eco-Friendly</div>
         <div class="metric-sub">Cero emisiones en la playa</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-num"><span>4.9</span> / 5 ★</div>
+      <div class="metric-card reveal-card">
+        <div class="metric-num"><span class="metric-counter" data-target="4.9" data-decimals="1">4.9</span> / 5 ★</div>
         <div class="metric-label">Satisfacción veraneante</div>
         <div class="metric-sub">Calificación verificada 2026</div>
       </div>
@@ -645,30 +649,48 @@ if (heroSearchForm) {
 }
 
 // Interaccion del Simulador de Sombrilla GPS
-document.querySelectorAll('.umbrella-btn').forEach(btn => {
+const umbrellaButtons = Array.from(document.querySelectorAll('.umbrella-btn'));
+let simAutoCycleTimer = null;
+let userInteractedWithSim = false;
+
+function activarSombrilla(btn) {
+  umbrellaButtons.forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+  
+  const name = btn.getAttribute('data-name');
+  const zona = btn.getAttribute('data-zona');
+  const rep = btn.getAttribute('data-rep');
+  const pin = btn.getAttribute('data-pin');
+  const tiempo = btn.getAttribute('data-tiempo');
+
+  const spotTitle = document.getElementById('sim-spot-title');
+  const spotSub = document.getElementById('sim-spot-sub');
+  const repEl = document.getElementById('sim-repartidor');
+  const pinEl = document.getElementById('sim-pin');
+  const tiempoEl = document.getElementById('sim-tiempo');
+
+  if (spotTitle) spotTitle.textContent = name;
+  if (spotSub) spotSub.textContent = zona;
+  if (repEl) repEl.textContent = rep;
+  if (pinEl) pinEl.textContent = 'PIN: ' + pin;
+  if (tiempoEl) tiempoEl.textContent = tiempo + ' a tu toalla';
+}
+
+umbrellaButtons.forEach((btn, idx) => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.umbrella-btn').forEach(b => b.classList.remove('activo'));
-    btn.classList.add('activo');
-    
-    const name = btn.getAttribute('data-name');
-    const zona = btn.getAttribute('data-zona');
-    const rep = btn.getAttribute('data-rep');
-    const pin = btn.getAttribute('data-pin');
-    const tiempo = btn.getAttribute('data-tiempo');
-
-    const spotTitle = document.getElementById('sim-spot-title');
-    const spotSub = document.getElementById('sim-spot-sub');
-    const repEl = document.getElementById('sim-repartidor');
-    const pinEl = document.getElementById('sim-pin');
-    const tiempoEl = document.getElementById('sim-tiempo');
-
-    if (spotTitle) spotTitle.textContent = name;
-    if (spotSub) spotSub.textContent = zona;
-    if (repEl) repEl.textContent = rep;
-    if (pinEl) pinEl.textContent = 'PIN: ' + pin;
-    if (tiempoEl) tiempoEl.textContent = tiempo + ' a tu toalla';
+    userInteractedWithSim = true;
+    if (simAutoCycleTimer) clearInterval(simAutoCycleTimer);
+    activarSombrilla(btn);
   });
 });
+
+// Auto-rotacion demostrativa del simulador si el usuario no interactua
+let simCurrentIdx = 0;
+simAutoCycleTimer = setInterval(() => {
+  if (userInteractedWithSim || !umbrellaButtons.length) return;
+  simCurrentIdx = (simCurrentIdx + 1) % umbrellaButtons.length;
+  activarSombrilla(umbrellaButtons[simCurrentIdx]);
+}, 4500);
 
 // Interaccion del Acordeon FAQ
 document.querySelectorAll('.faq-trigger').forEach(trigger => {
@@ -682,6 +704,192 @@ document.querySelectorAll('.faq-trigger').forEach(trigger => {
     }
   });
 });
+
+// ============================================================
+// Motor de Particulas Ambientales Solares y Marinas (Canvas)
+// ============================================================
+(function initHeroParticles() {
+  const canvas = document.getElementById('hero-particles');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let particles = [];
+  const PARTICLE_COUNT = 32;
+  let mouse = { x: null, y: null, radius: 90 };
+
+  function resize() {
+    width = canvas.width = canvas.parentElement.offsetWidth;
+    height = canvas.height = canvas.parentElement.offsetHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  window.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    } else {
+      mouse.x = null;
+      mouse.y = null;
+    }
+  });
+
+  class Particle {
+    constructor() {
+      this.reset(true);
+    }
+    reset(initial = false) {
+      this.x = Math.random() * width;
+      this.y = initial ? Math.random() * height : height + 10;
+      this.size = Math.random() * 2.8 + 1.2;
+      this.speedY = Math.random() * 0.45 + 0.25;
+      this.speedX = (Math.random() - 0.5) * 0.35;
+      this.opacity = Math.random() * 0.65 + 0.25;
+      this.isGold = Math.random() > 0.45;
+      this.angle = Math.random() * Math.PI * 2;
+    }
+    update() {
+      this.angle += 0.02;
+      this.y -= this.speedY;
+      this.x += Math.sin(this.angle) * 0.4 + this.speedX;
+
+      // Interaccion suave con el cursor
+      if (mouse.x !== null && mouse.y !== null) {
+        const dx = this.x - mouse.x;
+        const dy = this.y - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < mouse.radius) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          this.x += (dx / dist) * force * 2.5;
+          this.y += (dy / dist) * force * 2.5;
+        }
+      }
+
+      if (this.y < -10 || this.x < -20 || this.x > width + 20) {
+        this.reset();
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.isGold
+        ? `rgba(255, 212, 71, ${this.opacity})`
+        : `rgba(255, 255, 255, ${this.opacity * 0.9})`;
+      ctx.shadowBlur = this.size * 2.5;
+      ctx.shadowColor = this.isGold ? 'rgba(255, 212, 71, 0.6)' : 'rgba(255, 255, 255, 0.5)';
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push(new Particle());
+  }
+
+  let isCanvasVisible = true;
+  const heroObserver = new IntersectionObserver(([entry]) => {
+    isCanvasVisible = entry.isIntersecting;
+  });
+  heroObserver.observe(canvas.parentElement);
+
+  function animate() {
+    if (isCanvasVisible) {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ============================================================
+// 3D Perspective Tilt en la Mascota del Hero
+// ============================================================
+(function initMascotTilt() {
+  const heroInner = document.querySelector('.hero-inner');
+  const mascotPod = document.querySelector('.hero-mascot-pod');
+  if (!heroInner || !mascotPod) return;
+
+  heroInner.addEventListener('mousemove', (e) => {
+    const rect = heroInner.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mascotPod.style.transform = `perspective(900px) rotateY(${x * 15}deg) rotateX(${-y * 15}deg) translateY(-4px)`;
+  });
+
+  heroInner.addEventListener('mouseleave', () => {
+    mascotPod.style.transform = 'perspective(900px) rotateY(0deg) rotateX(0deg) translateY(0)';
+  });
+})();
+
+// ============================================================
+// Conteo Numerico Dinamico en Metricas al hacer Scroll
+// ============================================================
+(function initMetricCounters() {
+  const counters = document.querySelectorAll('.metric-counter');
+  if (!counters.length) return;
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const c = entry.target;
+        const target = parseFloat(c.getAttribute('data-target'));
+        const prefix = c.getAttribute('data-prefix') || '';
+        const suffix = c.getAttribute('data-suffix') || '';
+        const decimals = parseInt(c.getAttribute('data-decimals') || '0', 10);
+        if (isNaN(target)) return;
+
+        const duration = 1800;
+        const start = performance.now();
+
+        function step(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          // Curva fluida easeOutExpo
+          const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+          const current = target * ease;
+          const formatted = decimals > 0 ? current.toFixed(decimals) : Math.floor(current).toLocaleString('es-PE');
+          c.textContent = `${prefix}${formatted}${suffix}`;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            c.textContent = `${prefix}${decimals > 0 ? target.toFixed(decimals) : target.toLocaleString('es-PE')}${suffix}`;
+          }
+        }
+        requestAnimationFrame(step);
+        obs.unobserve(c);
+      }
+    });
+  }, { threshold: 0.35 });
+
+  counters.forEach(c => observer.observe(c));
+})();
+
+// ============================================================
+// Scroll Reveal Escalonado
+// ============================================================
+(function initScrollReveal() {
+  const cards = document.querySelectorAll('.trust-card, .step-card, .review-card, .metric-card');
+  if (!cards.length) return;
+
+  cards.forEach(c => c.classList.add('reveal-card'));
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  cards.forEach((c, idx) => {
+    c.style.transitionDelay = `${(idx % 4) * 70}ms`;
+    observer.observe(c);
+  });
+})();
 </script>
 
 <!-- Botón flotante circular oficial de WhatsApp -->

@@ -135,6 +135,23 @@ p { margin: 0 0 1rem; }
   color: var(--blanco);
   box-shadow: 0 8px 22px rgba(8, 127, 140, 0.35);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after, .btn-secondary::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -60%;
+  width: 35%; height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.38), transparent);
+  transform: rotate(25deg);
+  transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  opacity: 0;
+}
+.btn-primary:hover::after, .btn-secondary:hover::after {
+  left: 140%;
+  opacity: 1;
 }
 .btn-primary:hover {
   background: linear-gradient(135deg, #0aa2b2 0%, var(--turquesa-500) 100%);
@@ -147,6 +164,8 @@ p { margin: 0 0 1rem; }
   box-shadow: 0 8px 22px rgba(255, 212, 71, 0.4);
   font-weight: 750;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
 }
 .btn-secondary:hover {
   background: linear-gradient(135deg, #ffe066 0%, var(--amarillo-400) 100%);
@@ -717,6 +736,9 @@ p { margin: 0 0 1rem; }
   display: flex;
   align-items: center;
   justify-content: center;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .hero-mascot-pod::before {
   content: '';
@@ -2207,16 +2229,35 @@ body.con-tabbar { padding-bottom: var(--tabbar-h); }
   line-height: 0;
   pointer-events: none;
   z-index: 1;
-}
-.hero-wave svg {
-  width: 100%;
+  overflow: hidden;
   height: 38px;
+}
+.hero-wave-svg {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
   display: block;
 }
+.hero-wave-svg.wave-back {
+  opacity: 0.48;
+  animation: waveDriftBack 7s ease-in-out infinite alternate;
+}
+.hero-wave-svg.wave-front {
+  animation: waveDriftFront 5s ease-in-out infinite alternate;
+}
 @media (min-width: 860px) {
-  .hero-wave svg {
+  .hero-wave {
     height: 48px;
   }
+}
+@keyframes waveDriftBack {
+  0% { transform: translateX(0) scaleY(1); }
+  100% { transform: translateX(-24px) scaleY(1.18); }
+}
+@keyframes waveDriftFront {
+  0% { transform: translateX(0) scaleY(1); }
+  100% { transform: translateX(18px) scaleY(0.92); }
 }
 
 /* ---------- Puntos indicadores de carrusel ---------- */
@@ -3058,10 +3099,49 @@ body.con-tabbar { padding-bottom: var(--tabbar-h); }
   flex-shrink: 0;
   display: block;
 }
+.whatsapp-floating-btn::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(37, 211, 102, 0.7);
+  animation: waPulseRing 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  pointer-events: none;
+}
+@keyframes waPulseRing {
+  0% { transform: scale(0.95); opacity: 1; }
+  60% { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
 @media (min-width: 860px) {
   .wa-icon {
     width: 34px;
     height: 34px;
   }
+}
+
+/* ============================================================
+   Canvas de Partículas Solares y Marinas en el Hero
+   ============================================================ */
+.hero-particles-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============================================================
+   Sistema de Animaciones de Entrada (Scroll Reveal System)
+   ============================================================ */
+.reveal-card {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-card.revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
