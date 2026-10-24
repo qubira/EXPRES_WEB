@@ -53,23 +53,52 @@
 </nav>
 
 <header class="hero">
+  <div class="hero-aurora a1"></div>
+  <div class="hero-aurora a2"></div>
   <span class="hero-deco d1">☀️</span>
   <span class="hero-deco d2">🌊</span>
   <span class="hero-deco d3">🐚</span>
   <div class="container hero-inner fade-in-up">
-    <div>
-      <div class="hero-badge">☀️ Temporada de verano</div>
-      <h1>¿Qué se te antoja hoy?</h1>
-      <p class="lead">Pide comida y bebidas, directo a tu sombrilla.</p>
-      <form class="search-bar-wrap" action="catalogo.html" method="get">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        <span>☀️ Verano Ancón 2026 · Delivery en la Playa</span>
+      </div>
+      <h1 class="hero-headline">¿Qué se te antoja hoy en la sombrilla?</h1>
+      <p class="lead">Comida marina, piqueos, bebidas bien heladas y artículos de playa. Te lo llevamos en bicicleta directo a tu sombrilla.</p>
+      
+      <form class="hero-search-form" action="catalogo.html" method="get">
         <div class="search-bar">
           <span class="search-icon">🔍</span>
-          <input type="search" name="q" placeholder="Busca anticuchos, bebidas, sombrillas...">
+          <input type="search" name="q" placeholder="Busca anticuchos, cebiche, helados, sombrillas..." autocomplete="off">
+          <button type="submit" class="hero-search-btn">Buscar</button>
         </div>
       </form>
+
+      <div class="hero-quick-tags">
+        <span class="quick-tags-title">Popular:</span>
+        <div class="quick-tags-list">
+          <a href="catalogo.html?q=anticucho" class="quick-tag">🍢 Anticuchos</a>
+          <a href="catalogo.html?q=bebida" class="quick-tag">🥤 Bebidas frías</a>
+          <a href="catalogo.html?q=helado" class="quick-tag">🍦 Helados</a>
+          <a href="catalogo.html?q=ceviche" class="quick-tag">🐟 Ceviche</a>
+          <a href="catalogo.html?q=sombrilla" class="quick-tag">⛱️ Sombrillas</a>
+        </div>
+      </div>
     </div>
-    <div class="hero-mascot">
-      <img src="IMG/logo2.png" alt="Mascota Express" class="hero-mascot-img">
+
+    <div class="hero-mascot-showcase">
+      <div class="hero-mascot-pod">
+        <img src="IMG/logo2.png" alt="Mascota Express Ancón" class="hero-mascot-img">
+        <div class="hero-pill-float pill-status">
+          <span class="pulse-dot green"></span>
+          <span>Repartos activos en la arena</span>
+        </div>
+        <div class="hero-pill-float pill-time">
+          <span class="emoji">⚡</span>
+          <span>~20 min a tu toalla</span>
+        </div>
+      </div>
     </div>
   </div>
   <div class="hero-wave">
@@ -79,13 +108,48 @@
   </div>
 </header>
 
+<div class="trust-strip">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon-box">🚲</div>
+        <div class="trust-info">
+          <strong>100% en Bicicleta</strong>
+          <span>Cero colas, directo a tu toalla</span>
+        </div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon-box">📍</div>
+        <div class="trust-info">
+          <strong>A tu Sombrilla</strong>
+          <span>Llegamos a tu posición en la arena</span>
+        </div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon-box">🔑</div>
+        <div class="trust-info">
+          <strong>PIN de Entrega</strong>
+          <span>Tu código seguro de 4 dígitos</span>
+        </div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon-box">📱</div>
+        <div class="trust-info">
+          <strong>Yape o Plin</strong>
+          <span>Paga fácil sin efectivo en la arena</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="cat-strip" id="cat-strip"></div>
 
 <div class="container mt-16">
   <div class="promo-banner">
     <div class="promo-text">
-      <strong>Verano sin filas 🏖️</strong>
-      <span>Paga por adelantado y recibe tu pedido con PIN de entrega</span>
+      <strong>Verano sin filas en la arena 🏖️</strong>
+      <span>Paga por adelantado con Yape o Plin y recibe tu pedido con PIN seguro de entrega</span>
     </div>
     <div class="promo-emoji">🚲</div>
   </div>
@@ -165,6 +229,54 @@
         <h3 style="color:var(--mar-900)">¿Eres repartidor?</h3>
         <p class="text-sm text-muted">Gana una tarifa fija por cada entrega que hagas en bicicleta por la playa de Ancón. Habla con nosotros por WhatsApp para unirte.</p>
         <a href="https://wa.me/51924687363" target="_blank" rel="noopener" class="btn btn-outline btn-block">Quiero repartir 🚲</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reviews-section" id="testimonios">
+  <div class="container">
+    <div class="text-center">
+      <div class="eyebrow">Verano sin preocupaciones</div>
+      <h2 class="section-title" style="margin:0 auto 8px;">Lo que dicen los veraneantes 🏖️</h2>
+      <p class="section-sub" style="margin:0 auto;">Cientos de pedidos entregados a sombrillas en Ancón esta temporada.</p>
+    </div>
+
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-quote">"Nos trajeron ceviche mixto y gaseosas heladas a Las Conchitas en 20 minutos. ¡El PIN de entrega te da total tranquilidad!"</p>
+        <div class="review-author">
+          <div class="review-avatar">👨‍👩‍👧</div>
+          <div class="review-meta">
+            <span class="review-name">Familia Carranza</span>
+            <span class="review-location">📍 Sombrilla 14 · Las Conchitas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-quote">"Se me quedaron los lentes y el bloqueador en Lima. Lo pedí por Express y me lo trajeron en bicicleta súper amables y rápido."</p>
+        <div class="review-author">
+          <div class="review-avatar">🏄‍♀️</div>
+          <div class="review-meta">
+            <span class="review-name">Andrea Rivera</span>
+            <span class="review-location">📍 Playa Hermosa</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-quote">"Pagas con Yape al instante y no tienes que dejar tus cosas solas en la arena para ir a buscar comida hasta el malecón. 10/10."</p>
+        <div class="review-author">
+          <div class="review-avatar">🚴‍♂️</div>
+          <div class="review-meta">
+            <span class="review-name">Renzo Gonzales</span>
+            <span class="review-location">📍 Playa Miramar</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
