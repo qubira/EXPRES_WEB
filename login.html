@@ -148,6 +148,14 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     btn.innerHTML = '<span>Ingresar a mi cuenta</span> <span>→</span>';
   }
 });
+
+// Preservar parametro next hacia registro
+const nextUrlParam = new URLSearchParams(location.search).get('next');
+if (nextUrlParam) {
+  document.querySelectorAll('a[href^="registro.html"]').forEach(a => {
+    a.href = `registro.html?next=${encodeURIComponent(nextUrlParam)}`;
+  });
+}
 </script>
 </body>
 </html>

@@ -151,6 +151,14 @@ document.getElementById('form-registro').addEventListener('submit', async (e) =>
     btn.innerHTML = '<span>Crear mi cuenta</span> <span>→</span>';
   }
 });
+
+// Preservar parametro next hacia login
+const nextRegParam = new URLSearchParams(location.search).get('next');
+if (nextRegParam) {
+  document.querySelectorAll('a[href^="login.html"]').forEach(a => {
+    a.href = `login.html?next=${encodeURIComponent(nextRegParam)}`;
+  });
+}
 </script>
 </body>
 </html>

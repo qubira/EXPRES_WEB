@@ -121,9 +121,10 @@ function refrescarControlTarjeta(id) {
 }
 
 function tarjetaSimilar(p, index) {
+  const emoji = typeof getProductEmoji === 'function' ? getProductEmoji(p) : '🏖️';
   const media = p.foto_url
     ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>`
-    : `<div class="pcard-media pcard-media-vacia"><img src="IMG/fondo1.png" alt="Sin imagen"></div>`;
+    : `<div class="pcard-media pcard-media-emoji"><span class="emoji-symbol">${emoji}</span><span class="emoji-badge">Playa Ancón</span></div>`;
   return `
     <div class="pcard fade-in-up" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
@@ -166,9 +167,18 @@ async function cargarProducto() {
       media.classList.remove('pcard-media-vacia');
       media.innerHTML = '';
     } else {
+      const emoji = typeof getProductEmoji === 'function' ? getProductEmoji(p) : '🏖️';
       media.style.backgroundImage = '';
-      media.classList.add('pcard-media-vacia');
-      media.innerHTML = '<img src="IMG/fondo1.png" alt="Sin imagen">';
+      media.classList.remove('pcard-media-vacia');
+      media.style.background = 'radial-gradient(circle at 50% 35%, rgba(255,255,255,0.92) 0%, rgba(8,127,140,0.1) 50%, rgba(240,165,0,0.14) 100%)';
+      media.style.display = 'flex';
+      media.style.alignItems = 'center';
+      media.style.justifyContent = 'center';
+      media.style.position = 'relative';
+      media.innerHTML = `
+        <span style="font-size:76px; filter:drop-shadow(0 8px 18px rgba(3,47,53,0.16));">${emoji}</span>
+        <span style="position:absolute; bottom:12px; right:14px; background:rgba(255,255,255,0.92); backdrop-filter:blur(4px); font-size:11px; font-weight:700; color:var(--mar-900); padding:3px 10px; border-radius:12px; border:1px solid rgba(8,127,140,0.15);">Express Playa Ancón</span>
+      `;
     }
     // ojo: cargarProducto se re-ejecuta con el auto-refresco, asi que este boton
     // se reutiliza si ya existe en vez de duplicarse en cada ciclo.

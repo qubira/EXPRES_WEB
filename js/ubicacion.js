@@ -100,19 +100,34 @@ async function abrirSelectorUbicacion(onListo) {
     });
   }
 
+  const ZONAS_FALLBACK = [
+    'Playa Ancón - Frente al mar',
+    'Malecón Norte',
+    'Malecón Sur',
+    'Zona Muelle'
+  ];
+
   try {
-    const zonas = await Api.getZonas();
+    let zonas = await Api.getZonas();
+    if (!zonas || !zonas.length) zonas = ZONAS_FALLBACK;
     const lista = document.getElementById('lista-zonas-picker');
     if (!lista) return; // el modal se cerro mientras cargaba
     lista.innerHTML = zonas.map((z) => `
       <button class="btn btn-outline btn-block" data-zona="${z}" style="justify-content:flex-start;">📍 ${z}</button>
-    `).join('') || '<p class="text-muted text-sm">Aún no hay zonas registradas.</p>';
+    `).join('');
     lista.querySelectorAll('[data-zona]').forEach((btn) => {
       btn.addEventListener('click', () => confirmar(btn.dataset.zona));
     });
   } catch (err) {
     const lista = document.getElementById('lista-zonas-picker');
-    if (lista) lista.innerHTML = '<p class="form-error">No se pudieron cargar las zonas.</p>';
+    if (lista) {
+      lista.innerHTML = ZONAS_FALLBACK.map((z) => `
+        <button class="btn btn-outline btn-block" data-zona="${z}" style="justify-content:flex-start;">📍 ${z}</button>
+      `).join('');
+      lista.querySelectorAll('[data-zona]').forEach((btn) => {
+        btn.addEventListener('click', () => confirmar(btn.dataset.zona));
+      });
+    }
   }
 }
 

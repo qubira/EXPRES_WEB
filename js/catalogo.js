@@ -86,9 +86,10 @@ function controlHtml(p) {
 }
 
 function tarjetaProducto(p, index) {
+  const emoji = typeof getProductEmoji === 'function' ? getProductEmoji(p) : '🏖️';
   const media = p.foto_url
     ? `<div class="pcard-media" style="background-image:url('${p.foto_url}')"></div>`
-    : `<div class="pcard-media pcard-media-vacia"><img src="IMG/fondo1.png" alt="Sin imagen"></div>`;
+    : `<div class="pcard-media pcard-media-emoji"><span class="emoji-symbol">${emoji}</span><span class="emoji-badge">Playa Ancón</span></div>`;
   return `
     <div class="pcard fade-in-up" data-id="${p.id}" data-abrir="${p.id}" style="animation-delay:${Math.min(index * 40, 300)}ms">
       <div style="position:relative;">
@@ -186,6 +187,12 @@ async function cargarProductos(mostrarCarga = true) {
     if (productos.length === 0) {
       grid.innerHTML = '';
       vacio.classList.remove('hidden');
+      const vacioTexto = document.getElementById('vacio-texto');
+      if (vacioTexto) {
+        vacioTexto.innerHTML = terminoBusqueda 
+          ? `No encontramos productos para <strong>"${terminoBusqueda}"</strong> en esta zona.` 
+          : 'No encontramos productos con los filtros seleccionados.';
+      }
       return;
     }
     vacio.classList.add('hidden');
@@ -236,3 +243,21 @@ mostrarFiltroTienda();
 actualizarCartBar();
 iniciarAutoRefresco(() => cargarProductos(false));
 document.addEventListener('zona-actualizada', () => { cargarFiltros(); cargarProductos(); });
+
+const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+if (btnLimpiar) {
+  btnLimpiar.addEventListener('click', () => {
+    terminoBusqueda = '';
+    categoriaActiva = '';
+    tiendaIdActiva = '';
+    const b = document.getElementById('buscador');
+    if (b) b.value = '';
+    history.replaceState(null, '', 'catalogo.html');
+    const filtroTienda = document.getElementById('filtro-tienda');
+    if (filtroTienda) filtroTienda.classList.add('hidden');
+    document.querySelectorAll('#filtros .chip').forEach(c => c.classList.remove('activo'));
+    const chipTodo = document.querySelector('#filtros .chip[data-valor=""]');
+    if (chipTodo) chipTodo.classList.add('activo');
+    cargarProductos();
+  });
+}
