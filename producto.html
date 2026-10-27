@@ -5,10 +5,41 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Producto | Express Ancon</title>
+<meta name="description" content="Pide este producto en Express Ancón y recíbelo directo a tu sombrilla en Playa Ancón.">
+<meta property="og:type" content="product">
+<meta property="og:site_name" content="Express Ancón">
+<meta property="og:title" content="Express Ancón | Delivery en bicicleta para la playa">
+<meta property="og:description" content="Pide este producto y recíbelo directo a tu sombrilla en Playa Ancón.">
+<meta property="og:image" content="IMG/logo2.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="IMG/logo2.png">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="con-tabbar">
+<div id="express-splash" class="express-splash" aria-hidden="true">
+  <div class="splash-inner">
+    <img src="IMG/logo2.png" alt="" class="splash-mascot">
+    <div class="splash-brand">Express <span>Ancón</span></div>
+    <div class="splash-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+<script>
+(function(){
+  var inicio = Date.now();
+  function ocultarSplash(){
+    var el = document.getElementById('express-splash');
+    if (!el) return;
+    var espera = Math.max(0, 650 - (Date.now() - inicio));
+    setTimeout(function(){
+      el.classList.add('splash-oculto');
+      setTimeout(function(){ el.remove(); }, 420);
+    }, espera);
+  }
+  if (document.readyState === 'complete') ocultarSplash();
+  else window.addEventListener('load', ocultarSplash);
+})();
+</script>
 
 <nav class="navbar">
   <div class="container navbar-inner">
@@ -47,7 +78,7 @@
 
 <div id="contenido" class="hidden">
   <div class="container mt-16">
-    <a href="javascript:history.back()" class="text-sm" style="color:var(--mar-700);font-weight:700;">← Volver</a>
+    <a href="javascript:history.back()" class="text-sm" style="color:var(--turquesa-500);font-weight:700;">← Volver</a>
 
     <div class="card mt-16 producto-layout">
       <div id="producto-media" class="producto-media"></div>
@@ -74,7 +105,7 @@
           <div>
             <strong id="producto-tienda-nombre"></strong>
             <div class="text-sm text-muted" id="producto-tienda-zona"></div>
-            <div class="text-sm" id="producto-tienda-direccion" style="color:var(--mar-700);font-weight:600;display:none;"></div>
+            <div class="text-sm" id="producto-tienda-direccion" style="color:var(--turquesa-500);font-weight:600;display:none;"></div>
           </div>
         </div>
       </div>

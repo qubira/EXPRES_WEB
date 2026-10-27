@@ -12,6 +12,29 @@
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="auth-page">
+<div id="express-splash" class="express-splash" aria-hidden="true">
+  <div class="splash-inner">
+    <img src="IMG/logo2.png" alt="" class="splash-mascot">
+    <div class="splash-brand">Express <span>Ancón</span></div>
+    <div class="splash-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+<script>
+(function(){
+  var inicio = Date.now();
+  function ocultarSplash(){
+    var el = document.getElementById('express-splash');
+    if (!el) return;
+    var espera = Math.max(0, 650 - (Date.now() - inicio));
+    setTimeout(function(){
+      el.classList.add('splash-oculto');
+      setTimeout(function(){ el.remove(); }, 420);
+    }, espera);
+  }
+  if (document.readyState === 'complete') ocultarSplash();
+  else window.addEventListener('load', ocultarSplash);
+})();
+</script>
 
 <nav class="auth-nav">
   <div class="container auth-nav-inner">
