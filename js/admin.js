@@ -76,18 +76,18 @@ async function cargarPagos() {
       <div class="card card-pad mt-16">
         <div class="flex justify-between items-center">
           <div>
-            <strong>${pg.cliente_nombre}</strong> · ${pg.cliente_telefono}
-            <div class="text-sm text-muted">${pg.zona_entrega}</div>
+            <strong>${escapeHtml(pg.cliente_nombre)}</strong> · ${escapeHtml(pg.cliente_telefono)}
+            <div class="text-sm text-muted">${escapeHtml(pg.zona_entrega)}</div>
           </div>
-          <span class="tag">${pg.tipo}</span>
+          <span class="tag">${escapeHtml(pg.tipo)}</span>
         </div>
-        <div class="text-sm text-muted mt-8">Pedido #${pg.pedido_id.slice(0,8).toUpperCase()} · Ref. de pago: ${pg.referencia || '—'}</div>
-        ${tiendas.length > 0 ? `<div class="text-sm mt-8"><strong>Tienda${tiendas.length > 1 ? 's' : ''}:</strong> ${tiendas.join(', ')}</div>` : ''}
+        <div class="text-sm text-muted mt-8">Pedido #${pg.pedido_id.slice(0,8).toUpperCase()} · Ref. de pago: ${escapeHtml(pg.referencia || '—')}</div>
+        ${tiendas.length > 0 ? `<div class="text-sm mt-8"><strong>Tienda${tiendas.length > 1 ? 's' : ''}:</strong> ${escapeHtml(tiendas.join(', '))}</div>` : ''}
         ${items.length > 0 ? `
           <div class="mt-8" style="border-top:1px solid var(--arena-300); padding-top:8px;">
             ${items.map((i) => `
               <div class="flex justify-between text-sm">
-                <span>${i.cantidad}x ${i.nombre_producto}</span>
+                <span>${i.cantidad}x ${escapeHtml(i.nombre_producto)}</span>
                 <span class="text-muted">${formatoSoles(i.subtotal)}</span>
               </div>
             `).join('')}
@@ -97,7 +97,7 @@ async function cargarPagos() {
           <span class="text-sm text-muted">Productos ${formatoSoles(pg.monto_productos)} + delivery ${formatoSoles(pg.delivery_fee)}</span>
           <strong>${formatoSoles(pg.monto_total)}</strong>
         </div>
-        ${pg.comprobante_url ? `<a href="${uploadsUrl(pg.comprobante_url)}" target="_blank"><img src="${uploadsUrl(pg.comprobante_url)}" style="max-height:220px;border-radius:10px;margin-top:10px;"></a>` : ''}
+        ${pg.comprobante_url ? `<a href="${uploadsUrl(pg.comprobante_url)}" target="_blank"><img src="${uploadsUrl(pg.comprobante_url)}" alt="Comprobante de pago" style="max-height:220px;border-radius:10px;margin-top:10px;"></a>` : ''}
         <div class="flex gap-8 mt-16">
           <button class="btn btn-success btn-sm w-full" data-confirmar="${pg.id}">✓ Confirmar</button>
           <button class="btn btn-danger btn-sm w-full" data-rechazar="${pg.id}">✕ Rechazar</button>
@@ -146,11 +146,11 @@ async function cargarPedidos(estado = '') {
     tbody.innerHTML = pedidos.map((p) => `
       <tr>
         <td>#${p.id.slice(0,8).toUpperCase()}</td>
-        <td>${p.cliente_nombre}</td>
-        <td>${p.zona_entrega}</td>
+        <td>${escapeHtml(p.cliente_nombre)}</td>
+        <td>${escapeHtml(p.zona_entrega)}</td>
         <td><span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span></td>
         <td>${formatoSoles(p.monto_total)}</td>
-        <td>${p.repartidor_nombre || '—'}</td>
+        <td>${escapeHtml(p.repartidor_nombre || '—')}</td>
         <td>
           ${['pagado','preparando','listo_recoger'].includes(p.estado) && !p.repartidor_nombre
             ? `<button class="btn btn-outline btn-sm" data-asignar="${p.id}">Asignar</button>` : ''}
@@ -186,7 +186,7 @@ function abrirModalAsignar(pedidoId) {
     <h3>Asignar repartidor</h3>
     <div class="form-grupo">
       <select id="select-repartidor">
-        ${repartidoresCache.map((r) => `<option value="${r.id}">${r.nombre} ${r.disponible ? '(disponible)' : ''}</option>`).join('')}
+        ${repartidoresCache.map((r) => `<option value="${r.id}">${escapeHtml(r.nombre)} ${r.disponible ? '(disponible)' : ''}</option>`).join('')}
       </select>
     </div>
     <button class="btn btn-primary btn-block" id="btn-confirmar-asignar">Asignar</button>
@@ -210,10 +210,10 @@ async function cargarTiendas() {
     const tiendas = await Api.adminGetTiendas();
     tbody.innerHTML = tiendas.map((t) => `
       <tr class="fila-tienda" data-fila-tienda="${t.id}" style="cursor:pointer;">
-        <td>${t.nombre}</td>
-        <td class="text-sm text-muted">${t.email || '—'}</td>
+        <td>${escapeHtml(t.nombre)}</td>
+        <td class="text-sm text-muted">${escapeHtml(t.email || '—')}</td>
         <td>${labelTipoNegocio(t.categoria)}</td>
-        <td>${t.zona || '—'}</td>
+        <td>${escapeHtml(t.zona || '—')}</td>
         <td>${t.comision_pactada}%</td>
         <td>${t.activo ? '<span class="badge badge-entregado">Activa</span>' : '<span class="badge badge-cancelado">Inactiva</span>'}</td>
         <td><button class="btn btn-outline btn-sm" data-editar-tienda="${t.id}">Editar</button></td>
@@ -269,9 +269,9 @@ async function toggleProductosTienda(filaTienda, tiendaId) {
             <tbody>
               ${productos.map((p) => `
                 <tr>
-                  <td>${p.nombre}${!p.activo ? ' <span class="text-sm text-muted">(inactivo)</span>' : ''}</td>
+                  <td>${escapeHtml(p.nombre)}${!p.activo ? ' <span class="text-sm text-muted">(inactivo)</span>' : ''}</td>
                   <td>${p.categoria}</td>
-                  <td>${p.subcategoria || '—'}</td>
+                  <td>${escapeHtml(p.subcategoria || '—')}</td>
                   <td>${formatoContenido(p.contenido, p.unidad)}</td>
                   <td>${formatoSoles(p.precio)}</td>
                   <td>${p.vistas}</td>
@@ -294,12 +294,12 @@ async function abrirModalEditarTienda(t) {
   const tipos = await Api.getTiposNegocio();
   const zonaHtml = await zonaOptionsHtml(t.zona || '');
   abrirModal(`
-    <h3>${t.nombre}</h3>
+    <h3>${escapeHtml(t.nombre)}</h3>
     <div class="form-grupo">
       <label>Logo / imagen del negocio</label>
       <label class="file-drop ${t.logo_url ? 'con-imagen' : ''}" id="e-logo-drop">
         <input type="file" id="e-logo-file" accept="image/*" class="file-drop-input">
-        <img id="e-logo-preview" class="file-drop-preview" src="${t.logo_url || ''}" style="${t.logo_url ? '' : 'display:none;'}">
+        <img id="e-logo-preview" class="file-drop-preview" alt="Vista previa del logo" src="${encodeURI(t.logo_url || '')}" style="${t.logo_url ? '' : 'display:none;'}">
         <div id="e-logo-placeholder" style="${t.logo_url ? 'display:none;' : 'display:flex;flex-direction:column;align-items:center;gap:6px;'}">
           <span class="file-drop-icon">🏪</span>
           <span class="file-drop-text">Toca para subir el logo</span>
@@ -307,8 +307,8 @@ async function abrirModalEditarTienda(t) {
         </div>
       </label>
     </div>
-    <div class="form-grupo"><label>Email (login)</label><input value="${t.email || ''}" readonly style="opacity:0.7;"></div>
-    <div class="form-grupo"><label>Nombre</label><input id="e-nombre" value="${t.nombre}"></div>
+    <div class="form-grupo"><label>Email (login)</label><input value="${escapeHtml(t.email || '')}" readonly style="opacity:0.7;"></div>
+    <div class="form-grupo"><label>Nombre</label><input id="e-nombre" value="${escapeHtml(t.nombre)}"></div>
     <div class="form-grupo"><label>Categoría (tipo de negocio)</label>
       <div class="flex" style="gap:8px;">
         <select id="e-categoria" style="flex:1;">
@@ -317,18 +317,18 @@ async function abrirModalEditarTienda(t) {
         <button type="button" class="btn btn-outline btn-sm" id="e-categoria-add" title="Agregar tipo de negocio">+</button>
       </div>
     </div>
-    <div class="form-grupo"><label>¿Qué vende?</label><input id="e-subcategoria" value="${t.subcategoria || ''}" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
+    <div class="form-grupo"><label>¿Qué vende?</label><input id="e-subcategoria" value="${escapeHtml(t.subcategoria || '')}" placeholder="Ej. Ropa, helados, libros, bikinis..."></div>
     <div class="form-grupo"><label>Zona</label>
       <select id="e-zona">${zonaHtml}</select>
     </div>
     <div class="form-grupo"><label>DNI del titular</label>
       <div class="flex" style="gap:8px;">
-        <input id="e-dni" value="${t.dni_titular || ''}" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
+        <input id="e-dni" value="${escapeHtml(t.dni_titular || '')}" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678" style="flex:1;">
         <button type="button" class="btn btn-outline btn-sm" id="e-buscar-dni">Buscar</button>
       </div>
     </div>
-    <div class="form-grupo"><label>Nombre del titular</label><input id="e-nombre-titular" value="${t.nombre_titular || ''}" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
-    <div class="form-grupo"><label>Dirección del local (opcional)</label><input id="e-direccion" value="${t.direccion || ''}" placeholder="Ej. Malecón 123, frente a la playa"></div>
+    <div class="form-grupo"><label>Nombre del titular</label><input id="e-nombre-titular" value="${escapeHtml(t.nombre_titular || '')}" readonly placeholder="Se completa automáticamente al buscar el DNI"></div>
+    <div class="form-grupo"><label>Dirección del local (opcional)</label><input id="e-direccion" value="${escapeHtml(t.direccion || '')}" placeholder="Ej. Malecón 123, frente a la playa"></div>
     <div class="form-grupo"><label>Comisión (%)</label><input id="e-comision" type="number" step="0.5" value="${t.comision_pactada}"></div>
     <div class="form-grupo"><label>WhatsApp</label><input id="e-whatsapp" value="${t.contacto_whatsapp || ''}"></div>
     <div class="form-grupo flex justify-between items-center">
@@ -400,9 +400,9 @@ async function cargarRepartidores() {
     const reps = await Api.adminGetRepartidores();
     tbody.innerHTML = reps.map((r) => `
       <tr class="fila-repartidor" data-fila-repartidor="${r.id}" style="cursor:pointer;">
-        <td>${r.nombre}</td>
-        <td>${r.tipo_documento === 'ce' ? 'CE' : 'DNI'} ${r.dni}</td>
-        <td>${r.telefono}</td>
+        <td>${escapeHtml(r.nombre)}</td>
+        <td>${r.tipo_documento === 'ce' ? 'CE' : 'DNI'} ${escapeHtml(r.dni)}</td>
+        <td>${escapeHtml(r.telefono)}</td>
         <td>${r.disponible ? '🟢 Sí' : '⚪ No'}</td>
         <td>${formatoSoles(r.pago_pendiente)}</td>
         <td>
@@ -508,11 +508,11 @@ async function abrirModalFacturaPedido(pedidoId) {
       <p class="text-sm text-muted">#${p.id.slice(0,8).toUpperCase()} · ${labelHistorialEstado(p)}</p>
 
       <div class="card card-pad mt-16" style="background:var(--arena-100);">
-        <div class="text-sm"><strong>Cliente:</strong> ${p.cliente_nombre} · ${p.cliente_telefono}</div>
-        <div class="text-sm mt-8"><strong>Zona:</strong> ${p.zona_entrega}</div>
-        ${p.referencia_entrega ? `<div class="text-sm mt-8"><strong>Referencia:</strong> ${p.referencia_entrega}</div>` : ''}
-        <div class="text-sm mt-8"><strong>Tienda${tiendas.length > 1 ? 's' : ''}:</strong> ${tiendas.join(', ') || '—'}</div>
-        <div class="text-sm mt-8"><strong>Repartidor:</strong> ${p.repartidor_nombre || '—'}</div>
+        <div class="text-sm"><strong>Cliente:</strong> ${escapeHtml(p.cliente_nombre)} · ${escapeHtml(p.cliente_telefono)}</div>
+        <div class="text-sm mt-8"><strong>Zona:</strong> ${escapeHtml(p.zona_entrega)}</div>
+        ${p.referencia_entrega ? `<div class="text-sm mt-8"><strong>Referencia:</strong> ${escapeHtml(p.referencia_entrega)}</div>` : ''}
+        <div class="text-sm mt-8"><strong>Tienda${tiendas.length > 1 ? 's' : ''}:</strong> ${escapeHtml(tiendas.join(', ') || '—')}</div>
+        <div class="text-sm mt-8"><strong>Repartidor:</strong> ${escapeHtml(p.repartidor_nombre || '—')}</div>
       </div>
 
       <div class="mt-16">
@@ -520,8 +520,8 @@ async function abrirModalFacturaPedido(pedidoId) {
         ${p.items.map((i) => `
           <div class="flex justify-between mt-8 text-sm">
             <div>
-              <strong>${i.cantidad}x ${i.nombre_producto}</strong>
-              <div class="text-muted">${i.tienda_nombre}</div>
+              <strong>${i.cantidad}x ${escapeHtml(i.nombre_producto)}</strong>
+              <div class="text-muted">${escapeHtml(i.tienda_nombre)}</div>
             </div>
             <span>${formatoSoles(i.subtotal)}</span>
           </div>
@@ -551,7 +551,7 @@ async function abrirModalFacturaPedido(pedidoId) {
         <div class="mt-16">
           <h4 class="mb-0">Pagos</h4>
           ${p.pagos.map((pg) => `
-            <div class="text-sm mt-8">${pg.tipo} · ${pg.estado} · Ref: ${pg.referencia || '—'} · ${new Date(pg.created_at).toLocaleString('es-PE')}</div>
+            <div class="text-sm mt-8">${escapeHtml(pg.tipo)} · ${escapeHtml(pg.estado)} · Ref: ${escapeHtml(pg.referencia || '—')} · ${new Date(pg.created_at).toLocaleString('es-PE')}</div>
           `).join('')}
         </div>
       ` : ''}
@@ -741,10 +741,10 @@ async function cargarUsuarios() {
     }
     tbody.innerHTML = usuarios.map((u) => `
       <tr>
-        <td>${u.nombre}</td>
-        <td>${u.email || '—'}</td>
-        <td>${u.telefono}</td>
-        <td>${u.zona || '—'}</td>
+        <td>${escapeHtml(u.nombre)}</td>
+        <td>${escapeHtml(u.email || '—')}</td>
+        <td>${escapeHtml(u.telefono)}</td>
+        <td>${escapeHtml(u.zona || '—')}</td>
         <td>${u.compras_efectivas}</td>
         <td>${formatoSoles(u.total_gastado)}</td>
         <td>${u.incidentes > 0 ? `<span class="tag" style="background:#fde3e1;color:var(--rojo-alerta);">⚠️ ${u.incidentes}</span>` : '0'}</td>
@@ -773,7 +773,7 @@ async function abrirModalEditarUsuario(u) {
   const suspendidoHastaTexto = u.suspendido_hasta ? new Date(u.suspendido_hasta).toLocaleDateString('es-PE') : null;
 
   abrirModal(`
-    <h3>${u.nombre}</h3>
+    <h3>${escapeHtml(u.nombre)}</h3>
     <p class="text-sm text-muted">${u.total_pedidos} pedido(s) · ${u.compras_efectivas} compra(s) efectiva(s) · ${formatoSoles(u.total_gastado)} comprado</p>
 
     <div class="card card-pad mt-16" style="background:var(--arena-100);">
@@ -784,7 +784,7 @@ async function abrirModalEditarUsuario(u) {
         </div>
       </div>
       ${suspendidoHastaTexto ? `<div class="text-sm text-muted mt-8">Suspendida hasta: ${suspendidoHastaTexto}</div>` : ''}
-      ${u.estado_cuenta_motivo ? `<div class="text-sm text-muted mt-8">Motivo: ${u.estado_cuenta_motivo}</div>` : ''}
+      ${u.estado_cuenta_motivo ? `<div class="text-sm text-muted mt-8">Motivo: ${escapeHtml(u.estado_cuenta_motivo)}</div>` : ''}
       <div class="flex gap-8 mt-8" style="flex-wrap:wrap;">
         ${u.estado_cuenta !== 'suspendido' ? `<button class="btn btn-outline btn-sm" id="btn-suspender-usuario">⏸️ Suspender (5 días hábiles)</button>` : ''}
         ${u.estado_cuenta !== 'bloqueado' ? `<button class="btn btn-danger btn-sm" id="btn-bloquear-usuario">🚫 Bloquear</button>` : ''}
@@ -800,9 +800,9 @@ async function abrirModalEditarUsuario(u) {
       <div id="lista-incidentes" class="mt-8">
         ${incidentes.length === 0 ? '<p class="text-sm text-muted">Sin incidentes registrados.</p>' : incidentes.map((i) => `
           <div class="text-sm mt-8" style="border-bottom:1px solid var(--arena-300); padding-bottom:8px;">
-            <strong>${MOTIVO_INCIDENTE_LABELS[i.tipo] || i.tipo}</strong> · ${new Date(i.created_at).toLocaleString('es-PE')}
-            ${i.descripcion ? `<div class="text-muted">${i.descripcion}</div>` : ''}
-            <div class="text-muted">Reportado por: ${i.reportado_por_nombre || i.reportado_por_rol || '—'}</div>
+            <strong>${MOTIVO_INCIDENTE_LABELS[i.tipo] || escapeHtml(i.tipo)}</strong> · ${new Date(i.created_at).toLocaleString('es-PE')}
+            ${i.descripcion ? `<div class="text-muted">${escapeHtml(i.descripcion)}</div>` : ''}
+            <div class="text-muted">Reportado por: ${escapeHtml(i.reportado_por_nombre || i.reportado_por_rol || '—')}</div>
           </div>
         `).join('')}
       </div>
@@ -819,9 +819,9 @@ async function abrirModalEditarUsuario(u) {
     </div>
 
     <hr class="divider">
-    <div class="form-grupo"><label>Nombre</label><input id="eu-nombre" value="${u.nombre}"></div>
-    <div class="form-grupo"><label>Correo</label><input id="eu-email" type="email" value="${u.email || ''}"></div>
-    <div class="form-grupo"><label>Teléfono</label><input id="eu-telefono" value="${u.telefono}"></div>
+    <div class="form-grupo"><label>Nombre</label><input id="eu-nombre" value="${escapeHtml(u.nombre)}"></div>
+    <div class="form-grupo"><label>Correo</label><input id="eu-email" type="email" value="${escapeHtml(u.email || '')}"></div>
+    <div class="form-grupo"><label>Teléfono</label><input id="eu-telefono" value="${escapeHtml(u.telefono)}"></div>
     <div class="form-grupo"><label>Zona</label><select id="eu-zona">${zonaHtml}</select></div>
     <hr class="divider">
     <div class="form-grupo"><label>Nueva contraseña (opcional)</label><input id="eu-password" type="text" placeholder="Dejar vacío para no cambiar"></div>
@@ -962,24 +962,24 @@ function tarjetaReclamoHtml(r) {
         <span class="badge badge-${r.estado}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span>
       </div>
       <div class="mt-6"><span class="tag" style="${esLibro ? 'background:#eef0ff;color:#5b52d6;' : ''}">${origen.label}</span></div>
-      <div class="mt-6"><strong>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</strong>${r.dni_ce ? ` · ${(r.tipo_documento || '').toUpperCase()} ${r.dni_ce}` : ''}</div>
-      ${r.direccion_reclamante ? `<div class="text-sm text-muted mt-6">📍 ${r.direccion_reclamante}</div>` : ''}
+      <div class="mt-6"><strong>${escapeHtml(r.nombre_reclamante || r.cliente_nombre || 'Sin nombre')}</strong>${r.dni_ce ? ` · ${escapeHtml((r.tipo_documento || '').toUpperCase())} ${escapeHtml(r.dni_ce)}` : ''}</div>
+      ${r.direccion_reclamante ? `<div class="text-sm text-muted mt-6">📍 ${escapeHtml(r.direccion_reclamante)}</div>` : ''}
       <div class="text-sm text-muted mt-6">
-        ${r.telefono_contacto ? `📞 ${r.telefono_contacto}${r.permite_whatsapp ? ' (acepta WhatsApp)' : ''}` : ''}
-        ${r.email_contacto ? ` · ✉️ ${r.email_contacto}` : ''}
+        ${r.telefono_contacto ? `📞 ${escapeHtml(r.telefono_contacto)}${r.permite_whatsapp ? ' (acepta WhatsApp)' : ''}` : ''}
+        ${r.email_contacto ? ` · ✉️ ${escapeHtml(r.email_contacto)}` : ''}
       </div>
-      ${r.cuenta_nombre ? `<div class="text-sm text-muted mt-6">Cuenta registrada: ${r.cuenta_nombre} (${r.cuenta_email || 'sin correo'})</div>` : ''}
-      ${r.pedido_id ? `<div class="text-sm text-muted mt-6">Pedido #${r.pedido_id.slice(0,8).toUpperCase()} · ${r.pedido_estado || ''}</div>` : ''}
-      ${esLibro ? '' : `<div class="mt-6"><span class="tag">${MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo}</span></div>`}
-      ${r.bien_contratado ? `<div class="text-sm mt-6"><strong>Bien contratado:</strong> ${r.bien_contratado}</div>` : ''}
-      ${r.descripcion ? `<div class="text-sm mt-6">${r.descripcion}</div>` : ''}
-      ${r.solicitud_consumidor ? `<div class="text-sm mt-6"><strong>Solicita:</strong> ${r.solicitud_consumidor}</div>` : ''}
+      ${r.cuenta_nombre ? `<div class="text-sm text-muted mt-6">Cuenta registrada: ${escapeHtml(r.cuenta_nombre)} (${escapeHtml(r.cuenta_email || 'sin correo')})</div>` : ''}
+      ${r.pedido_id ? `<div class="text-sm text-muted mt-6">Pedido #${r.pedido_id.slice(0,8).toUpperCase()} · ${escapeHtml(r.pedido_estado || '')}</div>` : ''}
+      ${esLibro ? '' : `<div class="mt-6"><span class="tag">${MOTIVO_RECLAMO_LABELS[r.motivo] || escapeHtml(r.motivo)}</span></div>`}
+      ${r.bien_contratado ? `<div class="text-sm mt-6"><strong>Bien contratado:</strong> ${escapeHtml(r.bien_contratado)}</div>` : ''}
+      ${r.descripcion ? `<div class="text-sm mt-6">${escapeHtml(r.descripcion)}</div>` : ''}
+      ${r.solicitud_consumidor ? `<div class="text-sm mt-6"><strong>Solicita:</strong> ${escapeHtml(r.solicitud_consumidor)}</div>` : ''}
       ${r.imagenes && r.imagenes.length > 0 ? `
         <div class="flex gap-6 mt-6" style="flex-wrap:wrap;">
-          ${r.imagenes.map((url) => `<a href="${url}" target="_blank"><img src="${url}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></a>`).join('')}
+          ${r.imagenes.map((url) => `<a href="${encodeURI(url)}" target="_blank"><img src="${encodeURI(url)}" alt="Foto adjunta al reclamo" style="width:60px;height:60px;object-fit:cover;border-radius:8px;"></a>`).join('')}
         </div>
       ` : ''}
-      ${r.resolucion ? `<div class="text-sm mt-6" style="color:var(--verde-palma);"><strong>Resolución:</strong> ${r.resolucion}</div>` : ''}
+      ${r.resolucion ? `<div class="text-sm mt-6" style="color:var(--verde-palma);"><strong>Resolución:</strong> ${escapeHtml(r.resolucion)}</div>` : ''}
       <div class="flex justify-between items-center mt-6">
         <div>${plazoReclamoHtml(r)}</div>
         ${r.estado !== 'resuelto' ? `<button class="btn btn-secondary btn-xs" data-resolver="${r.id}">Resolver</button>` : ''}
@@ -1004,8 +1004,8 @@ function renderReclamosComoTabla(cont, reclamos) {
             <tr>
               <td>${new Date(r.created_at).toLocaleDateString('es-PE')}</td>
               <td>${origen.label}</td>
-              <td>${r.nombre_reclamante || r.cliente_nombre || 'Sin nombre'}</td>
-              <td>${origen.clave === 'pedido' ? (MOTIVO_RECLAMO_LABELS[r.motivo] || r.motivo) : (r.bien_contratado || '—')}</td>
+              <td>${escapeHtml(r.nombre_reclamante || r.cliente_nombre || 'Sin nombre')}</td>
+              <td>${origen.clave === 'pedido' ? (MOTIVO_RECLAMO_LABELS[r.motivo] || escapeHtml(r.motivo)) : escapeHtml(r.bien_contratado || '—')}</td>
               <td>${r.pedido_id ? `#${r.pedido_id.slice(0,8).toUpperCase()}` : '—'}</td>
               <td><span class="badge badge-${r.estado}">${ESTADO_RECLAMO_LABELS[r.estado] || r.estado}</span></td>
               <td>${plazoReclamoHtml(r) || '—'}</td>
@@ -1237,13 +1237,13 @@ async function cargarObservaciones() {
     cont.innerHTML = obs.map((o) => `
       <div class="card card-pad-sm mt-6">
         <div class="flex justify-between items-center">
-          <div class="text-sm text-muted">${new Date(o.created_at).toLocaleString('es-PE')} · Repartidor: ${o.repartidor_nombre}</div>
+          <div class="text-sm text-muted">${new Date(o.created_at).toLocaleString('es-PE')} · Repartidor: ${escapeHtml(o.repartidor_nombre)}</div>
           <span class="tag" style="background:${o.dirigido_a === 'cliente' ? '#fde3e1' : '#fff2e0'};color:${o.dirigido_a === 'cliente' ? 'var(--rojo-alerta)' : '#b7690a'};">
             Sobre ${o.dirigido_a === 'cliente' ? 'el cliente' : 'la tienda'}
           </span>
         </div>
-        <div class="mt-6"><strong>${TIPO_OBSERVACION_LABELS[o.tipo] || o.tipo}</strong> · Pedido #${o.pedido_id.slice(0,8).toUpperCase()} · Cliente: ${o.cliente_nombre}</div>
-        ${o.descripcion ? `<div class="text-sm mt-6">${o.descripcion}</div>` : ''}
+        <div class="mt-6"><strong>${TIPO_OBSERVACION_LABELS[o.tipo] || escapeHtml(o.tipo)}</strong> · Pedido #${o.pedido_id.slice(0,8).toUpperCase()} · Cliente: ${escapeHtml(o.cliente_nombre)}</div>
+        ${o.descripcion ? `<div class="text-sm mt-6">${escapeHtml(o.descripcion)}</div>` : ''}
         <div class="flex gap-6 mt-6">
           <button class="btn btn-outline btn-xs w-full" data-descartar-obs="${o.id}">Descartar</button>
           <button class="btn btn-primary btn-xs w-full" data-confirmar-obs="${o.id}">Confirmar</button>
@@ -1316,8 +1316,8 @@ async function cargarPagosRetenidos() {
     tbody.innerHTML = pedidos.map((p) => `
       <tr>
         <td>#${p.id.slice(0,8).toUpperCase()}</td>
-        <td>${p.repartidor_nombre}</td>
-        <td>${p.zona_entrega}</td>
+        <td>${escapeHtml(p.repartidor_nombre)}</td>
+        <td>${escapeHtml(p.zona_entrega)}</td>
         <td>${formatoSoles(p.delivery_fee)}</td>
         <td>${new Date(p.entregado_at).toLocaleString('es-PE')}</td>
         <td><button class="btn btn-success btn-sm" data-liberar="${p.id}">Liberar pago</button></td>
@@ -1352,11 +1352,11 @@ async function cargarAuditoria(rol = '') {
     tbody.innerHTML = registros.map((r) => `
       <tr>
         <td>${new Date(r.created_at).toLocaleString('es-PE')}</td>
-        <td>${ROL_LABELS[r.rol] || r.rol}</td>
-        <td>${r.nombre || '—'}</td>
+        <td>${ROL_LABELS[r.rol] || escapeHtml(r.rol)}</td>
+        <td>${escapeHtml(r.nombre || '—')}</td>
         <td>${r.accion === 'login_ok' ? '<span class="badge badge-entregado">Exitoso</span>' : '<span class="badge badge-cancelado">Fallido</span>'}</td>
-        <td>${r.ip || '—'}</td>
-        <td class="text-sm text-muted" style="max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${r.user_agent || ''}">${r.user_agent || '—'}</td>
+        <td>${escapeHtml(r.ip || '—')}</td>
+        <td class="text-sm text-muted" style="max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(r.user_agent || '')}">${escapeHtml(r.user_agent || '—')}</td>
       </tr>
     `).join('');
   } catch (err) {

@@ -34,7 +34,7 @@ function renderTimeline(estado) {
             color:white; display:flex; align-items:center; justify-content:center; font-size:13px;">
             ${i <= idxActual ? '✓' : ''}
           </div>
-          <div class="text-sm" style="color:${i <= idxActual ? 'var(--mar-900)' : 'var(--tinta-300)'};">${labelEstado(p)}</div>
+          <div class="text-sm" style="color:${i <= idxActual ? 'var(--turquesa-900)' : 'var(--tinta-300)'};">${labelEstado(p)}</div>
         </div>
       `).join('')}
     </div>
@@ -220,11 +220,11 @@ async function cargarPedido(id) {
         <div class="flex justify-between items-center">
           <div>
             <div class="text-sm text-muted">Pedido #${pedido.id.slice(0,8).toUpperCase()}</div>
-            <strong>${pedido.cliente_nombre}</strong>
+            <strong>${escapeHtml(pedido.cliente_nombre)}</strong>
           </div>
           <span class="badge badge-${pedido.estado}">${labelEstado(pedido.estado)}</span>
         </div>
-        <div class="text-sm text-muted mt-8">📍 ${pedido.zona_entrega}</div>
+        <div class="text-sm text-muted mt-8">📍 ${escapeHtml(pedido.zona_entrega)}</div>
 
         ${renderTimeline(pedido.estado)}
 
@@ -274,8 +274,8 @@ async function cargarPedido(id) {
         ${pedido.items.map((i) => `
           <div class="flex justify-between mt-8">
             <div>
-              <strong>${i.cantidad}x ${i.nombre_producto}</strong>
-              <div class="text-sm text-muted">${i.tienda_nombre}</div>
+              <strong>${i.cantidad}x ${escapeHtml(i.nombre_producto)}</strong>
+              <div class="text-sm text-muted">${escapeHtml(i.tienda_nombre)}</div>
             </div>
             <span>${formatoSoles(i.subtotal)}</span>
           </div>
@@ -364,7 +364,7 @@ function tarjetaMiPedido(p) {
         </div>
         <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
       </div>
-      <div class="text-sm text-muted mt-8">📍 ${p.zona_entrega}</div>
+      <div class="text-sm text-muted mt-8">📍 ${escapeHtml(p.zona_entrega)}</div>
       <div class="text-sm text-muted">${new Date(p.created_at).toLocaleString('es-PE')}</div>
       <a href="pedido.html?id=${p.id}" class="btn btn-secondary btn-sm btn-block mt-8" data-ver-pedido="${p.id}">Ver detalle del pedido →</a>
     </div>

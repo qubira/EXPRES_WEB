@@ -177,7 +177,7 @@ async function cargarProducto() {
       media.style.position = 'relative';
       media.innerHTML = `
         <span style="font-size:76px; filter:drop-shadow(0 8px 18px rgba(3,47,53,0.16));">${emoji}</span>
-        <span style="position:absolute; bottom:12px; right:14px; background:rgba(255,255,255,0.92); backdrop-filter:blur(4px); font-size:11px; font-weight:700; color:var(--mar-900); padding:3px 10px; border-radius:12px; border:1px solid rgba(8,127,140,0.15);">Express Playa Ancón</span>
+        <span style="position:absolute; bottom:12px; right:14px; background:rgba(255,255,255,0.92); backdrop-filter:blur(4px); font-size:11px; font-weight:700; color:var(--turquesa-900); padding:3px 10px; border-radius:12px; border:1px solid rgba(8,127,140,0.15);">Express Playa Ancón</span>
       `;
     }
     // ojo: cargarProducto se re-ejecuta con el auto-refresco, asi que este boton
@@ -198,7 +198,7 @@ async function cargarProducto() {
     document.getElementById('producto-tags').innerHTML = `
       ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
       <span class="tag">${p.categoria}</span>
-      ${p.subcategoria ? `<span class="tag" style="background:var(--arena-200);color:var(--tinta-600);">${p.subcategoria}</span>` : ''}
+      ${p.subcategoria ? `<span class="tag" style="background:var(--arena-200);color:var(--tinta-600);">${escapeHtml(p.subcategoria)}</span>` : ''}
     `;
     document.getElementById('producto-nombre').textContent = p.nombre;
     document.getElementById('producto-marca').textContent = p.marca ? `Marca: ${p.marca}` : '';

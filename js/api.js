@@ -740,7 +740,7 @@ async function zonaOptionsHtml(seleccionada) {
   }
   if (!zonas || !zonas.length) zonas = FALLBACK_ZONAS;
   return `<option value="">Selecciona una zona</option>` +
-    zonas.map((z) => `<option value="${z}" ${z === seleccionada ? 'selected' : ''}>${z}</option>`).join('');
+    zonas.map((z) => `<option value="${escapeHtml(z)}" ${z === seleccionada ? 'selected' : ''}>${escapeHtml(z)}</option>`).join('');
 }
 
 // Conecta un boton "+" a un <select> de tipo de negocio: pide el nombre y lo agrega
@@ -845,7 +845,10 @@ const TIPO_NEGOCIO_LABELS = {
   otro: 'Otro',
 };
 function labelTipoNegocio(tipo) {
-  return TIPO_NEGOCIO_LABELS[tipo] || tipo;
+  // El fallback puede ser un tipo de negocio que una tienda agrego con un
+  // "+" (texto libre, Api.agregarTipoNegocio): se escapa porque se
+  // interpola directo en tarjetas/chips de otras tiendas y clientes.
+  return TIPO_NEGOCIO_LABELS[tipo] || escapeHtml(tipo);
 }
 
 const ESTADO_LABELS = {

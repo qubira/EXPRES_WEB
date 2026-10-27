@@ -85,13 +85,13 @@ function tarjetaEntregaHtml(p) {
         <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
       </div>
       <div class="mt-8">
-        <div class="entrega-info-row">📍 <span>${p.zona_entrega}</span></div>
-        ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${p.referencia_entrega}</span></div>` : ''}
-        <div class="entrega-info-row">👤 <span>${p.cliente_nombre}</span></div>
+        <div class="entrega-info-row">📍 <span>${escapeHtml(p.zona_entrega)}</span></div>
+        ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${escapeHtml(p.referencia_entrega)}</span></div>` : ''}
+        <div class="entrega-info-row">👤 <span>${escapeHtml(p.cliente_nombre)}</span></div>
       </div>
       <div class="flex gap-8 mt-8">
-        <a href="tel:${p.cliente_telefono}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
-        <a href="https://wa.me/51${p.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
+        <a href="tel:${escapeHtml(p.cliente_telefono)}" class="btn btn-ghost btn-sm w-full">📞 Llamar</a>
+        <a href="https://wa.me/51${escapeHtml(p.cliente_telefono)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm w-full">💬 WhatsApp</a>
       </div>
       ${p.lat_entrega && p.lng_entrega ? `
         <a href="https://www.google.com/maps?q=${p.lat_entrega},${p.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-block mt-8">🗺️ Ver ubicación del cliente</a>
@@ -133,14 +133,14 @@ function renderActivosComoTabla(cont, pedidos) {
           ${pedidos.map((p) => `
             <tr>
               <td>#${p.id.slice(0,8).toUpperCase()}</td>
-              <td>${p.zona_entrega}</td>
-              <td>${p.cliente_nombre}</td>
+              <td>${escapeHtml(p.zona_entrega)}</td>
+              <td>${escapeHtml(p.cliente_nombre)}</td>
               <td><span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span></td>
               <td>${formatoSoles(p.delivery_fee)}</td>
               <td>
                 <div class="flex gap-6">
-                  <a href="tel:${p.cliente_telefono}" class="btn btn-ghost btn-xs" title="Llamar">📞</a>
-                  <a href="https://wa.me/51${p.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-ghost btn-xs" title="WhatsApp">💬</a>
+                  <a href="tel:${escapeHtml(p.cliente_telefono)}" class="btn btn-ghost btn-xs" title="Llamar">📞</a>
+                  <a href="https://wa.me/51${escapeHtml(p.cliente_telefono)}" target="_blank" rel="noopener" class="btn btn-ghost btn-xs" title="WhatsApp">💬</a>
                   ${p.lat_entrega && p.lng_entrega ? `<a href="https://www.google.com/maps?q=${p.lat_entrega},${p.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-xs" title="Ver ubicación">🗺️</a>` : ''}
                 </div>
               </td>
@@ -450,8 +450,8 @@ async function cargarDisponibles() {
           <span class="badge badge-${p.estado}">${labelEstado(p.estado)}</span>
         </div>
         <div class="mt-8">
-          <div class="entrega-info-row">📍 <span>${p.zona_entrega}</span></div>
-          ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${p.referencia_entrega}</span></div>` : ''}
+          <div class="entrega-info-row">📍 <span>${escapeHtml(p.zona_entrega)}</span></div>
+          ${p.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${escapeHtml(p.referencia_entrega)}</span></div>` : ''}
         </div>
         <div class="entrega-tarifa">
           <span class="text-sm">Tarifa de entrega</span>
@@ -492,7 +492,7 @@ async function cargarHistorial() {
             ${pedidos.map((p) => `
               <tr>
                 <td>#${p.id.slice(0,8).toUpperCase()}</td>
-                <td>${p.zona_entrega}</td>
+                <td>${escapeHtml(p.zona_entrega)}</td>
                 <td>${formatoSoles(p.monto_total)}</td>
                 <td>${formatoSoles(p.delivery_fee)}</td>
                 <td>${new Date(p.entregado_at).toLocaleString('es-PE')}</td>

@@ -113,7 +113,7 @@ async function abrirSelectorUbicacion(onListo) {
     const lista = document.getElementById('lista-zonas-picker');
     if (!lista) return; // el modal se cerro mientras cargaba
     lista.innerHTML = zonas.map((z) => `
-      <button class="btn btn-outline btn-block" data-zona="${z}" style="justify-content:flex-start;">📍 ${z}</button>
+      <button class="btn btn-outline btn-block" data-zona="${escapeHtml(z)}" style="justify-content:flex-start;">📍 ${escapeHtml(z)}</button>
     `).join('');
     lista.querySelectorAll('[data-zona]').forEach((btn) => {
       btn.addEventListener('click', () => confirmar(btn.dataset.zona));

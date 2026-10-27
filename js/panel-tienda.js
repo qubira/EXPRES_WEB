@@ -97,18 +97,18 @@ function tarjetaPedidoTiendaHtml(i) {
     <div class="card card-pad-sm pedido-card" data-estado="${i.pedido_estado}">
       <div class="flex justify-between items-center">
         <div>
-          <strong>${i.cantidad}x ${i.nombre_producto}</strong>
-          <div class="text-sm text-muted">#${i.pedido_id.slice(0,8).toUpperCase()} · ${i.zona_entrega}</div>
+          <strong>${i.cantidad}x ${escapeHtml(i.nombre_producto)}</strong>
+          <div class="text-sm text-muted">#${i.pedido_id.slice(0,8).toUpperCase()} · ${escapeHtml(i.zona_entrega)}</div>
         </div>
         <span class="badge badge-${i.pedido_estado}">${labelEstado(i.pedido_estado)}</span>
       </div>
       <div class="mt-6">
-        <div class="entrega-info-row">👤 <span>${i.cliente_nombre}</span></div>
-        ${i.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${i.referencia_entrega}</span></div>` : ''}
+        <div class="entrega-info-row">👤 <span>${escapeHtml(i.cliente_nombre)}</span></div>
+        ${i.referencia_entrega ? `<div class="entrega-info-row text-muted">💬 <span>${escapeHtml(i.referencia_entrega)}</span></div>` : ''}
       </div>
       <div class="flex gap-6 mt-6">
-        <a href="tel:${i.cliente_telefono}" class="btn btn-ghost btn-xs w-full">📞 Llamar</a>
-        <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-xs w-full">💬 WhatsApp</a>
+        <a href="tel:${escapeHtml(i.cliente_telefono)}" class="btn btn-ghost btn-xs w-full">📞 Llamar</a>
+        <a href="https://wa.me/51${escapeHtml(i.cliente_telefono)}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-xs w-full">💬 WhatsApp</a>
         ${i.lat_entrega && i.lng_entrega ? `
           <a href="https://www.google.com/maps?q=${i.lat_entrega},${i.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-xs" style="flex:0 0 44px;" title="Ver ubicación del cliente">🗺️</a>
         ` : ''}
@@ -140,16 +140,16 @@ function renderPedidosComoTabla(cont, items) {
         <tbody>
           ${items.map((i) => `
             <tr>
-              <td>${i.cantidad}x ${i.nombre_producto}</td>
+              <td>${i.cantidad}x ${escapeHtml(i.nombre_producto)}</td>
               <td>#${i.pedido_id.slice(0,8).toUpperCase()}</td>
-              <td>${i.cliente_nombre}</td>
-              <td>${i.zona_entrega}</td>
+              <td>${escapeHtml(i.cliente_nombre)}</td>
+              <td>${escapeHtml(i.zona_entrega)}</td>
               <td><span class="badge badge-${i.pedido_estado}">${labelEstado(i.pedido_estado)}</span></td>
               <td>${formatoSoles(i.subtotal)}</td>
               <td>
                 <div class="flex gap-6">
-                  <a href="tel:${i.cliente_telefono}" class="btn btn-ghost btn-xs" title="Llamar">📞</a>
-                  <a href="https://wa.me/51${i.cliente_telefono}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-xs" title="WhatsApp">💬</a>
+                  <a href="tel:${escapeHtml(i.cliente_telefono)}" class="btn btn-ghost btn-xs" title="Llamar">📞</a>
+                  <a href="https://wa.me/51${escapeHtml(i.cliente_telefono)}" target="_blank" rel="noopener" class="btn btn-whatsapp btn-xs" title="WhatsApp">💬</a>
                   ${i.lat_entrega && i.lng_entrega ? `<a href="https://www.google.com/maps?q=${i.lat_entrega},${i.lng_entrega}" target="_blank" rel="noopener" class="btn btn-outline btn-xs" title="Ver ubicación">🗺️</a>` : ''}
                 </div>
               </td>
@@ -299,10 +299,10 @@ function tarjetaProductoTiendaHtml(p) {
       <div class="pcard-media${p.foto_url ? '' : ' pcard-media-vacia'}" style="${p.foto_url ? `background-image:url('${p.foto_url}')` : ''}">${p.foto_url ? '' : '<img src="../IMG/fondo1.png" alt="Sin imagen">'}</div>
       <div class="card-pad-sm">
         <div class="flex gap-6" style="flex-wrap:wrap;">
-          <span class="tag">${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</span>
+          <span class="tag">${p.categoria}${p.subcategoria ? ` · ${escapeHtml(p.subcategoria)}` : ''}</span>
           ${p.es_combo ? '<span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}
         </div>
-        <strong class="producto-admin-nombre">${p.nombre}${p.marca ? ` · ${p.marca}` : ''}</strong>
+        <strong class="producto-admin-nombre">${escapeHtml(p.nombre)}${p.marca ? ` · ${escapeHtml(p.marca)}` : ''}</strong>
         <div class="precio">${formatoSoles(p.precio)} <span class="text-sm text-muted" style="font-weight:600;">/ ${formatoContenido(p.contenido, p.unidad)}</span></div>
         <div class="text-sm text-muted">Stock: ${p.stock} ${p.activo ? '' : '· ⚪ Inactivo'}</div>
         <div class="flex gap-6 mt-6">
@@ -327,8 +327,8 @@ function renderProductosComoTabla(cont, productos) {
           ${productos.map((p) => `
             <tr>
               <td>${p.foto_url ? `<img src="${p.foto_url}" style="width:36px;height:36px;border-radius:6px;object-fit:cover;">` : `<img src="../IMG/fondo1.png" alt="Sin imagen" style="width:36px;height:36px;object-fit:contain;">`}</td>
-              <td>${p.nombre}${p.marca ? ` · ${p.marca}` : ''}${p.es_combo ? ' <span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}</td>
-              <td>${p.categoria}${p.subcategoria ? ` · ${p.subcategoria}` : ''}</td>
+              <td>${escapeHtml(p.nombre)}${p.marca ? ` · ${escapeHtml(p.marca)}` : ''}${p.es_combo ? ' <span class="tag" style="background:#fff3d6;color:#b7690a;">🎁 Combo</span>' : ''}</td>
+              <td>${p.categoria}${p.subcategoria ? ` · ${escapeHtml(p.subcategoria)}` : ''}</td>
               <td>${formatoSoles(p.precio)} <span class="text-sm text-muted">/ ${formatoContenido(p.contenido, p.unidad)}</span></td>
               <td>${p.stock}</td>
               <td>${p.activo ? '<span class="tag" style="background:#e9f9ee;color:var(--verde-palma);">Activo</span>' : '<span class="tag" style="background:#f0f0f0;color:var(--tinta-300);">Inactivo</span>'}</td>
@@ -391,7 +391,7 @@ function abrirModalProducto(p) {
           <label>Foto del producto</label>
           <label class="file-drop ${p && p.foto_url ? 'con-imagen' : ''}" id="p-foto-drop">
             <input type="file" id="p-foto-file" accept="image/*" capture="environment" class="file-drop-input">
-            <img id="p-foto-preview" class="file-drop-preview" src="${p && p.foto_url ? p.foto_url : ''}" style="${p && p.foto_url ? '' : 'display:none;'}">
+            <img id="p-foto-preview" class="file-drop-preview" alt="Vista previa de la foto" src="${p && p.foto_url ? encodeURI(p.foto_url) : ''}" style="${p && p.foto_url ? '' : 'display:none;'}">
             <div id="p-foto-placeholder" style="${p && p.foto_url ? 'display:none;' : 'display:flex;flex-direction:column;align-items:center;gap:6px;'}">
               <span class="file-drop-icon">📷</span>
               <span class="file-drop-text">Toca para subir una foto</span>
@@ -419,13 +419,13 @@ function abrirModalProducto(p) {
         ` : ''}
       </div>
       <div class="modal-form-col-der">
-        <div class="form-grupo"><label>Nombre</label><input id="p-nombre" value="${p ? p.nombre : ''}" required></div>
-        <div class="form-grupo"><label>Marca (opcional)</label><input id="p-marca" value="${p ? (p.marca||'') : ''}" placeholder="Ej. Inca Kola, San Luis..."></div>
+        <div class="form-grupo"><label>Nombre</label><input id="p-nombre" value="${p ? escapeHtml(p.nombre) : ''}" required></div>
+        <div class="form-grupo"><label>Marca (opcional)</label><input id="p-marca" value="${p ? escapeHtml(p.marca||'') : ''}" placeholder="Ej. Inca Kola, San Luis..."></div>
         <div class="grid-cols grid-cols-2">
           <div class="form-grupo"><label>Categoría</label>
             <select id="p-categoria">${CATEGORIAS.map((c) => `<option value="${c}" ${p && p.categoria===c?'selected':''}>${c}</option>`).join('')}</select>
           </div>
-          <div class="form-grupo"><label>Subcategoría</label><input id="p-subcategoria" value="${p ? (p.subcategoria||'') : ''}" placeholder="Ej. jugos, sombreros..." required></div>
+          <div class="form-grupo"><label>Subcategoría</label><input id="p-subcategoria" value="${p ? escapeHtml(p.subcategoria||'') : ''}" placeholder="Ej. jugos, sombreros..." required></div>
         </div>
         <div class="form-grupo"><label>Precio de venta (S/)</label><input id="p-precio" type="number" step="0.10" value="${p ? p.precio : ''}" required></div>
         <div class="grid-cols grid-cols-2">
