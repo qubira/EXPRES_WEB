@@ -95,7 +95,7 @@ function renderCartPreview(dropdown) {
     itemsWrap.innerHTML = items.map((i) => `
       <div class="cart-preview-item">
         <div>
-          <div class="nombre">${i.nombre}</div>
+          <div class="nombre">${escapeHtml(i.nombre)}</div>
           <div class="detalle">${i.cantidad} x ${formatoSoles(i.precio)}</div>
         </div>
         <div class="flex items-center gap-8">

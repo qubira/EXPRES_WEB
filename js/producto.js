@@ -134,8 +134,8 @@ function tarjetaSimilar(p, index) {
         <div class="pcard-control" data-control="${p.id}">${controlTarjetaHtml(p)}</div>
       </div>
       <div class="pcard-body">
-        <span class="pcard-name">${p.nombre}</span>
-        <span class="pcard-store">${p.tienda_nombre} · ${formatoContenido(p.contenido, p.unidad)}</span>
+        <span class="pcard-name">${escapeHtml(p.nombre)}</span>
+        <span class="pcard-store">${escapeHtml(p.tienda_nombre)} · ${formatoContenido(p.contenido, p.unidad)}</span>
         <span class="pcard-price">${formatoSoles(p.precio)}</span>
       </div>
     </div>

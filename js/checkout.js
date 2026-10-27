@@ -25,8 +25,8 @@ function renderCarrito() {
   lista.innerHTML = items.map((i) => `
     <div class="card card-pad mt-16 flex justify-between items-center" data-id="${i.producto_id}">
       <div>
-        <strong>${i.nombre}</strong>
-        <div class="text-sm text-muted">${i.tienda_nombre || ''}</div>
+        <strong>${escapeHtml(i.nombre)}</strong>
+        <div class="text-sm text-muted">${escapeHtml(i.tienda_nombre || '')}</div>
         <div class="text-sm">${formatoSoles(i.precio)} c/u</div>
       </div>
       <div class="flex items-center gap-8">

@@ -5,6 +5,15 @@
 // La URL base se define en js/config.js (window.EXPRESS_API_BASE).
 const API_BASE_URL = (window.EXPRESS_API_BASE || 'http://localhost:4000') + '/api';
 
+// Nombres/descripciones de productos y tiendas son texto libre que la tienda
+// controla; esto evita que terminen interpretandose como HTML al insertarlos
+// con innerHTML en tarjetas, carrito, etc.
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 // ============================================================
 // Datos de respaldo y resiliencia para alta disponibilidad
 // Garantiza que la tienda funcione al 100% incluso en arranques en frio de Render
@@ -312,10 +321,7 @@ const Api = {
     try {
       const qs = new URLSearchParams(params).toString();
       const res = await apiRequest(`/categorias${qs ? `?${qs}` : ''}`, { timeoutMs: 7000 });
-      if (Array.isArray(res) && res.length > 0) {
-        const set = new Set([...res, ...FALLBACK_CATEGORIAS]);
-        return Array.from(set);
-      }
+      if (Array.isArray(res)) return res;
     } catch (e) {}
     return FALLBACK_CATEGORIAS;
   },
@@ -343,11 +349,9 @@ const Api = {
     try {
       const qs = new URLSearchParams(params).toString();
       const res = await apiRequest(`/tiendas${qs ? `?${qs}` : ''}`, { timeoutMs: 7500 });
-      if (Array.isArray(res) && res.length > 0) {
+      if (Array.isArray(res)) {
         try { localStorage.setItem('express_cache_tiendas', JSON.stringify(res)); } catch (e) {}
-        const ids = new Set(res.map(t => t.id));
-        const extras = FALLBACK_TIENDAS.filter(t => !ids.has(t.id));
-        return [...res, ...extras];
+        return res;
       }
     } catch (e) {}
     let list = FALLBACK_TIENDAS;
@@ -403,24 +407,7 @@ const Api = {
     };
 
     if (serverOk) {
-      const serverNames = serverProducts.map(p => (p.nombre || '').toLowerCase());
-      const hasCombo = serverProducts.some(p => p.es_combo);
-      const hasCeviche = serverNames.some(n => n.includes('ceviche') || n.includes('cebiche'));
-      const hasHelado = serverNames.some(n => n.includes('helado'));
-
-      const toAdd = [];
-      FALLBACK_PRODUCTOS.forEach(fp => {
-        const fpName = (fp.nombre || '').toLowerCase();
-        if (fp.es_combo && !hasCombo) {
-          toAdd.push(fp);
-        } else if (fpName.includes('ceviche') && !hasCeviche) {
-          toAdd.push(fp);
-        } else if (fpName.includes('helado') && !hasHelado) {
-          toAdd.push(fp);
-        }
-      });
-
-      return filterList([...serverProducts, ...toAdd]);
+      return filterList(serverProducts);
     }
 
     return filterList(FALLBACK_PRODUCTOS);
@@ -440,121 +427,20 @@ const Api = {
     const similares = FALLBACK_PRODUCTOS.slice(1, 5);
     return { ...def, id, similares };
   },
-  crearPedido: async (data) => {
-    try {
-      const res = await apiRequest('/pedidos', { method: 'POST', body: data, role: 'cliente', timeoutMs: 8000 });
-      if (res && res.id) return res;
-    } catch (e) {}
-
-    // Respaldo de pedido local funcional
-    const montoProd = (data.items || []).reduce((sum, it) => {
-      const p = FALLBACK_PRODUCTOS.find(fp => fp.id === it.producto_id);
-      return sum + (p ? Number(p.precio) * it.cantidad : 18 * it.cantidad);
-    }, 0);
-    const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    const localId = 'ord_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
-    const pedido = {
-      id: localId,
-      cliente_nombre: data.cliente_nombre || 'Cliente Express',
-      cliente_telefono: data.cliente_telefono || '987000000',
-      zona_entrega: data.zona_entrega || 'Playa Ancón - Frente al mar',
-      referencia_entrega: data.referencia_entrega || 'Sombrilla en la arena',
-      lat_entrega: data.lat_entrega || -11.7745,
-      lng_entrega: data.lng_entrega || -77.1780,
-      monto_productos: montoProd,
-      delivery_fee: 5.0,
-      monto_total: montoProd + 5.0,
-      estado: 'pendiente_pago',
-      pin_entrega: pin,
-      items: (data.items || []).map(it => {
-        const p = FALLBACK_PRODUCTOS.find(fp => fp.id === it.producto_id) || {};
-        return {
-          producto_id: it.producto_id,
-          nombre_producto: p.nombre || 'Producto Express Ancón',
-          tienda_nombre: p.tienda_nombre || 'Tienda Asociada',
-          cantidad: it.cantidad,
-          precio_unitario: Number(p.precio) || 18,
-          subtotal: (Number(p.precio) || 18) * it.cantidad
-        };
-      }),
-      created_at: new Date().toISOString()
-    };
-    try {
-      const locales = JSON.parse(localStorage.getItem('express_pedidos_locales') || '[]');
-      locales.unshift(pedido);
-      localStorage.setItem('express_pedidos_locales', JSON.stringify(locales));
-    } catch (e) {}
-    return pedido;
-  },
-  subirComprobante: async (pedidoId, formData) => {
-    try {
-      const locales = JSON.parse(localStorage.getItem('express_pedidos_locales') || '[]');
-      const idx = locales.findIndex(p => p.id === pedidoId);
-      if (idx !== -1) {
-        locales[idx].estado = 'recogido';
-        locales[idx].lat_repartidor = -11.7738;
-        locales[idx].lng_repartidor = -77.1772;
-        localStorage.setItem('express_pedidos_locales', JSON.stringify(locales));
-        return { ok: true, mensaje: 'Comprobante recibido exitosamente' };
-      }
-    } catch (e) {}
-
-    try {
-      return await apiRequest(`/pedidos/${pedidoId}/pago`, { method: 'POST', body: formData, isForm: true, timeoutMs: 10000 });
-    } catch (e) {
-      try {
-        const locales = JSON.parse(localStorage.getItem('express_pedidos_locales') || '[]');
-        const idx = locales.findIndex(p => p.id === pedidoId);
-        if (idx !== -1) {
-          locales[idx].estado = 'recogido';
-          locales[idx].lat_repartidor = -11.7738;
-          locales[idx].lng_repartidor = -77.1772;
-          localStorage.setItem('express_pedidos_locales', JSON.stringify(locales));
-          return { ok: true };
-        }
-      } catch (e2) {}
-      throw e;
-    }
-  },
-  getPedido: async (id) => {
-    try {
-      const locales = JSON.parse(localStorage.getItem('express_pedidos_locales') || '[]');
-      const local = locales.find(p => p.id === id);
-      if (local) return local;
-    } catch (e) {}
-
-    try {
-      const res = await apiRequest(`/pedidos/${id}`, { timeoutMs: 7500 });
-      if (res && res.id) return res;
-    } catch (e) {}
-
-    const lastId = localStorage.getItem('express_last_pedido');
-    if (lastId && lastId !== id) {
-      try {
-        const locales = JSON.parse(localStorage.getItem('express_pedidos_locales') || '[]');
-        const local = locales.find(p => p.id === lastId);
-        if (local) return local;
-      } catch (e) {}
-    }
-    throw new Error('Pedido no encontrado');
-  },
+  // Un pedido implica dinero real (Yape/Plin) y un PIN de entrega real: nunca
+  // se simula un pedido/pago localmente si el servidor falla. Si la creacion
+  // o el pago no se pudieron confirmar con el backend, se informa el error
+  // real para que el cliente reintente, en vez de mostrar un pedido/PIN que
+  // la tienda y el repartidor jamas verian.
+  crearPedido: (data) => apiRequest('/pedidos', { method: 'POST', body: data, role: 'cliente', timeoutMs: 15000 }),
+  subirComprobante: (pedidoId, formData) => apiRequest(`/pedidos/${pedidoId}/pago`, { method: 'POST', body: formData, isForm: true, timeoutMs: 15000 }),
+  getPedido: (id) => apiRequest(`/pedidos/${id}`, { timeoutMs: 7500 }),
   solicitarTienda: (data) => apiRequest('/tiendas/solicitud', { method: 'POST', body: data }),
-  loginUnificado: async (data) => {
-    try {
-      return await apiRequest('/login', { method: 'POST', body: data, timeoutMs: 7500 });
-    } catch (e) {
-      const nombre = (data.email || 'Cliente').split('@')[0];
-      const res = {
-        token: 'local_token_' + Date.now(),
-        rol: 'cliente',
-        nombre: nombre.charAt(0).toUpperCase() + nombre.slice(1),
-        email: data.email,
-        zona: localStorage.getItem('express_zona_entrega') || 'Playa Ancón - Frente al mar'
-      };
-      localStorage.setItem('express_email_cliente', data.email);
-      return res;
-    }
-  },
+  // El login nunca se simula: si no se puede verificar la contraseña contra
+  // el backend, no hay sesion. Antes, cualquier fallo (incluida una
+  // contraseña incorrecta) devolvia una sesion local valida sin verificar
+  // nada - un login con cualquier clave siempre "funcionaba".
+  loginUnificado: (data) => apiRequest('/login', { method: 'POST', body: data, timeoutMs: 12000 }),
   misSesiones: (role) => apiRequest('/mis-sesiones', { role }),
   cerrarSesionRemota: (id, role) => apiRequest(`/mis-sesiones/${id}/cerrar`, { method: 'POST', role }),
   cerrarOtrasSesiones: (role) => apiRequest('/mis-sesiones/cerrar-otras', { method: 'POST', role }),
@@ -636,66 +522,19 @@ const Api = {
   repartidorObservacion: (id, dirigido_a, tipo, descripcion) => apiRequest(`/repartidor/pedidos/${id}/observacion`, { method: 'POST', body: { dirigido_a, tipo, descripcion }, role: 'repartidor' }),
   repartidorEncuesta: (id, data) => apiRequest(`/repartidor/pedidos/${id}/encuesta`, { method: 'POST', body: data, role: 'repartidor' }),
 
-  // Cliente (cuenta de usuario con tolerancia a fallos)
-  clienteRegistro: async (data) => {
-    try {
-      return await apiRequest('/cliente/registro', { method: 'POST', body: data, timeoutMs: 7500 });
-    } catch (e) {
-      const res = {
-        token: 'local_token_' + Date.now(),
-        nombre: data.nombre,
-        email: data.email,
-        telefono: data.telefono,
-        zona: localStorage.getItem('express_zona_entrega') || 'Playa Ancón - Frente al mar'
-      };
-      localStorage.setItem('express_email_cliente', data.email);
-      return res;
-    }
-  },
-  clienteLogin: async (data) => {
-    try {
-      return await apiRequest('/cliente/login', { method: 'POST', body: data, timeoutMs: 7500 });
-    } catch (e) {
-      const nombre = (data.email || 'Cliente').split('@')[0];
-      const res = {
-        token: 'local_token_' + Date.now(),
-        nombre: nombre.charAt(0).toUpperCase() + nombre.slice(1),
-        email: data.email,
-        zona: localStorage.getItem('express_zona_entrega') || 'Playa Ancón - Frente al mar'
-      };
-      localStorage.setItem('express_email_cliente', data.email);
-      return res;
-    }
-  },
-  clientePerfil: async () => {
-    try {
-      return await apiRequest('/cliente/perfil', { role: 'cliente', timeoutMs: 7000 });
-    } catch (e) {
-      const nombre = localStorage.getItem('express_nombre_cliente') || 'Cliente Express';
-      const email = localStorage.getItem('express_email_cliente') || 'cliente@express.pe';
-      const zona = localStorage.getItem('express_zona_entrega') || 'Playa Ancón - Frente al mar';
-      return { nombre, email, telefono: '987654321', zona };
-    }
-  },
+  // Cliente (cuenta de usuario)
+  clienteRegistro: (data) => apiRequest('/cliente/registro', { method: 'POST', body: data, timeoutMs: 12000 }),
+  // No usado actualmente (login.html llama a loginUnificado), se mantiene
+  // por compatibilidad pero sin la simulacion de sesion que tenia antes.
+  clienteLogin: (data) => apiRequest('/cliente/login', { method: 'POST', body: data, timeoutMs: 12000 }),
+  clientePerfil: () => apiRequest('/cliente/perfil', { role: 'cliente', timeoutMs: 7000 }),
   clienteActualizarPerfil: (data) => apiRequest('/cliente/perfil', { method: 'PUT', body: data, role: 'cliente' }),
   clienteCambiarPassword: (data) => apiRequest('/cliente/perfil/password', { method: 'POST', body: data, role: 'cliente' }),
   clienteEliminarCuenta: (password) => apiRequest('/cliente/perfil', { method: 'DELETE', body: { password }, role: 'cliente' }),
   clienteActualizarZona: (zona) => apiRequest('/cliente/zona', { method: 'POST', body: { zona }, role: 'cliente' }),
   clientePedidos: async () => {
-    let server = [];
-    try {
-      const res = await apiRequest('/cliente/pedidos', { role: 'cliente', timeoutMs: 7500 });
-      if (Array.isArray(res)) server = res;
-    } catch (e) {}
-
-    let locales = [];
-    try {
-      locales = JSON.parse(localStorage.getItem('express_pedidos_locales') || '[]');
-    } catch (e) {}
-
-    const ids = new Set(server.map(p => p.id));
-    const unicosLocales = locales.filter(p => !ids.has(p.id));
-    return [...unicosLocales, ...server].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const server = await apiRequest('/cliente/pedidos', { role: 'cliente', timeoutMs: 7500 });
+    return (Array.isArray(server) ? server : []).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   },
   clienteCancelarPedido: (id) => apiRequest(`/cliente/pedidos/${id}/cancelar`, { method: 'POST', role: 'cliente' }),
   clienteReclamo: (id, motivo, descripcion, imagenes = []) => {
