@@ -1520,6 +1520,7 @@ label {
 }
 input, select, textarea {
   width: 100%;
+  min-width: 0;
   padding: 13px 16px;
   border-radius: var(--radio-s);
   border: 1.5px solid #d5e5e8;
